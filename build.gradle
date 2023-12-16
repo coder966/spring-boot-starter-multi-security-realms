@@ -1,0 +1,71 @@
+plugins {
+	id 'java'
+	id 'maven-publish'
+	id 'org.springframework.boot' version '3.2.0'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+
+java {
+	sourceCompatibility = '21'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			groupId = 'net.coder966.spring'
+			artifactId = 'spring-boot-starter-multi-security-realms'
+			version = '0.0.1-SNAPSHOT'
+			from components.java
+
+			versionMapping {
+				usage('java-api') {
+					fromResolutionOf('runtimeClasspath')
+				}
+				usage('java-runtime') {
+					fromResolutionResult()
+				}
+			}
+
+			pom {
+				name = 'multi-security-realms'
+				description = 'Support multiple security realms in a single Spring Boot application'
+				url = 'https://coder966.net'
+				licenses {
+					license {
+						name = 'The Apache License, Version 2.0'
+						url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+					}
+				}
+				developers {
+					developer {
+						id = 'coder966'
+						name = 'Khalid Alharisi'
+						email = 'coder966@gmail.com'
+					}
+				}
+			}
+		}
+	}
+	repositories {
+		maven {
+			url = "https://maven.pkg.github.com/coder966/spring-boot-starter-multi-security-realms"
+		}
+	}
+}
