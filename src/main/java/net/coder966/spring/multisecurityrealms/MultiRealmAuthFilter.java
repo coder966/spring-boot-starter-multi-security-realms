@@ -25,8 +25,8 @@ public class MultiRealmAuthFilter extends OncePerRequestFilter {
     private final String CURRENT_STEP_SESSION_ATTRIBUTE_NAME = "CURRENT_AUTH_STEP";
 
     // response headers
-    private final String NEXT_STEP_RESPONSE_HEADER_NAME = "X-Next-Auth-Step";
-    private final String ERROR_CODE_RESPONSE_HEADER_NAME = "X-Auth-Error-Code";
+    public static final String NEXT_STEP_RESPONSE_HEADER_NAME = "X-Next-Auth-Step";
+    public static final String ERROR_CODE_RESPONSE_HEADER_NAME = "X-Auth-Error-Code";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
