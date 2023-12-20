@@ -1,6 +1,7 @@
 package net.coder966.spring.multisecurityrealms;
 
 import net.coder966.spring.multisecurityrealms.other.Constants;
+import net.coder966.spring.multisecurityrealms.utils.BrowserEmulatorTestHttpClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +21,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testUserFromRealm2InRealm1() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/normal-user/login")
@@ -33,7 +34,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testUserFromRealm1InRealm2() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/admin-user/login")
@@ -49,7 +50,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm1FirstStepFailure() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/normal-user/login")
@@ -63,7 +64,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm1FirstStepSuccess() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/normal-user/login")
@@ -77,7 +78,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm1SecondStepFailure() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/normal-user/login")
@@ -99,7 +100,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm1SecondStepSuccess() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/normal-user/login")
@@ -121,7 +122,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm1Logout() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/normal-user/logout")
@@ -133,7 +134,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm2FirstStepFailure() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/admin-user/login")
@@ -147,7 +148,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm2FirstStepSuccess() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/admin-user/login")
@@ -161,7 +162,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm2SecondStepFailure() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/admin-user/login")
@@ -183,7 +184,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm2SecondStepSuccess() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/admin-user/login")
@@ -205,7 +206,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testRealm2Logout() {
-        SessionAwareTestHttpClient client = new SessionAwareTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
             .request(HttpMethod.POST, "/admin-user/logout")

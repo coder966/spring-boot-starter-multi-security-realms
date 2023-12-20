@@ -1,4 +1,4 @@
-package net.coder966.spring.multisecurityrealms;
+package net.coder966.spring.multisecurityrealms.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -13,15 +13,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-public class SessionAwareTestHttpClient {
+public class BrowserEmulatorTestHttpClient {
 
     final int port;
     final TestRestTemplate testRestTemplate = new TestRestTemplate();
     final List<String> cookies = new ArrayList<>();
 
 
-    public SessionAwareTestHttpClient(int port) {
+    public BrowserEmulatorTestHttpClient(int port) {
         this.port = port;
+
+        // simulate visiting the homepage
+        // essential to obtain the CSRF token
+        request(HttpMethod.GET, "/").exchange();
     }
 
     public Request request(HttpMethod method, String uri) {
@@ -30,12 +34,12 @@ public class SessionAwareTestHttpClient {
 
     public static class Request {
 
-        private final SessionAwareTestHttpClient client;
+        private final BrowserEmulatorTestHttpClient client;
         private final String uri;
         private final HttpMethod method;
         private final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
 
-        Request(SessionAwareTestHttpClient client, HttpMethod method, String uri) {
+        Request(BrowserEmulatorTestHttpClient client, HttpMethod method, String uri) {
             this.client = client;
             this.method = method;
             this.uri = uri;
@@ -44,9 +48,15 @@ public class SessionAwareTestHttpClient {
         public ResponseSpec exchange() {
             LinkedMultiValueMap<String, String> mergedHeaders = new LinkedMultiValueMap<>();
             mergedHeaders.addAll(headers);
+
             client.cookies.forEach(header -> {
                 mergedHeaders.add("Cookie", header);
+
+                if(header.startsWith("XSRF-TOKEN=")){
+                    mergedHeaders.add("X-XSRF-TOKEN", header.replace("XSRF-TOKEN=", "").replace("; Path=/", ""));
+                }
             });
+
 
             ResponseEntity<Object> response = client.testRestTemplate.exchange(
                 "http://localhost:" + client.port + uri,
