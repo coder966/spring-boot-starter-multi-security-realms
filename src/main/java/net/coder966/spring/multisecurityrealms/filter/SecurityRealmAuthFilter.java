@@ -7,9 +7,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import net.coder966.spring.multisecurityrealms.exception.MultiRealmAuthException;
-import net.coder966.spring.multisecurityrealms.model.MultiRealmAuth;
-import net.coder966.spring.multisecurityrealms.model.Realm;
+import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthException;
+import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
+import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuth;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,7 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
 
-    private final Realm<T> realm;
+    private final SecurityRealm<T> realm;
 
     // session attribute names
     private final String CURRENT_STEP_SESSION_ATTRIBUTE_NAME = "CURRENT_AUTH_STEP";
@@ -26,7 +26,7 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
     private final String NEXT_STEP_RESPONSE_HEADER_NAME = "X-Next-Auth-Step";
     private final String ERROR_CODE_RESPONSE_HEADER_NAME = "X-Auth-Error-Code";
 
-    public SecurityRealmAuthFilter(Realm<T> realm) {
+    public SecurityRealmAuthFilter(SecurityRealm<T> realm) {
         this.realm = realm;
     }
 
@@ -63,17 +63,17 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
 
         if(authStepName == null){ // first step
             try{
-                final MultiRealmAuth<T> resultAuth = realm.getFirstStepAuthProvider().authenticate(request);
+                final SecurityRealmAuth<T> resultAuth = realm.getFirstStepAuthProvider().authenticate(request);
                 afterAuthenticate(request, response, realm, resultAuth);
-            }catch(MultiRealmAuthException e){
+            }catch(SecurityRealmAuthException e){
                 setAuthErrorCode(response, e.getMessage());
             }
         }else{
             try{
-                final MultiRealmAuth<T> previousStepAuth = (MultiRealmAuth<T>) SecurityContextHolder.getContext().getAuthentication();
-                final MultiRealmAuth<T> resultAuth = realm.getAuthSteps().get(authStepName).authenticate(previousStepAuth, request);
+                final SecurityRealmAuth<T> previousStepAuth = (SecurityRealmAuth<T>) SecurityContextHolder.getContext().getAuthentication();
+                final SecurityRealmAuth<T> resultAuth = realm.getAuthSteps().get(authStepName).authenticate(previousStepAuth, request);
                 afterAuthenticate(request, response, realm, resultAuth);
-            }catch(MultiRealmAuthException e){
+            }catch(SecurityRealmAuthException e){
                 setAuthErrorCode(response, e.getMessage());
             }
         }
@@ -85,7 +85,7 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
         response.setStatus(200);
     }
 
-    private void afterAuthenticate(HttpServletRequest request, HttpServletResponse response, Realm<?> realm, MultiRealmAuth<?> auth) {
+    private void afterAuthenticate(HttpServletRequest request, HttpServletResponse response, SecurityRealm<?> realm, SecurityRealmAuth<?> auth) {
         if(auth == null){
             throw new IllegalStateException("MultiRealmAuthProvider should not return null. "
                 + "It should either throw MultiRealmAuthException or return a MultiRealmAuth object.");

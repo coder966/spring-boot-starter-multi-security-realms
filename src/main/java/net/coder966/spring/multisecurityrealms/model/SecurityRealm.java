@@ -4,20 +4,20 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import net.coder966.spring.multisecurityrealms.filter.SecurityRealmAuthFilter;
-import net.coder966.spring.multisecurityrealms.provider.MultiRealmAuthProvider;
-import net.coder966.spring.multisecurityrealms.provider.MultiRealmFirstStepAuthProvider;
+import net.coder966.spring.multisecurityrealms.provider.SecurityRealmAuthProvider;
+import net.coder966.spring.multisecurityrealms.provider.SecurityRealmFirstStepAuthProvider;
 
 @Getter
-public class Realm<T> {
+public class SecurityRealm<T> {
 
     private final String rolePrefix;
     private final String loginUrl;
     private final String logoutUrl;
-    private MultiRealmFirstStepAuthProvider<T> firstStepAuthProvider;
-    private final Map<String, MultiRealmAuthProvider<T>> authSteps;
+    private SecurityRealmFirstStepAuthProvider<T> firstStepAuthProvider;
+    private final Map<String, SecurityRealmAuthProvider<T>> authSteps;
     private SecurityRealmAuthFilter<T> filter;
 
-    public Realm(String rolePrefix, String loginUrl, String logoutUrl) {
+    public SecurityRealm(String rolePrefix, String loginUrl, String logoutUrl) {
         if(rolePrefix == null || rolePrefix.length() < 3 || rolePrefix.trim().length() != rolePrefix.length()){
             throw new IllegalArgumentException("Invalid rolePrefix: " + rolePrefix);
         }
@@ -40,7 +40,7 @@ public class Realm<T> {
         this.authSteps = new HashMap<>();
     }
 
-    public Realm<T> setFirstAuthStep(MultiRealmFirstStepAuthProvider<T> authenticationProvider) {
+    public SecurityRealm<T> setFirstAuthStep(SecurityRealmFirstStepAuthProvider<T> authenticationProvider) {
         firstStepAuthProvider = authenticationProvider;
         return this;
     }
@@ -51,7 +51,7 @@ public class Realm<T> {
      * @param name                    The step name, must be unique for this realm.
      * @param authenticationProvider, the auth provider.
      */
-    public Realm<T> addAuthStep(String name, MultiRealmAuthProvider<T> authenticationProvider) {
+    public SecurityRealm<T> addAuthStep(String name, SecurityRealmAuthProvider<T> authenticationProvider) {
         if(name == null || name.length() < 3 || name.trim().length() != name.length()){
             throw new IllegalArgumentException("Invalid auth step name: " + name);
         }

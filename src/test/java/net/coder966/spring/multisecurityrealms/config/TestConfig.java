@@ -4,9 +4,9 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import net.coder966.spring.multisecurityrealms.entity.AdminUser;
 import net.coder966.spring.multisecurityrealms.entity.NormalUser;
-import net.coder966.spring.multisecurityrealms.exception.MultiRealmAuthException;
-import net.coder966.spring.multisecurityrealms.model.MultiRealmAuth;
-import net.coder966.spring.multisecurityrealms.model.Realm;
+import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthException;
+import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
+import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuth;
 import net.coder966.spring.multisecurityrealms.other.Constants.ErrorCodes;
 import net.coder966.spring.multisecurityrealms.other.Constants.Headers;
 import net.coder966.spring.multisecurityrealms.other.Constants.StepNames;
@@ -23,8 +23,8 @@ public class TestConfig {
     private final AdminUserRepo adminUserRepo;
 
     @Bean
-    public Realm<NormalUser> configureNormalUserRealm() {
-        return new Realm<NormalUser>(
+    public SecurityRealm<NormalUser> configureNormalUserRealm() {
+        return new SecurityRealm<NormalUser>(
                 "NORMAL_USER",
                 "/normal-user/login",
                 "/normal-user/logout"
@@ -37,14 +37,14 @@ public class TestConfig {
 
                 Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(username);
                 if(optionalUser.isEmpty()){
-                    throw new MultiRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                    throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
                 }
                 NormalUser user = optionalUser.get();
 
 
                 // WARNING: FOR DEMO PURPOSE ONLY
                 if(!user.getPassword().equals(password)){
-                    throw new MultiRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                    throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
                 }
 
                 // TODO: send otp to mobile
@@ -52,7 +52,7 @@ public class TestConfig {
                 user.setOtp(otp);
                 user = normalUserRepo.save(user);
 
-                return new MultiRealmAuth<>(user, user.getUsername(), null, StepNames.OTP);
+                return new SecurityRealmAuth<>(user, user.getUsername(), null, StepNames.OTP);
             })
             .addAuthStep(StepNames.OTP, (previousStepAuth, request) -> {
                 String otp = request.getHeader(Headers.OTP);
@@ -60,20 +60,20 @@ public class TestConfig {
                 NormalUser user = previousStepAuth.getPrincipal();
 
                 if(!user.getOtp().equals(otp)){
-                    throw new MultiRealmAuthException(ErrorCodes.BAD_OTP);
+                    throw new SecurityRealmAuthException(ErrorCodes.BAD_OTP);
                 }
 
                 // clear otp
                 user.setOtp(otp);
                 user = normalUserRepo.save(user);
 
-                return new MultiRealmAuth<>(user, user.getUsername(), null);
+                return new SecurityRealmAuth<>(user, user.getUsername(), null);
             });
     }
 
     @Bean
-    public Realm<AdminUser> configureAdminUserRealm() {
-        return new Realm<AdminUser>(
+    public SecurityRealm<AdminUser> configureAdminUserRealm() {
+        return new SecurityRealm<AdminUser>(
                 "ADMIN_USER",
                 "/admin-user/login",
                 "/admin-user/logout"
@@ -86,14 +86,14 @@ public class TestConfig {
 
                 Optional<AdminUser> optionalUser = adminUserRepo.findByUsername(username);
                 if(optionalUser.isEmpty()){
-                    throw new MultiRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                    throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
                 }
                 AdminUser user = optionalUser.get();
 
 
                 // WARNING: FOR DEMO PURPOSE ONLY
                 if(!user.getPassword().equals(password)){
-                    throw new MultiRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                    throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
                 }
 
                 // TODO: send otp to mobile
@@ -101,7 +101,7 @@ public class TestConfig {
                 user.setOtp(otp);
                 user = adminUserRepo.save(user);
 
-                return new MultiRealmAuth<>(user, user.getUsername(), null, StepNames.OTP);
+                return new SecurityRealmAuth<>(user, user.getUsername(), null, StepNames.OTP);
             })
             .addAuthStep(StepNames.OTP, (previousStepAuth, request) -> {
                 String otp = request.getHeader(Headers.OTP);
@@ -109,14 +109,14 @@ public class TestConfig {
                 AdminUser user = previousStepAuth.getPrincipal();
 
                 if(!user.getOtp().equals(otp)){
-                    throw new MultiRealmAuthException(ErrorCodes.BAD_OTP);
+                    throw new SecurityRealmAuthException(ErrorCodes.BAD_OTP);
                 }
 
                 // clear otp
                 user.setOtp(otp);
                 user = adminUserRepo.save(user);
 
-                return new MultiRealmAuth<>(user, user.getUsername(), null);
+                return new SecurityRealmAuth<>(user, user.getUsername(), null);
             });
     }
 }

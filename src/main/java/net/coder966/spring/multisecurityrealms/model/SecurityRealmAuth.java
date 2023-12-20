@@ -9,7 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Setter
 @Getter
-public class MultiRealmAuth<T> implements Authentication {
+public class SecurityRealmAuth<T> implements Authentication {
 
     private T principal;
     private String name;
@@ -20,7 +20,7 @@ public class MultiRealmAuth<T> implements Authentication {
     /**
      * USe this when the user is fully authenticated.
      */
-    public MultiRealmAuth(T principal, String name, Set<SimpleGrantedAuthority> authorities) {
+    public SecurityRealmAuth(T principal, String name, Set<SimpleGrantedAuthority> authorities) {
         this.principal = principal;
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
@@ -31,7 +31,7 @@ public class MultiRealmAuth<T> implements Authentication {
     /**
      * USe this when the user is not fully authenticated and needs to proceed to the another auth step.
      */
-    public MultiRealmAuth(T principal, String name, Set<SimpleGrantedAuthority> authorities, String nextAuthStep) {
+    public SecurityRealmAuth(T principal, String name, Set<SimpleGrantedAuthority> authorities, String nextAuthStep) {
         this.principal = principal;
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
