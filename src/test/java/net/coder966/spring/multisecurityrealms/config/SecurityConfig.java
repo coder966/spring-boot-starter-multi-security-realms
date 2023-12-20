@@ -2,7 +2,7 @@ package net.coder966.spring.multisecurityrealms.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coder966.spring.multisecurityrealms.MultiRealmAuthFilter;
+import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -18,8 +18,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    protected SecurityFilterChain globalSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.addFilterBefore(new MultiRealmAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+    protected SecurityFilterChain globalSecurityFilterChain(HttpSecurity http, MultiSecurityRealmAuthFilter multiSecurityRealmAuthFilter)
+        throws Exception {
+        http.addFilterBefore(multiSecurityRealmAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.csrf(AbstractHttpConfigurer::disable);
 

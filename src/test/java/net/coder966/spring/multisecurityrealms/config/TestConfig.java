@@ -1,31 +1,30 @@
 package net.coder966.spring.multisecurityrealms.config;
 
-import jakarta.annotation.PostConstruct;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import net.coder966.spring.multisecurityrealms.MultiRealmSecurityConfigurer;
 import net.coder966.spring.multisecurityrealms.entity.AdminUser;
 import net.coder966.spring.multisecurityrealms.entity.NormalUser;
 import net.coder966.spring.multisecurityrealms.exception.MultiRealmAuthException;
 import net.coder966.spring.multisecurityrealms.model.MultiRealmAuth;
+import net.coder966.spring.multisecurityrealms.model.Realm;
 import net.coder966.spring.multisecurityrealms.other.Constants.ErrorCodes;
 import net.coder966.spring.multisecurityrealms.other.Constants.Headers;
 import net.coder966.spring.multisecurityrealms.other.Constants.StepNames;
 import net.coder966.spring.multisecurityrealms.repo.AdminUserRepo;
 import net.coder966.spring.multisecurityrealms.repo.NormalUserRepo;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @AllArgsConstructor
 @Configuration
 public class TestConfig {
 
-    private final MultiRealmSecurityConfigurer configurer;
     private final NormalUserRepo normalUserRepo;
     private final AdminUserRepo adminUserRepo;
 
-    @PostConstruct
-    public void configureNormalUserRealm() {
-        configurer.<NormalUser>addRealm(
+    @Bean
+    public Realm<NormalUser> configureNormalUserRealm() {
+        return new Realm<NormalUser>(
                 "NORMAL_USER",
                 "/normal-user/login",
                 "/normal-user/logout"
@@ -72,9 +71,9 @@ public class TestConfig {
             });
     }
 
-    @PostConstruct
-    public void configureAdminUserRealm() {
-        configurer.<AdminUser>addRealm(
+    @Bean
+    public Realm<AdminUser> configureAdminUserRealm() {
+        return new Realm<AdminUser>(
                 "ADMIN_USER",
                 "/admin-user/login",
                 "/admin-user/logout"

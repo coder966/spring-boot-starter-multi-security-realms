@@ -1,9 +1,12 @@
-package net.coder966.spring.multisecurityrealms;
+package net.coder966.spring.multisecurityrealms.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.exception.MultiRealmAuthException;
 import net.coder966.spring.multisecurityrealms.model.MultiRealmAuth;
 import net.coder966.spring.multisecurityrealms.model.Realm;
@@ -11,62 +14,64 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+@Slf4j
+public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
 
-public class MultiRealmAuthFilter extends OncePerRequestFilter {
-
-    static final Map<String, Realm<?>> realmsByLoginUrl = new HashMap<>();
-    static final Map<String, Realm<?>> realmsByLogoutUrl = new HashMap<>();
+    private final Realm<T> realm;
 
     // session attribute names
     private final String CURRENT_STEP_SESSION_ATTRIBUTE_NAME = "CURRENT_AUTH_STEP";
 
     // response headers
-    public static final String NEXT_STEP_RESPONSE_HEADER_NAME = "X-Next-Auth-Step";
-    public static final String ERROR_CODE_RESPONSE_HEADER_NAME = "X-Auth-Error-Code";
+    private final String NEXT_STEP_RESPONSE_HEADER_NAME = "X-Next-Auth-Step";
+    private final String ERROR_CODE_RESPONSE_HEADER_NAME = "X-Auth-Error-Code";
+
+    public SecurityRealmAuthFilter(Realm<T> realm) {
+        this.realm = realm;
+    }
+
+    public boolean matchesLogin(HttpServletRequest request) {
+        return request.getMethod().equals("POST") && request.getRequestURI().equals(realm.getLoginUrl());
+    }
+
+    public boolean matchesLogout(HttpServletRequest request) {
+        return request.getMethod().equals("POST") && request.getRequestURI().equals(realm.getLogoutUrl());
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
 
-        if(!request.getMethod().equals("POST")){
-            filterChain.doFilter(request, response);
+        if(matchesLogin(request)){
+            log.debug("handling login");
+            handleLogin(request, response);
             return;
         }
 
-        Realm<?> loginRealm = realmsByLoginUrl.get(request.getRequestURI());
-        if(loginRealm != null){
-            handleLogin(loginRealm, request, response);
-            return;
-        }
-
-        Realm<?> logoutRealm = realmsByLogoutUrl.get(request.getRequestURI());
-        if(logoutRealm != null){
-            handleLogout(logoutRealm, request, response);
+        if(matchesLogout(request)){
+            log.debug("handling logout");
+            handleLogout(request, response);
             return;
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private void handleLogin(Realm<?> realm, HttpServletRequest request, HttpServletResponse response) {
+    private void handleLogin(HttpServletRequest request, HttpServletResponse response) {
         // get current auth step for this realm
         String authStepName = (String) request.getSession().getAttribute(CURRENT_STEP_SESSION_ATTRIBUTE_NAME);
 
         if(authStepName == null){ // first step
             try{
-                final MultiRealmAuth<?> resultAuth = realm.getFirstStepAuthProvider().authenticate(request);
+                final MultiRealmAuth<T> resultAuth = realm.getFirstStepAuthProvider().authenticate(request);
                 afterAuthenticate(request, response, realm, resultAuth);
             }catch(MultiRealmAuthException e){
                 setAuthErrorCode(response, e.getMessage());
             }
         }else{
             try{
-                final MultiRealmAuth previousStepAuth = (MultiRealmAuth<?>) SecurityContextHolder.getContext().getAuthentication();
-                final MultiRealmAuth<?> resultAuth = realm.getAuthSteps().get(authStepName).authenticate(previousStepAuth, request);
+                final MultiRealmAuth<T> previousStepAuth = (MultiRealmAuth<T>) SecurityContextHolder.getContext().getAuthentication();
+                final MultiRealmAuth<T> resultAuth = realm.getAuthSteps().get(authStepName).authenticate(previousStepAuth, request);
                 afterAuthenticate(request, response, realm, resultAuth);
             }catch(MultiRealmAuthException e){
                 setAuthErrorCode(response, e.getMessage());
@@ -74,7 +79,7 @@ public class MultiRealmAuthFilter extends OncePerRequestFilter {
         }
     }
 
-    private void handleLogout(Realm<?> realm, HttpServletRequest request, HttpServletResponse response) {
+    private void handleLogout(HttpServletRequest request, HttpServletResponse response) {
         request.getSession().setAttribute(CURRENT_STEP_SESSION_ATTRIBUTE_NAME, null);
         SecurityContextHolder.clearContext();
         response.setStatus(200);
