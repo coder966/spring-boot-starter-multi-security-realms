@@ -77,6 +77,7 @@ public class MultiRealmAuthFilter extends OncePerRequestFilter {
     private void handleLogout(Realm<?> realm, HttpServletRequest request, HttpServletResponse response) {
         request.getSession().setAttribute(CURRENT_STEP_SESSION_ATTRIBUTE_NAME, null);
         SecurityContextHolder.clearContext();
+        response.setStatus(200);
     }
 
     private void afterAuthenticate(HttpServletRequest request, HttpServletResponse response, Realm<?> realm, MultiRealmAuth<?> auth) {
