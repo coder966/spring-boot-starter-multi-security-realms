@@ -32,6 +32,11 @@ public class MultiRealmAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
 
+        if(!request.getMethod().equals("POST")){
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         Realm<?> loginRealm = realmsByLoginUrl.get(request.getRequestURI());
         if(loginRealm != null){
             handleLogin(loginRealm, request, response);
