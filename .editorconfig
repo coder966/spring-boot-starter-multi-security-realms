@@ -4,7 +4,7 @@ end_of_line = lf
 indent_size = 4
 indent_style = space
 insert_final_newline = false
-max_line_length = 140
+max_line_length = 160
 tab_width = 2
 ij_continuation_indent_size = 4
 ij_formatter_off_tag = @formatter:off
@@ -41,7 +41,6 @@ ij_gherkin_keep_indents_on_empty_lines = false
 
 [*.java]
 indent_size = 4
-max_line_length = 140
 tab_width = 4
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
@@ -369,7 +368,6 @@ ij_less_use_double_quotes = true
 ij_less_value_alignment = 0
 
 [*.proto]
-max_line_length = 140
 ij_continuation_indent_size = 2
 ij_protobuf_keep_blank_lines_in_code = 2
 ij_protobuf_keep_indents_on_empty_lines = false
@@ -641,7 +639,6 @@ ij_shell_switch_cases_indented = false
 ij_shell_use_unix_line_separator = true
 
 [{*.cjs,*.js}]
-max_line_length = 140
 ij_javascript_align_imports = false
 ij_javascript_align_multiline_array_initializer_expression = false
 ij_javascript_align_multiline_binary_operation = false
@@ -816,9 +813,9 @@ tab_width = 4
 ij_continuation_indent_size = 8
 ij_vtl_keep_indents_on_empty_lines = false
 
-[{*.gant,*.groovy,*.gy}]
-indent_size = 4
-tab_width = 4
+[{*.gant,*.groovy,*.gy,*.gradle}]
+indent_size = 2
+tab_width = 2
 ij_continuation_indent_size = 8
 ij_groovy_align_group_field_declarations = false
 ij_groovy_align_multiline_array_initializer_expression = false
