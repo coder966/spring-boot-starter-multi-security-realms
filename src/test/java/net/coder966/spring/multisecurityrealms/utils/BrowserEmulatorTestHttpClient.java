@@ -45,7 +45,11 @@ public class BrowserEmulatorTestHttpClient {
             this.uri = uri;
         }
 
-        public ResponseSpec exchange() {
+        public ResponseSpec<Object> exchange() {
+            return exchange(Object.class);
+        }
+
+        public <T> ResponseSpec<T> exchange(Class<T> clazz) {
             LinkedMultiValueMap<String, String> mergedHeaders = new LinkedMultiValueMap<>();
             mergedHeaders.addAll(headers);
 
@@ -58,11 +62,11 @@ public class BrowserEmulatorTestHttpClient {
             });
 
 
-            ResponseEntity<Object> response = client.testRestTemplate.exchange(
+            ResponseEntity<T> response = client.testRestTemplate.exchange(
                 "http://localhost:" + client.port + uri,
                 method,
                 new HttpEntity<>(mergedHeaders),
-                Object.class
+                clazz
             );
 
             List<String> cookiesHeader = response.getHeaders().get("Set-Cookie");
@@ -70,7 +74,7 @@ public class BrowserEmulatorTestHttpClient {
                 client.cookies.addAll(cookiesHeader);
             }
 
-            return new ResponseSpec(response);
+            return new ResponseSpec<>(response);
         }
 
         public Request header(String key, String value) {
@@ -79,31 +83,36 @@ public class BrowserEmulatorTestHttpClient {
         }
     }
 
-    public static class ResponseSpec {
+    public static class ResponseSpec<T> {
 
-        private final ResponseEntity<Object> response;
+        private final ResponseEntity<T> response;
 
-        ResponseSpec(ResponseEntity<Object> response) {
+        ResponseSpec(ResponseEntity<T> response) {
             this.response = response;
         }
 
-        public ResponseSpec expectStatus(int code) {
+        public ResponseSpec<T> expectStatus(int code) {
             assertEquals(code, response.getStatusCode().value());
             return this;
         }
 
-        public ResponseSpec expectHeaderExists(String headerName) {
+        public ResponseSpec<T> expectHeaderExists(String headerName) {
             assertNotNull(response.getHeaders().get(headerName));
             return this;
         }
 
-        public ResponseSpec expectHeaderDoesNotExist(String headerName) {
+        public ResponseSpec<T> expectHeaderDoesNotExist(String headerName) {
             assertNull(response.getHeaders().get(headerName));
             return this;
         }
 
-        public ResponseSpec expectHeader(String headerName, String headerValue) {
+        public ResponseSpec<T> expectHeader(String headerName, String headerValue) {
             assertEquals(headerValue, response.getHeaders().get(headerName).getFirst());
+            return this;
+        }
+
+        public ResponseSpec<T> expectBody(T expected) {
+            assertEquals(expected, response.getBody());
             return this;
         }
     }
