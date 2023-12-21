@@ -7,15 +7,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Set;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
 public class MultiSecurityRealmAuthFilter extends OncePerRequestFilter {
 
     private final Set<SecurityRealm<?>> realms;
 
-    MultiSecurityRealmAuthFilter(Set<SecurityRealm<?>> realms) {
+    public MultiSecurityRealmAuthFilter(Set<SecurityRealm<?>> realms) {
         this.realms = realms;
     }
 
