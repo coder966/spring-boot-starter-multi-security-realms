@@ -36,7 +36,7 @@ tasks.named('test') {
 
 publishing {
 	publications {
-		mavenJava(MavenPublication) {
+    maven(MavenPublication) {
 			groupId = 'net.coder966.spring'
 			artifactId = 'spring-boot-starter-multi-security-realms'
 			version = '0.0.1-SNAPSHOT'
@@ -52,9 +52,9 @@ publishing {
 			}
 
 			pom {
-				name = 'multi-security-realms'
+        name = 'spring-boot-starter-multi-security-realms'
 				description = 'Support multiple security realms in a single Spring Boot application'
-				url = 'https://coder966.net'
+        url = 'https://github.com/coder966/spring-boot-starter-multi-security-realms'
 				licenses {
 					license {
 						name = 'The Apache License, Version 2.0'
@@ -73,6 +73,7 @@ publishing {
 	}
 	repositories {
 		maven {
+      name = "spring-boot-starter-multi-security-realms"
 			url = "https://maven.pkg.github.com/coder966/spring-boot-starter-multi-security-realms"
 		}
 	}
