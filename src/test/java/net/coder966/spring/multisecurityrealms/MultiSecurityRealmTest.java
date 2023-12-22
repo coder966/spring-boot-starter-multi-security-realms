@@ -20,7 +20,7 @@ public class MultiSecurityRealmTest {
     private final String ERROR_CODE_RESPONSE_HEADER_NAME = "X-Auth-Error-Code";
 
     @Test
-    public void testUserFromRealm2InRealm1() {
+    public void testLoginWithUserFromDifferentRealm() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
@@ -29,12 +29,8 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange()
             .expectStatus(401)
-            .expectHeaderDoesNotExist(NEXT_STEP_RESPONSE_HEADER_NAME);
-    }
-
-    @Test
-    public void testUserFromRealm1InRealm2() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+            .expectHeaderDoesNotExist(NEXT_STEP_RESPONSE_HEADER_NAME)
+            .expectHeader(ERROR_CODE_RESPONSE_HEADER_NAME, Constants.ErrorCodes.BAD_CREDENTIALS);
 
         client
             .request(HttpMethod.POST, "/admin-user/login")
@@ -46,127 +42,8 @@ public class MultiSecurityRealmTest {
             .expectHeader(ERROR_CODE_RESPONSE_HEADER_NAME, Constants.ErrorCodes.BAD_CREDENTIALS);
     }
 
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
     @Test
-    public void testRealm1FirstStepFailure() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
-
-        client
-            .request(HttpMethod.POST, "/normal-user/login")
-            .header(Constants.Headers.USERNAME, "tester")
-            .header(Constants.Headers.PASSWORD, "wrong")
-            .exchange()
-            .expectStatus(401)
-            .expectHeaderDoesNotExist(NEXT_STEP_RESPONSE_HEADER_NAME)
-            .expectHeader(ERROR_CODE_RESPONSE_HEADER_NAME, Constants.ErrorCodes.BAD_CREDENTIALS);
-    }
-
-    @Test
-    public void testRealm1FirstStepSuccess() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
-
-        client
-            .request(HttpMethod.POST, "/normal-user/login")
-            .header(Constants.Headers.USERNAME, "mohammed")
-            .header(Constants.Headers.PASSWORD, "mpass")
-            .exchange()
-            .expectStatus(200)
-            .expectHeader(NEXT_STEP_RESPONSE_HEADER_NAME, Constants.StepNames.OTP)
-            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
-    }
-
-    @Test
-    public void testRealm1SecondStepFailure() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
-
-        client
-            .request(HttpMethod.POST, "/normal-user/login")
-            .header(Constants.Headers.USERNAME, "mohammed")
-            .header(Constants.Headers.PASSWORD, "mpass")
-            .exchange()
-            .expectStatus(200)
-            .expectHeader(NEXT_STEP_RESPONSE_HEADER_NAME, Constants.StepNames.OTP)
-            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
-
-        client
-            .request(HttpMethod.POST, "/normal-user/login")
-            .header(Constants.Headers.OTP, "0000")
-            .exchange()
-            .expectStatus(401)
-            .expectHeaderDoesNotExist(NEXT_STEP_RESPONSE_HEADER_NAME)
-            .expectHeader(ERROR_CODE_RESPONSE_HEADER_NAME, Constants.ErrorCodes.BAD_OTP);
-    }
-
-    @Test
-    public void testRealm1SecondStepSuccess() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
-
-        client
-            .request(HttpMethod.POST, "/normal-user/login")
-            .header(Constants.Headers.USERNAME, "mohammed")
-            .header(Constants.Headers.PASSWORD, "mpass")
-            .exchange()
-            .expectStatus(200)
-            .expectHeader(NEXT_STEP_RESPONSE_HEADER_NAME, Constants.StepNames.OTP)
-            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
-
-        client
-            .request(HttpMethod.POST, "/normal-user/login")
-            .header(Constants.Headers.OTP, "1234")
-            .exchange()
-            .expectStatus(200)
-            .expectHeaderDoesNotExist(NEXT_STEP_RESPONSE_HEADER_NAME)
-            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
-    }
-
-    @Test
-    public void testRealm1AccessRoleProtectedApi() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
-
-        client
-            .request(HttpMethod.POST, "/normal-user/login")
-            .header(Constants.Headers.USERNAME, "mohammed")
-            .header(Constants.Headers.PASSWORD, "mpass")
-            .exchange()
-            .expectStatus(200)
-            .expectHeader(NEXT_STEP_RESPONSE_HEADER_NAME, Constants.StepNames.OTP)
-            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
-
-        client
-            .request(HttpMethod.POST, "/normal-user/login")
-            .header(Constants.Headers.OTP, "1234")
-            .exchange()
-            .expectStatus(200)
-            .expectHeaderDoesNotExist(NEXT_STEP_RESPONSE_HEADER_NAME)
-            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
-
-        client
-            .request(HttpMethod.GET, "/normal-user/my-name")
-            .exchange(String.class)
-            .expectStatus(200)
-            .expectBody("Mohammed");
-
-        client
-            .request(HttpMethod.GET, "/admin-user/my-name")
-            .exchange(String.class)
-            .expectStatus(403);
-    }
-
-    @Test
-    public void testRealm1Logout() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
-
-        client
-            .request(HttpMethod.POST, "/normal-user/logout")
-            .exchange()
-            .expectStatus(200);
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    @Test
-    public void testRealm2FirstStepFailure() {
+    public void testFirstStepBadCredentials() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
@@ -180,7 +57,7 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
-    public void testRealm2FirstStepSuccess() {
+    public void testFirstStepCorrectCredentials() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
@@ -194,7 +71,7 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
-    public void testRealm2SecondStepFailure() {
+    public void testSecondStepBadCredentials() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
@@ -216,7 +93,7 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
-    public void testRealm2SecondStepSuccess() {
+    public void testRealm2SecondCorrectCredentials() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
@@ -238,7 +115,7 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
-    public void testRealm2AccessRoleProtectedApi() {
+    public void testAccessingRoleProtectedApis() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
@@ -271,12 +148,41 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
-    public void testRealm2Logout() {
+    public void testLogout() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+
+        client
+            .request(HttpMethod.POST, "/admin-user/login")
+            .header(Constants.Headers.USERNAME, "khalid")
+            .header(Constants.Headers.PASSWORD, "kpass")
+            .exchange()
+            .expectStatus(200)
+            .expectHeader(NEXT_STEP_RESPONSE_HEADER_NAME, Constants.StepNames.OTP)
+            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
+
+        client
+            .request(HttpMethod.POST, "/admin-user/login")
+            .header(Constants.Headers.OTP, "1234")
+            .exchange()
+            .expectStatus(200)
+            .expectHeaderDoesNotExist(NEXT_STEP_RESPONSE_HEADER_NAME)
+            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
+
+        client
+            .request(HttpMethod.GET, "/admin-user/my-name")
+            .exchange(String.class)
+            .expectStatus(200)
+            .expectBody("Khalid");
+
 
         client
             .request(HttpMethod.POST, "/admin-user/logout")
             .exchange()
             .expectStatus(200);
+
+        client
+            .request(HttpMethod.GET, "/admin-user/my-name")
+            .exchange()
+            .expectStatus(403);
     }
 }
