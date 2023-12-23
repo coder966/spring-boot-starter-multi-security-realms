@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.3] - 2023-12-23
+
+- Create a default `SecurityFilterChain` and injects the multi realm support into it if the application does not already have one.
+- Internal enhancements.
+
 ## [0.0.2] - 2023-12-23
 
 - Support Spring Security 6.
