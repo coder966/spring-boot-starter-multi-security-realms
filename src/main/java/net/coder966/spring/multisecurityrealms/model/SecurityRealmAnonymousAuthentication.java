@@ -5,7 +5,7 @@ import java.util.Collections;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-public class SecurityRealmAnonymousAuth implements Authentication {
+public class SecurityRealmAnonymousAuthentication implements Authentication {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

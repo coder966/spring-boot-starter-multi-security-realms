@@ -56,7 +56,7 @@ implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.
 
 ### Setup
 
-Optionally, if you define a custom `SecurityFilterChain` then you need to add this filter `MultiSecurityRealmAuthFilter`
+Optionally, if you define a custom `SecurityFilterChain` then you need to add this filter `MultiSecurityRealmAuthenticationFilter`
 before `AnonymousAuthenticationFilter`.
 
 ```java
@@ -70,14 +70,14 @@ public class SecurityConfig {
     @Bean
     protected SecurityFilterChain globalSecurityFilterChain(
             HttpSecurity http,
-            MultiSecurityRealmAuthFilter multiSecurityRealmAuthFilter // inject this filter
+            MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter // inject this filter
     ) throws Exception {
 
         // this is optional. If you don't have a custom SecurityFilterChain then you don't need to do all of this
         // A default SecurityFilterChain is configured out of the box.
 
         // add it before AnonymousAuthenticationFilter
-        http.addFilterBefore(multiSecurityRealmAuthFilter, AnonymousAuthenticationFilter.class);
+        http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
 
         // the reset of your configuration ....
 
@@ -120,18 +120,18 @@ public class TestConfig {
 
                     Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(username);
                     if (optionalUser.isEmpty()) {
-                        // to indicate authentication error, throw a SecurityRealmAuthException 
+                        // to indicate authentication error, throw a SecurityRealmAuthenticationException 
                         // with the error code to tell the client frontend how to deal with it or to display an appropriate message.
-                        throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
                     }
                     NormalUser user = optionalUser.get();
 
 
                     // WARNING: FOR DEMO PURPOSE ONLY
                     if (!user.getPassword().equals(password)) {
-                        // to indicate authentication error, throw a SecurityRealmAuthException 
+                        // to indicate authentication error, throw a SecurityRealmAuthenticationException 
                         // with the error code to tell the client frontend how to deal with it or to display an appropriate message.
-                        throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
                     }
 
                     // TODO: send otp to mobile
@@ -139,9 +139,9 @@ public class TestConfig {
                     user.setOtp(otp);
                     user = normalUserRepo.save(user);
 
-                    // to indicate authentication success, return a new SecurityRealmAuth 
-                    // If you want the user to complete a further authentication step, specify its name in SecurityRealmAuth constructor arguments.
-                    return new SecurityRealmAuth<>(user, user.getUsername(), null, StepNames.OTP);
+                    // to indicate authentication success, return a new SecurityRealmAuthentication 
+                    // If you want the user to complete a further authentication step, specify its name in SecurityRealmAuthentication constructor arguments.
+                    return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
                 })
                 .addAuthStep(StepNames.OTP, (previousStepAuth, request) -> {
                     String otp = request.getHeader(Headers.OTP);
@@ -149,14 +149,14 @@ public class TestConfig {
                     NormalUser user = previousStepAuth.getPrincipal();
 
                     if (!user.getOtp().equals(otp)) {
-                        throw new SecurityRealmAuthException(ErrorCodes.BAD_OTP);
+                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
                     }
 
                     // clear otp
                     user.setOtp(otp);
                     user = normalUserRepo.save(user);
 
-                    return new SecurityRealmAuth<>(user, user.getUsername(), null);
+                    return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
                 });
     }
 
@@ -175,14 +175,14 @@ public class TestConfig {
 
                     Optional<AdminUser> optionalUser = adminUserRepo.findByUsername(username);
                     if (optionalUser.isEmpty()) {
-                        throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
                     }
                     AdminUser user = optionalUser.get();
 
 
                     // WARNING: FOR DEMO PURPOSE ONLY
                     if (!user.getPassword().equals(password)) {
-                        throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
                     }
 
                     // TODO: send otp to mobile
@@ -190,7 +190,7 @@ public class TestConfig {
                     user.setOtp(otp);
                     user = adminUserRepo.save(user);
 
-                    return new SecurityRealmAuth<>(user, user.getUsername(), null, StepNames.OTP);
+                    return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
                 })
                 .addAuthStep(StepNames.OTP, (previousStepAuth, request) -> {
                     String otp = request.getHeader(Headers.OTP);
@@ -198,14 +198,14 @@ public class TestConfig {
                     AdminUser user = previousStepAuth.getPrincipal();
 
                     if (!user.getOtp().equals(otp)) {
-                        throw new SecurityRealmAuthException(ErrorCodes.BAD_OTP);
+                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
                     }
 
                     // clear otp
                     user.setOtp(otp);
                     user = adminUserRepo.save(user);
 
-                    return new SecurityRealmAuth<>(user, user.getUsername(), null);
+                    return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
                 });
     }
 }

@@ -2,7 +2,7 @@ package net.coder966.spring.multisecurityrealms.autoconfigure;
 
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
-import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthFilter;
+import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthenticationFilter;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -26,19 +26,21 @@ public class AutoConfigureMultiSecurityRealmsSupport {
         return new HttpSessionSecurityContextRepository();
     }
 
-    @ConditionalOnMissingBean(MultiSecurityRealmAuthFilter.class)
+    @ConditionalOnMissingBean(MultiSecurityRealmAuthenticationFilter.class)
     @Bean
-    public MultiSecurityRealmAuthFilter multiSecurityRealmAuthFilter(Set<SecurityRealm<?>> realms, SecurityContextRepository securityContextRepository) {
-        log.info("Creating a default MultiSecurityRealmAuthFilter");
-        return new MultiSecurityRealmAuthFilter(realms, securityContextRepository);
+    public MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter(Set<SecurityRealm<?>> realms,
+        SecurityContextRepository securityContextRepository) {
+        log.info("Creating a default MultiSecurityRealmAuthenticationFilter");
+        return new MultiSecurityRealmAuthenticationFilter(realms, securityContextRepository);
     }
 
     @ConditionalOnMissingBean(SecurityFilterChain.class)
     @Bean
-    protected SecurityFilterChain securityFilterChain(HttpSecurity http, MultiSecurityRealmAuthFilter multiSecurityRealmAuthFilter) throws Exception {
+    protected SecurityFilterChain securityFilterChain(HttpSecurity http, MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter)
+        throws Exception {
         log.info("Creating a default SecurityFilterChain");
 
-        http.addFilterBefore(multiSecurityRealmAuthFilter, AnonymousAuthenticationFilter.class);
+        http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
 
         http.authorizeHttpRequests(configurer -> configurer.anyRequest().authenticated());
 

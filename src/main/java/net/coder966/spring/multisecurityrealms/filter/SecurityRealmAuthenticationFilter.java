@@ -6,10 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
-import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthException;
+import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationException;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAnonymousAuth;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuth;
+import net.coder966.spring.multisecurityrealms.model.SecurityRealmAnonymousAuthentication;
+import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthentication;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,7 +19,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
-public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
+public class SecurityRealmAuthenticationFilter<T> extends OncePerRequestFilter {
 
     private final SecurityRealm<T> realm;
     private final SecurityContextRepository securityContextRepository;
@@ -28,7 +28,7 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
     private final String NEXT_STEP_RESPONSE_HEADER_NAME = "X-Next-Auth-Step";
     private final String ERROR_CODE_RESPONSE_HEADER_NAME = "X-Auth-Error-Code";
 
-    public SecurityRealmAuthFilter(SecurityRealm<T> realm, SecurityContextRepository securityContextRepository) {
+    public SecurityRealmAuthenticationFilter(SecurityRealm<T> realm, SecurityContextRepository securityContextRepository) {
         this.realm = realm;
         this.securityContextRepository = securityContextRepository;
     }
@@ -77,14 +77,14 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
     private void handleLogin(HttpServletRequest request, HttpServletResponse response) {
         Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
 
-        if(currentAuth != null && !(currentAuth instanceof SecurityRealmAuth)){
-            throw new SecurityRealmAuthException("User already authenticated with a custom authentication not supported by this filter.");
+        if(currentAuth != null && !(currentAuth instanceof SecurityRealmAuthentication)){
+            throw new SecurityRealmAuthenticationException("User already authenticated with a custom authentication not supported by this filter.");
         }
 
-        SecurityRealmAuth<T> currentRealmAuth = (SecurityRealmAuth<T>) currentAuth;
+        SecurityRealmAuthentication<T> currentRealmAuth = (SecurityRealmAuthentication<T>) currentAuth;
 
         try{
-            final SecurityRealmAuth<T> resultAuth;
+            final SecurityRealmAuthentication<T> resultAuth;
 
             if(currentRealmAuth == null || currentRealmAuth.getNextAuthStep() == null){ // first step
                 resultAuth = realm.getFirstStepAuthProvider().authenticate(request);
@@ -105,12 +105,12 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
 
     private void handlePublicApi(HttpServletRequest request, HttpServletResponse response) {
         // don't use AnonymousAuthenticationToken because it will be rejected down via AuthorizationFilter
-        saveAuthInContextRepository(request, response, new SecurityRealmAnonymousAuth());
+        saveAuthInContextRepository(request, response, new SecurityRealmAnonymousAuthentication());
     }
 
-    private void afterAuthenticate(HttpServletRequest request, HttpServletResponse response, SecurityRealm<T> realm, SecurityRealmAuth<T> auth) {
+    private void afterAuthenticate(HttpServletRequest request, HttpServletResponse response, SecurityRealm<T> realm, SecurityRealmAuthentication<T> auth) {
         if(auth == null){
-            throw new IllegalStateException("MultiRealmAuthProvider should not return null. "
+            throw new IllegalStateException("MultiRealmAuthenticationProvider should not return null. "
                 + "It should either throw MultiRealmAuthException or return a MultiRealmAuth object.");
         }
 

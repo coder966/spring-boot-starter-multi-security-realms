@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
-import net.coder966.spring.multisecurityrealms.provider.SecurityRealmAuthProvider;
-import net.coder966.spring.multisecurityrealms.provider.SecurityRealmFirstStepAuthProvider;
+import net.coder966.spring.multisecurityrealms.provider.SecurityRealmAuthenticationProvider;
+import net.coder966.spring.multisecurityrealms.provider.SecurityRealmFirstStepAuthenticationProvider;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Getter
@@ -15,8 +15,8 @@ public class SecurityRealm<T> {
     private final String rolePrefix;
     private final String loginUrl;
     private final String logoutUrl;
-    private SecurityRealmFirstStepAuthProvider<T> firstStepAuthProvider;
-    private final Map<String, SecurityRealmAuthProvider<T>> authSteps;
+    private SecurityRealmFirstStepAuthenticationProvider<T> firstStepAuthProvider;
+    private final Map<String, SecurityRealmAuthenticationProvider<T>> authSteps;
     private final List<RequestMatcher> publicApisRequestMatchers = new ArrayList<>();
 
     public SecurityRealm(String rolePrefix, String loginUrl, String logoutUrl) {
@@ -42,7 +42,7 @@ public class SecurityRealm<T> {
         this.authSteps = new HashMap<>();
     }
 
-    public SecurityRealm<T> setFirstAuthStep(SecurityRealmFirstStepAuthProvider<T> authenticationProvider) {
+    public SecurityRealm<T> setFirstAuthStep(SecurityRealmFirstStepAuthenticationProvider<T> authenticationProvider) {
         firstStepAuthProvider = authenticationProvider;
         return this;
     }
@@ -53,7 +53,7 @@ public class SecurityRealm<T> {
      * @param name                    The step name, must be unique for this realm.
      * @param authenticationProvider, the auth provider.
      */
-    public SecurityRealm<T> addAuthStep(String name, SecurityRealmAuthProvider<T> authenticationProvider) {
+    public SecurityRealm<T> addAuthStep(String name, SecurityRealmAuthenticationProvider<T> authenticationProvider) {
         if(name == null || name.length() < 3 || name.trim().length() != name.length()){
             throw new IllegalArgumentException("Invalid auth step name: " + name);
         }

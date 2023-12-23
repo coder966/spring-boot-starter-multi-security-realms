@@ -4,9 +4,9 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import net.coder966.spring.multisecurityrealms.entity.AdminUser;
 import net.coder966.spring.multisecurityrealms.entity.NormalUser;
-import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthException;
+import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationException;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuth;
+import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.other.Constants.ErrorCodes;
 import net.coder966.spring.multisecurityrealms.other.Constants.Headers;
 import net.coder966.spring.multisecurityrealms.other.Constants.StepNames;
@@ -40,14 +40,14 @@ public class SecurityRealmsConfig {
 
                 Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(username);
                 if(optionalUser.isEmpty()){
-                    throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                    throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
                 }
                 NormalUser user = optionalUser.get();
 
 
                 // WARNING: FOR DEMO PURPOSE ONLY
                 if(!user.getPassword().equals(password)){
-                    throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                    throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
                 }
 
                 // TODO: send otp to mobile
@@ -55,7 +55,7 @@ public class SecurityRealmsConfig {
                 user.setOtp(otp);
                 user = normalUserRepo.save(user);
 
-                return new SecurityRealmAuth<>(user, user.getUsername(), null, StepNames.OTP);
+                return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
             })
             .addAuthStep(StepNames.OTP, (previousStepAuth, request) -> {
                 String otp = request.getHeader(Headers.OTP);
@@ -63,14 +63,14 @@ public class SecurityRealmsConfig {
                 NormalUser user = previousStepAuth.getPrincipal();
 
                 if(!user.getOtp().equals(otp)){
-                    throw new SecurityRealmAuthException(ErrorCodes.BAD_OTP);
+                    throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
                 }
 
                 // clear otp
                 user.setOtp(otp);
                 user = normalUserRepo.save(user);
 
-                return new SecurityRealmAuth<>(user, user.getUsername(), null);
+                return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
             });
     }
 
@@ -91,14 +91,14 @@ public class SecurityRealmsConfig {
 
                 Optional<AdminUser> optionalUser = adminUserRepo.findByUsername(username);
                 if(optionalUser.isEmpty()){
-                    throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                    throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
                 }
                 AdminUser user = optionalUser.get();
 
 
                 // WARNING: FOR DEMO PURPOSE ONLY
                 if(!user.getPassword().equals(password)){
-                    throw new SecurityRealmAuthException(ErrorCodes.BAD_CREDENTIALS);
+                    throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
                 }
 
                 // TODO: send otp to mobile
@@ -106,7 +106,7 @@ public class SecurityRealmsConfig {
                 user.setOtp(otp);
                 user = adminUserRepo.save(user);
 
-                return new SecurityRealmAuth<>(user, user.getUsername(), null, StepNames.OTP);
+                return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
             })
             .addAuthStep(StepNames.OTP, (previousStepAuth, request) -> {
                 String otp = request.getHeader(Headers.OTP);
@@ -114,14 +114,14 @@ public class SecurityRealmsConfig {
                 AdminUser user = previousStepAuth.getPrincipal();
 
                 if(!user.getOtp().equals(otp)){
-                    throw new SecurityRealmAuthException(ErrorCodes.BAD_OTP);
+                    throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
                 }
 
                 // clear otp
                 user.setOtp(otp);
                 user = adminUserRepo.save(user);
 
-                return new SecurityRealmAuth<>(user, user.getUsername(), null);
+                return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
             });
     }
 }

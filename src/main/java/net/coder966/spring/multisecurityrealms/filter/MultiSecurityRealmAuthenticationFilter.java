@@ -11,13 +11,13 @@ import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-public class MultiSecurityRealmAuthFilter extends OncePerRequestFilter {
+public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter {
 
-    private final Set<SecurityRealmAuthFilter<?>> filters = new HashSet<>();
+    private final Set<SecurityRealmAuthenticationFilter<?>> filters = new HashSet<>();
 
-    public MultiSecurityRealmAuthFilter(Set<SecurityRealm<?>> realms, SecurityContextRepository securityContextRepository) {
+    public MultiSecurityRealmAuthenticationFilter(Set<SecurityRealm<?>> realms, SecurityContextRepository securityContextRepository) {
         realms.forEach(realm -> {
-            filters.add(new SecurityRealmAuthFilter<>(realm, securityContextRepository));
+            filters.add(new SecurityRealmAuthenticationFilter<>(realm, securityContextRepository));
         });
     }
 
@@ -25,7 +25,7 @@ public class MultiSecurityRealmAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
 
-        for(SecurityRealmAuthFilter<?> filter : filters){
+        for(SecurityRealmAuthenticationFilter<?> filter : filters){
             if(filter.matches(request)){
                 filter.doFilter(request, response, filterChain);
                 return;

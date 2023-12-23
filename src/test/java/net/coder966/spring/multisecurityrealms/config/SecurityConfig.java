@@ -2,7 +2,7 @@ package net.coder966.spring.multisecurityrealms.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthFilter;
+import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -19,9 +19,9 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 public class SecurityConfig {
 
     @Bean
-    protected SecurityFilterChain globalSecurityFilterChain(HttpSecurity http, MultiSecurityRealmAuthFilter multiSecurityRealmAuthFilter)
+    protected SecurityFilterChain globalSecurityFilterChain(HttpSecurity http, MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter)
         throws Exception {
-        http.addFilterBefore(multiSecurityRealmAuthFilter, AnonymousAuthenticationFilter.class);
+        http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
 
         http.authorizeHttpRequests(configurer -> configurer.anyRequest().authenticated());
 
