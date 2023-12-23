@@ -8,15 +8,16 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class MultiSecurityRealmAuthFilter extends OncePerRequestFilter {
 
     private final Set<SecurityRealmAuthFilter<?>> filters = new HashSet<>();
 
-    public MultiSecurityRealmAuthFilter(Set<SecurityRealm<?>> realms) {
+    public MultiSecurityRealmAuthFilter(Set<SecurityRealm<?>> realms, SecurityContextRepository securityContextRepository) {
         realms.forEach(realm -> {
-            filters.add(new SecurityRealmAuthFilter<>(realm));
+            filters.add(new SecurityRealmAuthFilter<>(realm, securityContextRepository));
         });
     }
 

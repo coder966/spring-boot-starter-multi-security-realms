@@ -31,10 +31,6 @@ public class SecurityConfig {
             .csrfTokenRequestHandler(requestHandler)
         );
 
-        // required for Spring Security 6.x
-        http.securityContext(configurer -> configurer.requireExplicitSave(false));
-
-
         return http.build();
     }
 }

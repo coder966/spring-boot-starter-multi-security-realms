@@ -12,13 +12,16 @@ import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuth;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
 public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
 
     private final SecurityRealm<T> realm;
+    private final SecurityContextRepository securityContextRepository;
 
     // session attribute names
     private final String CURRENT_STEP_SESSION_ATTRIBUTE_NAME = "CURRENT_AUTH_STEP";
@@ -27,8 +30,9 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
     private final String NEXT_STEP_RESPONSE_HEADER_NAME = "X-Next-Auth-Step";
     private final String ERROR_CODE_RESPONSE_HEADER_NAME = "X-Auth-Error-Code";
 
-    public SecurityRealmAuthFilter(SecurityRealm<T> realm) {
+    public SecurityRealmAuthFilter(SecurityRealm<T> realm, SecurityContextRepository securityContextRepository) {
         this.realm = realm;
+        this.securityContextRepository = securityContextRepository;
     }
 
     public boolean matchesLogin(HttpServletRequest request) {
@@ -83,7 +87,10 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
 
     private void handleLogout(HttpServletRequest request, HttpServletResponse response) {
         request.getSession().setAttribute(CURRENT_STEP_SESSION_ATTRIBUTE_NAME, null);
+
         SecurityContextHolder.clearContext();
+        securityContextRepository.saveContext(SecurityContextHolder.createEmptyContext(), request, response);
+
         response.setStatus(200);
     }
 
@@ -93,7 +100,9 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
                 + "It should either throw MultiRealmAuthException or return a MultiRealmAuth object.");
         }
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        SecurityContext newContext = SecurityContextHolder.createEmptyContext();
+        newContext.setAuthentication(auth);
+        securityContextRepository.saveContext(newContext, request, response);
 
         if(auth.getNextAuthStep() != null){
             setNextAuthStep(request, response, auth.getNextAuthStep());
