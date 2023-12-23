@@ -23,6 +23,7 @@ This library allows you to easily and declaratively define these realms. It also
   support.
 - Ability to define public apis per realm without the need to access and update the `SecurityFilterChain` manually.
   This is helpful if your application is huge, and you want to define public apis in segregated modules without the need to define them in a central place.
+- You still have full control and can inject this library in a single `SecurityFilterChain` if you wish and have multiple `SecurityFilterChain`.
 - Supports any type of `SecurityContextRepository`. By default, this library creates a bean of `HttpSessionSecurityContextRepository` if you don't already have
   one.
 
@@ -30,8 +31,7 @@ This library allows you to easily and declaratively define these realms. It also
 
 ### Requirements
 
-Spring Boot >= 3.x.x
-Java >= 17 (This is also a requirement for Spring Boot 3)
+- Spring Boot >= 3.x.x
 
 ### Installation
 
