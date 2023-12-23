@@ -12,7 +12,7 @@
 
     <groupId>net.coder966.spring</groupId>
     <artifactId>spring-boot-starter-multi-security-realms</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 
     <name>spring-boot-starter-multi-security-realms</name>
     <description>Support multiple security realms in a single Spring Boot application</description>

@@ -21,6 +21,10 @@ This library allows you to easily and declaratively define these realms. It also
 
 - Multi steps authentication support (e.g. username & password step, then OTP step). You don't have to think about how to implement this, just use the built-in
   support.
+- Ability to define public apis per realm without the need to access and update the `SecurityFilterChain` manually.
+  This is helpful if your application is huge, and you want to define public apis in segregated modules without the need to define them in a central place.
+- Supports any type of `SecurityContextRepository`. By default, this library creates a bean of `HttpSessionSecurityContextRepository` if you don't already have
+  one.
 
 ## Usage
 
@@ -38,14 +42,14 @@ Maven:
 <dependency>
     <groupId>net.coder966.spring</groupId>
     <artifactId>spring-boot-starter-multi-security-realms</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
 Gradle:
 
 ```groovy
-implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.0.1'
+implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.0.2'
 ```
 
 ### Setup
@@ -98,6 +102,10 @@ public class TestConfig {
                 "/normal-user/login", // realm login url
                 "/normal-user/logout" // realm logout url
         )
+                // optionally define public apis.
+                .publicApi(AntPathRequestMatcher.antMatcher("/normal-user/my-first-open-api"))
+                .publicApi(AntPathRequestMatcher.antMatcher("/normal-user/my-second-open-api"))
+
                 .setFirstAuthStep(request -> {
                     // WARNING: FOR DEMO PURPOSE ONLY
 
