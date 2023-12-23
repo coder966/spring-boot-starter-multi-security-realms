@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthException;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuth;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -63,6 +64,13 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
     }
 
     private void handleLogin(HttpServletRequest request, HttpServletResponse response) {
+        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+
+        if(currentAuth != null && !(currentAuth instanceof SecurityRealmAuth)){
+            throw new SecurityRealmAuthException("User already authenticated with a custom authentication not supported by this filter.");
+        }
+
+
         // get current auth step for this realm
         String authStepName = (String) request.getSession().getAttribute(CURRENT_STEP_SESSION_ATTRIBUTE_NAME);
 
@@ -98,6 +106,10 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
         if(auth == null){
             throw new IllegalStateException("MultiRealmAuthProvider should not return null. "
                 + "It should either throw MultiRealmAuthException or return a MultiRealmAuth object.");
+        }
+
+        if(auth.getPrincipal() == null){
+            throw new IllegalStateException("Principal should not be null.");
         }
 
         SecurityContext newContext = SecurityContextHolder.createEmptyContext();
