@@ -61,21 +61,20 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
         // get current auth step for this realm
         String authStepName = (String) request.getSession().getAttribute(CURRENT_STEP_SESSION_ATTRIBUTE_NAME);
 
-        if(authStepName == null){ // first step
-            try{
-                final SecurityRealmAuth<T> resultAuth = realm.getFirstStepAuthProvider().authenticate(request);
-                afterAuthenticate(request, response, realm, resultAuth);
-            }catch(SecurityRealmAuthException e){
-                setAuthErrorCode(response, e.getMessage());
+
+        try{
+            final SecurityRealmAuth<T> resultAuth;
+
+            if(authStepName == null){ // first step
+                resultAuth = realm.getFirstStepAuthProvider().authenticate(request);
+            }else{
+                SecurityRealmAuth<T> previousStepAuth = (SecurityRealmAuth<T>) SecurityContextHolder.getContext().getAuthentication();
+                resultAuth = realm.getAuthSteps().get(authStepName).authenticate(previousStepAuth, request);
             }
-        }else{
-            try{
-                final SecurityRealmAuth<T> previousStepAuth = (SecurityRealmAuth<T>) SecurityContextHolder.getContext().getAuthentication();
-                final SecurityRealmAuth<T> resultAuth = realm.getAuthSteps().get(authStepName).authenticate(previousStepAuth, request);
-                afterAuthenticate(request, response, realm, resultAuth);
-            }catch(SecurityRealmAuthException e){
-                setAuthErrorCode(response, e.getMessage());
-            }
+
+            afterAuthenticate(request, response, realm, resultAuth);
+        }catch(SecurityRealmAuthException e){
+            setAuthErrorCode(response, e.getMessage());
         }
     }
 
