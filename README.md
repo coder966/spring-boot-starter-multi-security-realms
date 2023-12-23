@@ -23,8 +23,10 @@ This library allows you to easily and declaratively define these realms. It also
   support.
 - Ability to define public apis per realm without the need to access and update the `SecurityFilterChain` manually.
   This is helpful if your application is huge, and you want to define public apis in segregated modules without the need to define them in a central place.
-- You still have full control and can inject this library in a single `SecurityFilterChain` if you wish and have multiple `SecurityFilterChain`.
-- Supports any type of `SecurityContextRepository`. By default, this library creates a bean of `HttpSessionSecurityContextRepository` if you don't already have
+- You still have full control and can inject this library in a single `SecurityFilterChain` if you wish and have multiple `SecurityFilterChain`. By default,
+  this library creates a default `SecurityFilterChain` and injects the multi realm support into it.
+- Supports any type of `SecurityContextRepository`. By default, this library creates a default repository of type `HttpSessionSecurityContextRepository` if you
+  don't already have
   one.
 
 ## Usage
@@ -54,7 +56,8 @@ implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.
 
 ### Setup
 
-Inject `MultiSecurityRealmAuthFilter` to your SecurityFilterChain before `UsernamePasswordAuthenticationFilter`
+Optionally, if you define a custom `SecurityFilterChain` then you need to add this filter `MultiSecurityRealmAuthFilter`
+before `AnonymousAuthenticationFilter`.
 
 ```java
 
@@ -70,8 +73,11 @@ public class SecurityConfig {
             MultiSecurityRealmAuthFilter multiSecurityRealmAuthFilter // inject this filter
     ) throws Exception {
 
-        // add it before UsernamePasswordAuthenticationFilter
-        http.addFilterBefore(multiSecurityRealmAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        // this is optional. If you don't have a custom SecurityFilterChain then you don't need to do all of this
+        // A default SecurityFilterChain is configured out of the box.
+
+        // add it before AnonymousAuthenticationFilter
+        http.addFilterBefore(multiSecurityRealmAuthFilter, AnonymousAuthenticationFilter.class);
 
         // the reset of your configuration ....
 

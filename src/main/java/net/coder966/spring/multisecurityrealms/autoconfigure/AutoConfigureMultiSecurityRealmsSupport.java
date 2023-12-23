@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -38,7 +38,7 @@ public class AutoConfigureMultiSecurityRealmsSupport {
     protected SecurityFilterChain securityFilterChain(HttpSecurity http, MultiSecurityRealmAuthFilter multiSecurityRealmAuthFilter) throws Exception {
         log.info("Creating a default SecurityFilterChain");
 
-        http.addFilterBefore(multiSecurityRealmAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(multiSecurityRealmAuthFilter, AnonymousAuthenticationFilter.class);
 
         http.authorizeHttpRequests(configurer -> configurer.anyRequest().authenticated());
 
