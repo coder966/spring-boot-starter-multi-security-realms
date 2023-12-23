@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 
 @AllArgsConstructor
 @Configuration
-public class TestConfig {
+public class SecurityRealmsConfig {
 
     private final NormalUserRepo normalUserRepo;
     private final AdminUserRepo adminUserRepo;
