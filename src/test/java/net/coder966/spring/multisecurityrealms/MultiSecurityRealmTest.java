@@ -119,6 +119,11 @@ public class MultiSecurityRealmTest {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
+            .request(HttpMethod.GET, "/admin-user/my-name")
+            .exchange(String.class)
+            .expectStatus(403);
+
+        client
             .request(HttpMethod.POST, "/admin-user/login")
             .header(Constants.Headers.USERNAME, "khalid")
             .header(Constants.Headers.PASSWORD, "kpass")
