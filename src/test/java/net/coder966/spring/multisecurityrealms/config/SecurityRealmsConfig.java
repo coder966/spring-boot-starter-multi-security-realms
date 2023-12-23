@@ -14,6 +14,7 @@ import net.coder966.spring.multisecurityrealms.repo.AdminUserRepo;
 import net.coder966.spring.multisecurityrealms.repo.NormalUserRepo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @AllArgsConstructor
 @Configuration
@@ -29,6 +30,8 @@ public class SecurityRealmsConfig {
                 "/normal-user/login",
                 "/normal-user/logout"
             )
+            .publicApi(AntPathRequestMatcher.antMatcher("/normal-user/my-first-open-api"))
+            .publicApi(AntPathRequestMatcher.antMatcher("/normal-user/my-second-open-api"))
             .setFirstAuthStep(request -> {
                 // WARNING: FOR DEMO PURPOSE ONLY
 
@@ -78,6 +81,8 @@ public class SecurityRealmsConfig {
                 "/admin-user/login",
                 "/admin-user/logout"
             )
+            .publicApi(AntPathRequestMatcher.antMatcher("/admin-user/my-first-open-api"))
+            .publicApi(AntPathRequestMatcher.antMatcher("/admin-user/my-second-open-api"))
             .setFirstAuthStep(request -> {
                 // WARNING: FOR DEMO PURPOSE ONLY
 

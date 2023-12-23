@@ -23,6 +23,8 @@ public class SecurityConfig {
         throws Exception {
         http.addFilterBefore(multiSecurityRealmAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
+        http.authorizeHttpRequests(configurer -> configurer.anyRequest().authenticated());
+
         // required for Spring Security 6.x OR disable CSRF (not recommended)
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName(null);

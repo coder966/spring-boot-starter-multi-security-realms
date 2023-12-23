@@ -4,9 +4,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthException;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
+import net.coder966.spring.multisecurityrealms.model.SecurityRealmAnonymousAuth;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuth;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -15,7 +17,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.filter.OncePerRequestFilter;
-import java.io.IOException;
 
 @Slf4j
 public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
@@ -32,12 +33,20 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
         this.securityContextRepository = securityContextRepository;
     }
 
-    public boolean matchesLogin(HttpServletRequest request) {
+    public boolean matches(HttpServletRequest request) {
+        return matchesLogin(request) || matchesLogout(request) || matchesPublicApi(request);
+    }
+
+    private boolean matchesLogin(HttpServletRequest request) {
         return request.getMethod().equals("POST") && request.getRequestURI().equals(realm.getLoginUrl());
     }
 
-    public boolean matchesLogout(HttpServletRequest request) {
+    private boolean matchesLogout(HttpServletRequest request) {
         return request.getMethod().equals("POST") && request.getRequestURI().equals(realm.getLogoutUrl());
+    }
+
+    private boolean matchesPublicApi(HttpServletRequest request) {
+        return realm.getPublicApisRequestMatchers().stream().anyMatch(requestMatcher -> requestMatcher.matches(request));
     }
 
     @Override
@@ -54,6 +63,12 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
             log.debug("handling logout");
             handleLogout(request, response);
             return;
+        }
+
+        if(matchesPublicApi(request)){
+            log.debug("handling public api");
+            handlePublicApi(request, response);
+            // don't return, we need to continue the filter chain on order to reach the servlet controller
         }
 
         filterChain.doFilter(request, response);
@@ -85,8 +100,12 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
     }
 
     private void handleLogout(HttpServletRequest request, HttpServletResponse response) {
-        SecurityContextHolder.clearContext();
-        securityContextRepository.saveContext(SecurityContextHolder.createEmptyContext(), request, response);
+        saveAuthInContextRepository(request, response, null);
+    }
+
+    private void handlePublicApi(HttpServletRequest request, HttpServletResponse response) {
+        // don't use AnonymousAuthenticationToken because it will be rejected down via AuthorizationFilter
+        saveAuthInContextRepository(request, response, new SecurityRealmAnonymousAuth());
     }
 
     private void afterAuthenticate(HttpServletRequest request, HttpServletResponse response, SecurityRealm<T> realm, SecurityRealmAuth<T> auth) {
@@ -99,9 +118,7 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
             throw new IllegalStateException("Principal should not be null.");
         }
 
-        SecurityContext newContext = SecurityContextHolder.createEmptyContext();
-        newContext.setAuthentication(auth);
-        securityContextRepository.saveContext(newContext, request, response);
+        saveAuthInContextRepository(request, response, auth);
 
         if(auth.getNextAuthStep() != null){
             response.setHeader(NEXT_STEP_RESPONSE_HEADER_NAME, auth.getNextAuthStep());
@@ -109,6 +126,14 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
         }
 
         auth.getAuthorities().add(new SimpleGrantedAuthority("ROLE_" + realm.getRolePrefix()));
+    }
+
+    private void saveAuthInContextRepository(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        SecurityContextHolder.clearContext();
+        SecurityContext newContext = SecurityContextHolder.createEmptyContext();
+        newContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(newContext);
+        securityContextRepository.saveContext(newContext, request, response);
     }
 
 }

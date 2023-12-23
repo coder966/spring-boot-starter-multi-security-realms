@@ -26,7 +26,7 @@ public class MultiSecurityRealmAuthFilter extends OncePerRequestFilter {
         throws ServletException, IOException {
 
         for(SecurityRealmAuthFilter<?> filter : filters){
-            if(filter.matchesLogin(request) || filter.matchesLogout(request)){
+            if(filter.matches(request)){
                 filter.doFilter(request, response, filterChain);
                 return;
             }

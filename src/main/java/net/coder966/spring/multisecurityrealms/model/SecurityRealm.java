@@ -1,10 +1,13 @@
 package net.coder966.spring.multisecurityrealms.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import net.coder966.spring.multisecurityrealms.provider.SecurityRealmAuthProvider;
 import net.coder966.spring.multisecurityrealms.provider.SecurityRealmFirstStepAuthProvider;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Getter
 public class SecurityRealm<T> {
@@ -14,6 +17,7 @@ public class SecurityRealm<T> {
     private final String logoutUrl;
     private SecurityRealmFirstStepAuthProvider<T> firstStepAuthProvider;
     private final Map<String, SecurityRealmAuthProvider<T>> authSteps;
+    private final List<RequestMatcher> publicApisRequestMatchers = new ArrayList<>();
 
     public SecurityRealm(String rolePrefix, String loginUrl, String logoutUrl) {
         if(rolePrefix == null || rolePrefix.length() < 3 || rolePrefix.trim().length() != rolePrefix.length()){
@@ -59,6 +63,11 @@ public class SecurityRealm<T> {
         }
 
         authSteps.put(name, authenticationProvider);
+        return this;
+    }
+
+    public SecurityRealm<T> publicApi(RequestMatcher requestMatcher) {
+        publicApisRequestMatchers.add(requestMatcher);
         return this;
     }
 
