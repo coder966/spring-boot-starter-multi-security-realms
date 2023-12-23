@@ -24,6 +24,11 @@ This library allows you to easily and declaratively define these realms. It also
 
 ## Usage
 
+### Requirements
+
+Spring Boot >= 3.x.x
+Java >= 17 (This is also a requirement for Spring Boot 3)
+
 ### Installation
 
 Maven:
