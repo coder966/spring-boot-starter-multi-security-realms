@@ -107,7 +107,7 @@ public class BrowserEmulatorTestHttpClient {
         }
 
         public ResponseSpec<T> expectHeader(String headerName, String headerValue) {
-            assertEquals(headerValue, response.getHeaders().get(headerName).getFirst());
+            assertEquals(headerValue, response.getHeaders().get(headerName).get(0));
             return this;
         }
 
