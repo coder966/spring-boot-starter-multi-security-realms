@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthException;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuth;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -75,6 +76,8 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
             afterAuthenticate(request, response, realm, resultAuth);
         }catch(SecurityRealmAuthException e){
             setAuthErrorCode(response, e.getMessage());
+        }catch(AuthenticationException e){
+            setAuthErrorCode(response, null);
         }
     }
 
@@ -108,8 +111,7 @@ public class SecurityRealmAuthFilter<T> extends OncePerRequestFilter {
     }
 
     private void setAuthErrorCode(HttpServletResponse response, String errorCode) {
-        Objects.requireNonNull(errorCode);
         response.setStatus(401);
-        response.setHeader(ERROR_CODE_RESPONSE_HEADER_NAME, errorCode);
+        response.setHeader(ERROR_CODE_RESPONSE_HEADER_NAME, errorCode == null ? "" : errorCode);
     }
 }
