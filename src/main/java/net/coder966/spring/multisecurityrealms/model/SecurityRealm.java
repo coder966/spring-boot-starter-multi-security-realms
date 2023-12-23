@@ -3,7 +3,6 @@ package net.coder966.spring.multisecurityrealms.model;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
-import net.coder966.spring.multisecurityrealms.filter.SecurityRealmAuthFilter;
 import net.coder966.spring.multisecurityrealms.provider.SecurityRealmAuthProvider;
 import net.coder966.spring.multisecurityrealms.provider.SecurityRealmFirstStepAuthProvider;
 
@@ -15,7 +14,6 @@ public class SecurityRealm<T> {
     private final String logoutUrl;
     private SecurityRealmFirstStepAuthProvider<T> firstStepAuthProvider;
     private final Map<String, SecurityRealmAuthProvider<T>> authSteps;
-    private SecurityRealmAuthFilter<T> filter;
 
     public SecurityRealm(String rolePrefix, String loginUrl, String logoutUrl) {
         if(rolePrefix == null || rolePrefix.length() < 3 || rolePrefix.trim().length() != rolePrefix.length()){
@@ -64,10 +62,4 @@ public class SecurityRealm<T> {
         return this;
     }
 
-    public SecurityRealmAuthFilter<T> getFilter() {
-        if(filter == null){
-            filter = new SecurityRealmAuthFilter<>(this);
-        }
-        return filter;
-    }
 }
