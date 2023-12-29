@@ -82,16 +82,10 @@ public class SecurityRealmAuthenticationFilter<T> extends OncePerRequestFilter {
         }
 
         SecurityRealmAuthentication<T> currentRealmAuth = (SecurityRealmAuthentication<T>) currentAuth;
+        String step = currentRealmAuth == null ? null : currentRealmAuth.getNextAuthStep();
 
         try{
-            final SecurityRealmAuthentication<T> resultAuth;
-
-            if(currentRealmAuth == null || currentRealmAuth.getNextAuthStep() == null){ // first step
-                resultAuth = realm.getFirstStepAuthProvider().authenticate(request);
-            }else{
-                resultAuth = realm.getAuthSteps().get(currentRealmAuth.getNextAuthStep()).authenticate(currentRealmAuth, request);
-            }
-
+            SecurityRealmAuthentication<T> resultAuth = realm.authenticate(request, step, currentRealmAuth);
             afterAuthenticate(request, response, realm, resultAuth);
         }catch(AuthenticationException e){
             response.setStatus(401);

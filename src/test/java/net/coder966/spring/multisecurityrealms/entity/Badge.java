@@ -4,9 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Entity
 @NoArgsConstructor
-public class AdminUser {
+public class Badge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -23,19 +21,10 @@ public class AdminUser {
 
     private String name;
 
-    private String username;
+    @ManyToOne
+    private AdminUser adminUser;
 
-    private String password;
-
-    private String otp;
-
-    @OneToMany(mappedBy = "adminUser")
-    private Set<Badge> badges = new HashSet<>();
-
-    public AdminUser(String name, String username, String password, Set<Badge> badges) {
+    public Badge(String name) {
         this.name = name;
-        this.username = username;
-        this.password = password;
-        this.badges = badges;
     }
 }

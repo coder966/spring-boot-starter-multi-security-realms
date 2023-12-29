@@ -57,7 +57,7 @@ implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.
 ### Setup
 
 Optionally, if you define a custom `SecurityFilterChain` then you need to add this filter `MultiSecurityRealmAuthenticationFilter`
-before `AnonymousAuthenticationFilter`.
+before `UsernamePasswordAuthenticationFilter`.
 
 ```java
 
@@ -77,7 +77,7 @@ public class SecurityConfig {
         // A default SecurityFilterChain is configured out of the box.
 
         // add it before AnonymousAuthenticationFilter
-        http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
+        http.addFilterBefore(multiSecurityRealmAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         // the reset of your configuration ....
 
@@ -92,121 +92,147 @@ public class SecurityConfig {
 To define a realm, simple create a bean of type `SecurityRealm`.
 Here in this example, we define two realms (normal-user & admin-user).
 
+#### NormalUserSecurityRealm.java
 ```java
 
-@AllArgsConstructor
+@Slf4j
 @Configuration
-public class TestConfig {
+public class NormalUserSecurityRealm extends SecurityRealm<NormalUser> {
 
-    private final NormalUserRepo normalUserRepo;
-    private final AdminUserRepo adminUserRepo;
+    @Autowired
+    private NormalUserRepo normalUserRepo;
 
-    @Bean
-    public SecurityRealm<NormalUser> configureNormalUserRealm() {
-        return new SecurityRealm<NormalUser>(
-                "NORMAL_USER", // realm role name
-                "/normal-user/login", // realm login url
-                "/normal-user/logout" // realm logout url
-        )
-                // optionally define public apis.
-                .publicApi(AntPathRequestMatcher.antMatcher("/normal-user/my-first-open-api"))
-                .publicApi(AntPathRequestMatcher.antMatcher("/normal-user/my-second-open-api"))
-
-                .setFirstAuthStep(request -> {
-                    // WARNING: FOR DEMO PURPOSE ONLY
-
-                    String username = request.getHeader(Headers.USERNAME);
-                    String password = request.getHeader(Headers.PASSWORD);
-
-                    Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(username);
-                    if (optionalUser.isEmpty()) {
-                        // to indicate authentication error, throw a SecurityRealmAuthenticationException 
-                        // with the error code to tell the client frontend how to deal with it or to display an appropriate message.
-                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
-                    }
-                    NormalUser user = optionalUser.get();
-
-
-                    // WARNING: FOR DEMO PURPOSE ONLY
-                    if (!user.getPassword().equals(password)) {
-                        // to indicate authentication error, throw a SecurityRealmAuthenticationException 
-                        // with the error code to tell the client frontend how to deal with it or to display an appropriate message.
-                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
-                    }
-
-                    // TODO: send otp to mobile
-                    String otp = "1234"; // random
-                    user.setOtp(otp);
-                    user = normalUserRepo.save(user);
-
-                    // to indicate authentication success, return a new SecurityRealmAuthentication 
-                    // If you want the user to complete a further authentication step, specify its name in SecurityRealmAuthentication constructor arguments.
-                    return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
-                })
-                .addAuthStep(StepNames.OTP, (previousStepAuth, request) -> {
-                    String otp = request.getHeader(Headers.OTP);
-
-                    NormalUser user = previousStepAuth.getPrincipal();
-
-                    if (!user.getOtp().equals(otp)) {
-                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
-                    }
-
-                    // clear otp
-                    user.setOtp(otp);
-                    user = normalUserRepo.save(user);
-
-                    return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
-                });
+    public NormalUserSecurityRealm() {
+        super("NORMAL_USER", "/normal-user/login", "/normal-user/logout");
     }
 
-    @Bean
-    public SecurityRealm<AdminUser> configureAdminUserRealm() {
-        return new SecurityRealm<AdminUser>(
-                "ADMIN_USER", // realm role name
-                "/admin-user/login", // realm login url
-                "/admin-user/logout" // realm logout url
-        )
-                .setFirstAuthStep(request -> {
-                    // WARNING: FOR DEMO PURPOSE ONLY
+    @Override
+    public SecurityRealmAuthentication<NormalUser> authenticate(
+            HttpServletRequest request,
+            String step,
+            SecurityRealmAuthentication<NormalUser> previousStepAuth
+    ) {
+        if (step == null) {
+            // WARNING: FOR DEMO PURPOSE ONLY
 
-                    String username = request.getHeader(Headers.USERNAME);
-                    String password = request.getHeader(Headers.PASSWORD);
+            String username = request.getHeader(Headers.USERNAME);
+            String password = request.getHeader(Headers.PASSWORD);
 
-                    Optional<AdminUser> optionalUser = adminUserRepo.findByUsername(username);
-                    if (optionalUser.isEmpty()) {
-                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
-                    }
-                    AdminUser user = optionalUser.get();
+            Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(username);
+            if (optionalUser.isEmpty()) {
+                throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
+            }
+            NormalUser user = optionalUser.get();
 
 
-                    // WARNING: FOR DEMO PURPOSE ONLY
-                    if (!user.getPassword().equals(password)) {
-                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
-                    }
+            // WARNING: FOR DEMO PURPOSE ONLY
+            if (!user.getPassword().equals(password)) {
+                throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
+            }
 
-                    // TODO: send otp to mobile
-                    String otp = "1234"; // random
-                    user.setOtp(otp);
-                    user = adminUserRepo.save(user);
+            // TODO: send otp to mobile
+            String otp = "1234"; // random
+            user.setOtp(otp);
+            user = normalUserRepo.save(user);
 
-                    return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
-                })
-                .addAuthStep(StepNames.OTP, (previousStepAuth, request) -> {
-                    String otp = request.getHeader(Headers.OTP);
+            return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
+        } else if (step.equals(StepNames.OTP)) {
+            String otp = request.getHeader(Headers.OTP);
 
-                    AdminUser user = previousStepAuth.getPrincipal();
+            NormalUser user = previousStepAuth.getPrincipal();
 
-                    if (!user.getOtp().equals(otp)) {
-                        throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
-                    }
+            if (!user.getOtp().equals(otp)) {
+                throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
+            }
 
-                    // clear otp
-                    user.setOtp(otp);
-                    user = adminUserRepo.save(user);
+            // clear otp
+            user.setOtp(otp);
+            user = normalUserRepo.save(user);
 
-                    return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
-                });
+            return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
+        }
+
+        throw new IllegalStateException("Should never happen");
+    }
+
+    @Override
+    public List<RequestMatcher> getPublicApis() {
+        return List.of(
+                AntPathRequestMatcher.antMatcher("/normal-user/my-first-open-api"),
+                AntPathRequestMatcher.antMatcher("/normal-user/my-second-open-api")
+        );
+    }
+}
+```
+
+#### AdminUserSecurityRealm.java
+
+```java
+
+@Slf4j
+@Configuration
+public class AdminUserSecurityRealm extends SecurityRealm<AdminUser> {
+
+    @Autowired
+    private AdminUserRepo adminUserRepo;
+
+    public AdminUserSecurityRealm() {
+        super("ADMIN_USER", "/admin-user/login", "/admin-user/logout");
+    }
+
+    @Transactional
+    @Override
+    public SecurityRealmAuthentication<AdminUser> authenticate(
+            HttpServletRequest request,
+            String step,
+            SecurityRealmAuthentication<AdminUser> previousStepAuth
+    ) {
+        if (step == null) { // first step
+            String username = request.getHeader(Headers.USERNAME);
+            String password = request.getHeader(Headers.PASSWORD);
+
+            Optional<AdminUser> optionalUser = adminUserRepo.findByUsername(username);
+            if (optionalUser.isEmpty()) {
+                throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
+            }
+            AdminUser user = optionalUser.get();
+
+            // WARNING: FOR DEMO PURPOSE ONLY
+            if (!user.getPassword().equals(password)) {
+                throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
+            }
+
+            // TODO: send otp to mobile
+            String otp = "1234"; // random
+            user.setOtp(otp);
+            user = adminUserRepo.save(user);
+
+            return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
+        } else if (step.equals(StepNames.OTP)) {
+            String otp = request.getHeader(Headers.OTP);
+
+            AdminUser user = previousStepAuth.getPrincipal();
+
+            if (!user.getOtp().equals(otp)) {
+                throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
+            }
+
+            // clear otp
+            user.setOtp(otp);
+            user = adminUserRepo.save(user);
+
+            return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
+        }
+
+        throw new IllegalStateException("Should never happen");
+    }
+
+    @Override
+    public List<RequestMatcher> getPublicApis() {
+        return List.of(
+                AntPathRequestMatcher.antMatcher("/admin-user/my-first-open-api"),
+                AntPathRequestMatcher.antMatcher("/admin-user/my-second-open-api")
+        );
     }
 }
 ```
