@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.4] - 2023-12-30
+
+- support joining JPA sessions in the authentication handler. Meaning annotating the authentication handler with `@Transactional` is now possible.
+
 ## [0.0.3] - 2023-12-23
 
 - Create a default `SecurityFilterChain` and injects the multi realm support into it if the application does not already have one.
