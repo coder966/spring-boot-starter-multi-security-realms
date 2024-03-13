@@ -12,7 +12,6 @@ import net.coder966.spring.multisecurityrealms.model.SecurityRealmAnonymousAuthe
 import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthentication;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -112,14 +111,13 @@ public class SecurityRealmAuthenticationFilter<T> extends OncePerRequestFilter {
             throw new IllegalStateException("Principal should not be null.");
         }
 
+        auth.setRealmName(realm.getName());
+
         saveAuthInContextRepository(request, response, auth);
 
         if(auth.getNextAuthStep() != null){
             response.setHeader(NEXT_STEP_RESPONSE_HEADER_NAME, auth.getNextAuthStep());
-            return;
         }
-
-        auth.getAuthorities().add(new SimpleGrantedAuthority("ROLE_" + realm.getRolePrefix()));
     }
 
     private void saveAuthInContextRepository(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {

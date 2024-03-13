@@ -9,14 +9,14 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Getter
 public abstract class SecurityRealm<T> {
 
-    private final String rolePrefix;
+    private final String name;
     private final String loginUrl;
     private final String logoutUrl;
     private final List<RequestMatcher> publicApisRequestMatchers = new ArrayList<>();
 
-    public SecurityRealm(String rolePrefix, String loginUrl, String logoutUrl) {
-        if(rolePrefix == null || rolePrefix.length() < 3 || rolePrefix.trim().length() != rolePrefix.length()){
-            throw new IllegalArgumentException("Invalid rolePrefix: " + rolePrefix);
+    public SecurityRealm(String name, String loginUrl, String logoutUrl) {
+        if(name == null || name.length() < 2 || name.trim().length() != name.length()){
+            throw new IllegalArgumentException("Invalid realm name: " + name);
         }
 
         if(loginUrl == null || loginUrl.trim().length() != loginUrl.length()){
@@ -31,7 +31,7 @@ public abstract class SecurityRealm<T> {
             throw new IllegalArgumentException("logoutUrl cannot be the same as loginUrl");
         }
 
-        this.rolePrefix = rolePrefix;
+        this.name = name;
         this.loginUrl = loginUrl;
         this.logoutUrl = logoutUrl;
 

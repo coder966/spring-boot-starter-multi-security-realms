@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class SecurityRealmAuthentication<T> implements Authentication {
 
     private T principal;
+    private String realmName;
     private String name;
     private Set<SimpleGrantedAuthority> authorities;
     private boolean isAuthenticated;

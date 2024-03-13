@@ -115,7 +115,7 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
-    public void testAccessingRoleProtectedApis() {
+    public void testAccessingProtectedApiFromAnotherRealm() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client

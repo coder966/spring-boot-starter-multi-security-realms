@@ -244,19 +244,18 @@ This image explains the authentication flow
 
 ### Realm Protected APIs
 
-To protect an api so that it can only be used by a certain realm users, add `@PreAuthorize("hasRole('<realm-role-name>')")` to the controller itself or the
-controller method.
+To protect an api so that it can only be used by a certain realm users, you can use `@PreAuthorize("permitRealm('<realm-role-name>')")`.
 
 Example:
 
 ```java
 // adding this hear, will apply it for all the endpoints in this controller
-@PreAuthorize("hasRole('ADMIN_USER')")
+@PreAuthorize("permitRealm('ADMIN_USER')")
 @RestController
 public class AdminUserController {
 
     // OR it can be defined here at the method level
-    @PreAuthorize("hasRole('ADMIN_USER')")
+    @PreAuthorize("permitRealm('ADMIN_USER')")
     @GetMapping("/admin-user/my-name")
     public String myName(@AuthenticationPrincipal AdminUser adminUser) {
         return adminUser.getName();

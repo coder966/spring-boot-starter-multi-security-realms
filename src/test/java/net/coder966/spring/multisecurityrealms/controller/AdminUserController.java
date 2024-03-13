@@ -6,7 +6,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@PreAuthorize("hasRole('ADMIN_USER')")
+@PreAuthorize("permitRealm('ADMIN_USER')")
 @RestController
 public class AdminUserController {
 
