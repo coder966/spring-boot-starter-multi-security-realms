@@ -182,6 +182,54 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
+    public void testAccessingProtectedApisWithAuthenticationNotFinishedAllSteps() {
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+
+        client
+            .request(HttpMethod.GET, "/admin-user/my-name")
+            .exchange(String.class)
+            .expectStatus(403);
+
+        client
+            .request(HttpMethod.POST, "/admin-user/login")
+            .header(Constants.Headers.USERNAME, "khalid")
+            .header(Constants.Headers.PASSWORD, "kpass")
+            .exchange()
+            .expectStatus(200)
+            .expectHeader(NEXT_STEP_RESPONSE_HEADER_NAME, Constants.StepNames.OTP)
+            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
+
+        client
+            .request(HttpMethod.GET, "/admin-user/my-name")
+            .exchange(String.class)
+            .expectStatus(403);
+
+        client
+            .request(HttpMethod.GET, "/admin-user/no-pre-authorize")
+            .exchange(String.class)
+            .expectStatus(403);
+
+        client
+            .request(HttpMethod.POST, "/admin-user/login")
+            .header(Constants.Headers.OTP, "1234")
+            .exchange()
+            .expectStatus(200)
+            .expectHeaderDoesNotExist(NEXT_STEP_RESPONSE_HEADER_NAME)
+            .expectHeaderDoesNotExist(ERROR_CODE_RESPONSE_HEADER_NAME);
+
+        client
+            .request(HttpMethod.GET, "/admin-user/my-name")
+            .exchange(String.class)
+            .expectStatus(200)
+            .expectBody("Khalid");
+
+        client
+            .request(HttpMethod.GET, "/admin-user/no-pre-authorize")
+            .exchange(String.class)
+            .expectStatus(200);
+    }
+
+    @Test
     public void testLogout() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
