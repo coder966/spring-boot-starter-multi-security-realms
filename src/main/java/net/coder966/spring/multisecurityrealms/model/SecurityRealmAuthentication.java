@@ -5,24 +5,21 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 
 @Setter
 @Getter
-public class SecurityRealmAuthentication<T> implements Authentication {
-
-    private T principal;
+public class SecurityRealmAuthentication implements Authentication {
     private String realmName;
     private String name;
-    private Set<SimpleGrantedAuthority> authorities;
+    private Set<GrantedAuthority> authorities;
     private boolean isAuthenticated;
     private String nextAuthStep;
 
     /**
      * USe this when the user is fully authenticated.
      */
-    public SecurityRealmAuthentication(T principal, String name, Set<SimpleGrantedAuthority> authorities) {
-        this.principal = principal;
+    public SecurityRealmAuthentication(String name, Set<GrantedAuthority> authorities) {
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
         this.isAuthenticated = true;
@@ -32,8 +29,7 @@ public class SecurityRealmAuthentication<T> implements Authentication {
     /**
      * USe this when the user is not fully authenticated and needs to proceed to the another auth step.
      */
-    public SecurityRealmAuthentication(T principal, String name, Set<SimpleGrantedAuthority> authorities, String nextAuthStep) {
-        this.principal = principal;
+    public SecurityRealmAuthentication(String name, Set<GrantedAuthority> authorities, String nextAuthStep) {
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
         this.isAuthenticated = nextAuthStep == null;
@@ -41,7 +37,7 @@ public class SecurityRealmAuthentication<T> implements Authentication {
     }
 
     @Override
-    public Set<SimpleGrantedAuthority> getAuthorities() {
+    public Set<GrantedAuthority> getAuthorities() {
         return authorities;
     }
 
@@ -56,8 +52,8 @@ public class SecurityRealmAuthentication<T> implements Authentication {
     }
 
     @Override
-    public T getPrincipal() {
-        return principal;
+    public Object getPrincipal() {
+        return null;
     }
 
     @Override

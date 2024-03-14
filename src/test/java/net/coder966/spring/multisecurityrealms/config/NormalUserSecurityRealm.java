@@ -19,20 +19,20 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Slf4j
 @Configuration
-public class NormalUserSecurityRealm extends SecurityRealm<NormalUser> {
+public class NormalUserSecurityRealm extends SecurityRealm {
 
     @Autowired
     private NormalUserRepo normalUserRepo;
 
     public NormalUserSecurityRealm() {
-        super("NORMAL_USER", "/normal-user/login", "/normal-user/logout");
+        super("NORMAL_USER", "/normal-user/login");
     }
 
     @Override
-    public SecurityRealmAuthentication<NormalUser> authenticate(
+    public SecurityRealmAuthentication authenticate(
         HttpServletRequest request,
         String step,
-        SecurityRealmAuthentication<NormalUser> previousStepAuth
+        SecurityRealmAuthentication previousStepAuth
     ) {
         if(step == null){
             // WARNING: FOR DEMO PURPOSE ONLY
@@ -57,11 +57,11 @@ public class NormalUserSecurityRealm extends SecurityRealm<NormalUser> {
             user.setOtp(otp);
             user = normalUserRepo.save(user);
 
-            return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
+            return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP);
         }else if(step.equals(StepNames.OTP)){
             String otp = request.getHeader(Headers.OTP);
 
-            NormalUser user = previousStepAuth.getPrincipal();
+            NormalUser user = normalUserRepo.findByUsername(previousStepAuth.getName()).get();
 
             if(!user.getOtp().equals(otp)){
                 throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
@@ -71,7 +71,7 @@ public class NormalUserSecurityRealm extends SecurityRealm<NormalUser> {
             user.setOtp(otp);
             user = normalUserRepo.save(user);
 
-            return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
+            return new SecurityRealmAuthentication(user.getUsername(), null);
         }
 
         throw new IllegalStateException("Should never happen");

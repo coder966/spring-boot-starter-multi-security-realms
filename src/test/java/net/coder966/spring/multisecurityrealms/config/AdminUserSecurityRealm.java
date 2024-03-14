@@ -20,21 +20,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Configuration
-public class AdminUserSecurityRealm extends SecurityRealm<AdminUser> {
+public class AdminUserSecurityRealm extends SecurityRealm {
 
     @Autowired
     private AdminUserRepo adminUserRepo;
 
     public AdminUserSecurityRealm() {
-        super("ADMIN_USER", "/admin-user/login", "/admin-user/logout");
+        super("ADMIN_USER", "/admin-user/login");
     }
 
     @Transactional
     @Override
-    public SecurityRealmAuthentication<AdminUser> authenticate(
+    public SecurityRealmAuthentication authenticate(
         HttpServletRequest request,
         String step,
-        SecurityRealmAuthentication<AdminUser> previousStepAuth
+        SecurityRealmAuthentication previousStepAuth
     ) {
         if(step == null){ // first step
             String username = request.getHeader(Headers.USERNAME);
@@ -60,21 +60,21 @@ public class AdminUserSecurityRealm extends SecurityRealm<AdminUser> {
             user.setOtp(otp);
             user = adminUserRepo.save(user);
 
-            return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
+            return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP);
         }else if(step.equals(StepNames.OTP)){
-                String otp = request.getHeader(Headers.OTP);
+            String otp = request.getHeader(Headers.OTP);
 
-                AdminUser user = previousStepAuth.getPrincipal();
+            AdminUser user = adminUserRepo.findByUsername(previousStepAuth.getName()).get();
 
-                if(!user.getOtp().equals(otp)){
-                    throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
-                }
+            if(!user.getOtp().equals(otp)){
+                throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
+            }
 
-                // clear otp
-                user.setOtp(otp);
-                user = adminUserRepo.save(user);
+            // clear otp
+            user.setOtp(otp);
+            user = adminUserRepo.save(user);
 
-                return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
+            return new SecurityRealmAuthentication(user.getUsername(), null);
         }
 
         throw new IllegalStateException("Should never happen");

@@ -7,14 +7,13 @@ import lombok.Getter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Getter
-public abstract class SecurityRealm<T> {
+public abstract class SecurityRealm {
 
     private final String name;
     private final String loginUrl;
-    private final String logoutUrl;
     private final List<RequestMatcher> publicApisRequestMatchers = new ArrayList<>();
 
-    public SecurityRealm(String name, String loginUrl, String logoutUrl) {
+    public SecurityRealm(String name, String loginUrl) {
         if(name == null || name.length() < 2 || name.trim().length() != name.length()){
             throw new IllegalArgumentException("Invalid realm name: " + name);
         }
@@ -23,17 +22,8 @@ public abstract class SecurityRealm<T> {
             throw new IllegalArgumentException("Invalid loginUrl: " + loginUrl);
         }
 
-        if(logoutUrl == null || logoutUrl.trim().length() != logoutUrl.length()){
-            throw new IllegalArgumentException("Invalid logoutUrl: " + logoutUrl);
-        }
-
-        if(logoutUrl.equals(loginUrl)){
-            throw new IllegalArgumentException("logoutUrl cannot be the same as loginUrl");
-        }
-
         this.name = name;
         this.loginUrl = loginUrl;
-        this.logoutUrl = logoutUrl;
 
         List<RequestMatcher> publicApis = getPublicApis();
         if(publicApis != null){
@@ -57,7 +47,7 @@ public abstract class SecurityRealm<T> {
      *
      * @return the user authentication object in case of successful authentication.
      */
-    public abstract SecurityRealmAuthentication<T> authenticate(HttpServletRequest request, String step, SecurityRealmAuthentication<T> previousStepAuth);
+    public abstract SecurityRealmAuthentication authenticate(HttpServletRequest request, String step, SecurityRealmAuthentication previousStepAuth);
 
     /**
      * If you want, you can define endpoints here and they will be made publicly available without authentication.

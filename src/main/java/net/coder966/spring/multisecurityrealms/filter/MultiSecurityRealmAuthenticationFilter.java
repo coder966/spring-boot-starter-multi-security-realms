@@ -7,17 +7,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import net.coder966.spring.multisecurityrealms.autoconfigure.SecurityRealmConfig;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter {
 
-    private final Set<SecurityRealmAuthenticationFilter<?>> filters = new HashSet<>();
+    private final Set<SecurityRealmAuthenticationFilter> filters = new HashSet<>();
 
-    public MultiSecurityRealmAuthenticationFilter(Set<SecurityRealm<?>> realms, SecurityContextRepository securityContextRepository) {
+    public MultiSecurityRealmAuthenticationFilter(SecurityRealmConfig config, Set<SecurityRealm> realms) {
         realms.forEach(realm -> {
-            filters.add(new SecurityRealmAuthenticationFilter<>(realm, securityContextRepository));
+            filters.add(new SecurityRealmAuthenticationFilter(config, realm));
         });
     }
 
@@ -25,9 +25,9 @@ public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
 
-        for(SecurityRealmAuthenticationFilter<?> filter : filters){
-            if(filter.matches(request)){
-                filter.doFilter(request, response, filterChain);
+        for(SecurityRealmAuthenticationFilter filter : filters){
+            boolean handled = filter.handle(request, response);
+            if(handled){
                 return;
             }
         }

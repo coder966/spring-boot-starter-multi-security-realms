@@ -97,20 +97,20 @@ Here in this example, we define two realms (normal-user & admin-user).
 
 @Slf4j
 @Configuration
-public class NormalUserSecurityRealm extends SecurityRealm<NormalUser> {
+public class NormalUserSecurityRealm extends SecurityRealm {
 
     @Autowired
     private NormalUserRepo normalUserRepo;
 
     public NormalUserSecurityRealm() {
-        super("NORMAL_USER", "/normal-user/login", "/normal-user/logout");
+        super("NORMAL_USER", "/normal-user/login");
     }
 
     @Override
-    public SecurityRealmAuthentication<NormalUser> authenticate(
+    public SecurityRealmAuthentication authenticate(
             HttpServletRequest request,
             String step,
-            SecurityRealmAuthentication<NormalUser> previousStepAuth
+            SecurityRealmAuthentication previousStepAuth
     ) {
         if (step == null) {
             // WARNING: FOR DEMO PURPOSE ONLY
@@ -135,11 +135,11 @@ public class NormalUserSecurityRealm extends SecurityRealm<NormalUser> {
             user.setOtp(otp);
             user = normalUserRepo.save(user);
 
-            return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
+            return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP);
         } else if (step.equals(StepNames.OTP)) {
             String otp = request.getHeader(Headers.OTP);
 
-            NormalUser user = previousStepAuth.getPrincipal();
+            NormalUser user = normalUserRepo.findByUsername(previousStepAuth.getName()).get();
 
             if (!user.getOtp().equals(otp)) {
                 throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
@@ -149,7 +149,7 @@ public class NormalUserSecurityRealm extends SecurityRealm<NormalUser> {
             user.setOtp(otp);
             user = normalUserRepo.save(user);
 
-            return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
+            return new SecurityRealmAuthentication(user.getUsername(), null);
         }
 
         throw new IllegalStateException("Should never happen");
@@ -171,21 +171,21 @@ public class NormalUserSecurityRealm extends SecurityRealm<NormalUser> {
 
 @Slf4j
 @Configuration
-public class AdminUserSecurityRealm extends SecurityRealm<AdminUser> {
+public class AdminUserSecurityRealm extends SecurityRealm {
 
     @Autowired
     private AdminUserRepo adminUserRepo;
 
     public AdminUserSecurityRealm() {
-        super("ADMIN_USER", "/admin-user/login", "/admin-user/logout");
+        super("ADMIN_USER", "/admin-user/login");
     }
 
     @Transactional
     @Override
-    public SecurityRealmAuthentication<AdminUser> authenticate(
+    public SecurityRealmAuthentication authenticate(
             HttpServletRequest request,
             String step,
-            SecurityRealmAuthentication<AdminUser> previousStepAuth
+            SecurityRealmAuthentication previousStepAuth
     ) {
         if (step == null) { // first step
             String username = request.getHeader(Headers.USERNAME);
@@ -207,11 +207,11 @@ public class AdminUserSecurityRealm extends SecurityRealm<AdminUser> {
             user.setOtp(otp);
             user = adminUserRepo.save(user);
 
-            return new SecurityRealmAuthentication<>(user, user.getUsername(), null, StepNames.OTP);
+            return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP);
         } else if (step.equals(StepNames.OTP)) {
             String otp = request.getHeader(Headers.OTP);
 
-            AdminUser user = previousStepAuth.getPrincipal();
+            AdminUser user = adminUserRepo.findByUsername(previousStepAuth.getName()).get();
 
             if (!user.getOtp().equals(otp)) {
                 throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);
@@ -221,7 +221,7 @@ public class AdminUserSecurityRealm extends SecurityRealm<AdminUser> {
             user.setOtp(otp);
             user = adminUserRepo.save(user);
 
-            return new SecurityRealmAuthentication<>(user, user.getUsername(), null);
+            return new SecurityRealmAuthentication(user.getUsername(), null);
         }
 
         throw new IllegalStateException("Should never happen");
@@ -257,8 +257,9 @@ public class AdminUserController {
     // OR it can be defined here at the method level
     @PreAuthorize("permitRealm('ADMIN_USER')")
     @GetMapping("/admin-user/my-name")
-    public String myName(@AuthenticationPrincipal AdminUser adminUser) {
-        return adminUser.getName();
+    public String myName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 
 }

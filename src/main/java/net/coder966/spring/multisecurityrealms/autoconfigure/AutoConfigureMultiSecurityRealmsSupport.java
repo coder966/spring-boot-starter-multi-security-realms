@@ -16,31 +16,20 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Slf4j
 @AutoConfiguration
 public class AutoConfigureMultiSecurityRealmsSupport {
 
-    @ConditionalOnMissingBean(SecurityContextRepository.class)
-    @Bean
-    public SecurityContextRepository httpSessionSecurityContextRepository() {
-        log.info("Creating a default SecurityContextRepository of type HttpSessionSecurityContextRepository");
-        return new HttpSessionSecurityContextRepository();
-    }
-
     @ConditionalOnMissingBean(MultiSecurityRealmAuthenticationFilter.class)
     @Bean
-    public MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter(Set<SecurityRealm<?>> realms,
-        SecurityContextRepository securityContextRepository) {
+    public MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter(SecurityRealmConfig config, Set<SecurityRealm> realms) {
         log.info("Creating a default MultiSecurityRealmAuthenticationFilter");
-        return new MultiSecurityRealmAuthenticationFilter(realms, securityContextRepository);
+        return new MultiSecurityRealmAuthenticationFilter(config, realms);
     }
 
     @ConditionalOnMissingBean(SecurityFilterChain.class)
@@ -50,16 +39,8 @@ public class AutoConfigureMultiSecurityRealmsSupport {
         log.info("Creating a default SecurityFilterChain");
 
         http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
-
         http.authorizeHttpRequests(configurer -> configurer.anyRequest().authenticated());
-
-        // required for Spring Security 6.x OR disable CSRF (not recommended)
-        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
-        requestHandler.setCsrfRequestAttributeName(null);
-        http.csrf(configurer -> configurer
-            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-            .csrfTokenRequestHandler(requestHandler)
-        );
+        http.csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

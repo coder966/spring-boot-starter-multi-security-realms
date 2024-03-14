@@ -21,7 +21,7 @@ public class PermitRealmExpressionRoot extends SecurityExpressionRoot {
             return false;
         }
 
-        String actualRealmName = ((SecurityRealmAuthentication<?>) auth).getRealmName();
+        String actualRealmName = ((SecurityRealmAuthentication) auth).getRealmName();
 
         boolean permitted = false;
         for(String expected : realmName){

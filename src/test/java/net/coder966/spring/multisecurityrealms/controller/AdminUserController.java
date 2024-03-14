@@ -1,8 +1,8 @@
 package net.coder966.spring.multisecurityrealms.controller;
 
-import net.coder966.spring.multisecurityrealms.entity.AdminUser;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,8 +11,9 @@ public class AdminUserController {
 
     @PreAuthorize("permitRealm('ADMIN_USER')")
     @GetMapping("/admin-user/my-name")
-    public String myName(@AuthenticationPrincipal AdminUser adminUser) {
-        return adminUser.getName();
+    public String myName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 
     @GetMapping("/admin-user/no-pre-authorize")
