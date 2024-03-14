@@ -13,21 +13,20 @@ For example, suppose you have a multi-tenant online e-store application. This ap
 - store customer users (realm)
 
 These different user types are probably authenticated (login mechanism/flow/steps) and authorized (different protected APIs) differently.
-Configuring this in Spring can be tricky and a bit complicated.
+Configuring this in Spring can be tricky and a bit complicated. You can even potentially introduce security bugs if you try to implement these features
+manually.
 
 ## Why `spring-boot-starter-multi-security-realms`
 
 This library allows you to easily and declaratively define these realms. It also brings extra features like:
 
-- Multi steps authentication support (e.g. username & password step, then OTP step). You don't have to think about how to implement this, just use the built-in
+- Multi steps authentication support (aka MFA). For example: username & password step, then OTP step, etc... You don't have to think about how to implement
+  this, just use the built-in
   support.
 - Ability to define public apis per realm without the need to access and update the `SecurityFilterChain` manually.
   This is helpful if your application is huge, and you want to define public apis in segregated modules without the need to define them in a central place.
-- You still have full control and can inject this library in a single `SecurityFilterChain` if you wish and have multiple `SecurityFilterChain`. By default,
+- You still have full control and can define custom `SecurityFilterChain`s if you wish. By default,
   this library creates a default `SecurityFilterChain` and injects the multi realm support into it.
-- Supports any type of `SecurityContextRepository`. By default, this library creates a default repository of type `HttpSessionSecurityContextRepository` if you
-  don't already have
-  one.
 
 ## Usage
 
@@ -58,7 +57,7 @@ implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.
 
 ### Define security realms
 
-To define a realm, simple create a bean of type `SecurityRealm`.
+To define a realm, simply create a bean of type `SecurityRealm`.
 Here in this example, we define two realms (normal-user & admin-user).
 
 #### NormalUserSecurityRealm.java
@@ -225,7 +224,7 @@ To protect an api so that it can only be used by a certain realm users, you can 
 Example:
 
 ```java
-// adding this hear, will apply it for all the endpoints in this controller
+// adding this here, will apply it for all the endpoints in this controller
 @PreAuthorize("permitRealm('ADMIN_USER')")
 @RestController
 public class AdminUserController {
@@ -235,7 +234,7 @@ public class AdminUserController {
     @GetMapping("/admin-user/my-name")
     public String myName() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
+        return authentication.getName(); // username
     }
 
 }
