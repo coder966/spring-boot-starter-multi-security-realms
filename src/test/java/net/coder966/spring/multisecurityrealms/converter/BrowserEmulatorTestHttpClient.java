@@ -1,6 +1,7 @@
-package net.coder966.spring.multisecurityrealms.utils;
+package net.coder966.spring.multisecurityrealms.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -114,6 +115,15 @@ public class BrowserEmulatorTestHttpClient {
         public ResponseSpec<T> expectBody(T expected) {
             assertEquals(expected, response.getBody());
             return this;
+        }
+
+        public ResponseSpec<T> expectBodyNotEqual(T unexpected) {
+            assertNotEquals(unexpected, response.getBody());
+            return this;
+        }
+
+        public T readBody() {
+            return response.getBody();
         }
     }
 }
