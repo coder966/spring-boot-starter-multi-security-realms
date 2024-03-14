@@ -88,7 +88,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.OTP, "0000")
             .exchange(LoginResponse.class)
             .expectStatus(401)
-            .expectBody(new LoginResponse("ADMIN_USER", null, null, ErrorCodes.BAD_OTP));
+            .expectBody(new LoginResponse("ADMIN_USER", loginResponse.getToken(), Constants.StepNames.OTP, ErrorCodes.BAD_OTP));
     }
 
     @Test

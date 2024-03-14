@@ -63,13 +63,14 @@ public class SecurityRealmAuthenticationFilter {
 
     @SneakyThrows
     private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication authenticationExtractedFromRequest) {
+        String step = authenticationExtractedFromRequest == null ? null : authenticationExtractedFromRequest.getNextAuthStep();
         SecurityRealmAuthenticationResponse responseBody = new SecurityRealmAuthenticationResponse();
         responseBody.setRealm(realm.getName());
 
         try{
             SecurityRealmAuthentication resultAuth = realm.authenticate(
                 request,
-                authenticationExtractedFromRequest == null ? null : authenticationExtractedFromRequest.getNextAuthStep(),
+                step,
                 authenticationExtractedFromRequest
             );
 
@@ -82,6 +83,8 @@ public class SecurityRealmAuthenticationFilter {
             responseBody.setToken(authenticationTokenConverter.createToken(resultAuth));
             responseBody.setNextAuthenticationStep(resultAuth.getNextAuthStep());
         }catch(AuthenticationException e){
+            responseBody.setToken(extractTokenFromRequest(request));
+            responseBody.setNextAuthenticationStep(step);
             responseBody.setError(e.getMessage());
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
@@ -92,17 +95,26 @@ public class SecurityRealmAuthenticationFilter {
     }
 
     private SecurityRealmAuthentication extractAuthenticationFromRequest(HttpServletRequest request) {
+        String authorization = extractTokenFromRequest(request);
+
+        if(authorization != null){
+            SecurityRealmAuthentication authentication = authenticationTokenConverter.verifyToken(authorization);
+            if(authentication != null && authentication.getRealmName().equals(realm.getName())){
+                return authentication;
+            }
+        }
+
+        return null;
+    }
+
+    private String extractTokenFromRequest(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
 
         if(authorization != null){
             if(authorization.startsWith("Bearer ")){
                 authorization = authorization.substring(6);
             }
-
-            SecurityRealmAuthentication authentication = authenticationTokenConverter.verifyToken(authorization);
-            if(authentication != null && authentication.getRealmName().equals(realm.getName())){
-                return authentication;
-            }
+            return authorization;
         }
 
         return null;
