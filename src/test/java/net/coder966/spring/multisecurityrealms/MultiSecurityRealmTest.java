@@ -66,7 +66,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
             .expectStatus(200)
-            .expectBody(new LoginResponse("ADMIN_USER", "any not null", Constants.StepNames.OTP, null));
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
             .expectStatus(200)
-            .expectBody(new LoginResponse("ADMIN_USER", "any not null", Constants.StepNames.OTP, null))
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         client
@@ -101,7 +101,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
             .expectStatus(200)
-            .expectBody(new LoginResponse("ADMIN_USER", "any not null", Constants.StepNames.OTP, null))
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         client
@@ -110,7 +110,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.OTP, "1234")
             .exchange(LoginResponse.class)
             .expectStatus(200)
-            .expectBody(new LoginResponse("ADMIN_USER", "any not null", null, null));
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null));
     }
 
     @Test
@@ -128,7 +128,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
             .expectStatus(200)
-            .expectBody(new LoginResponse("ADMIN_USER", "any not null", Constants.StepNames.OTP, null))
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         loginResponse = client
@@ -137,7 +137,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.OTP, "1234")
             .exchange(LoginResponse.class)
             .expectStatus(200)
-            .expectBody(new LoginResponse("ADMIN_USER", "any not null", null, null))
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
         client
@@ -198,7 +198,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
             .expectStatus(200)
-            .expectBody(new LoginResponse("ADMIN_USER", "any not null", Constants.StepNames.OTP, null))
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         client
@@ -219,7 +219,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.OTP, "1234")
             .exchange(LoginResponse.class)
             .expectStatus(200)
-            .expectBody(new LoginResponse("ADMIN_USER", "any not null", null, null))
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
         client
@@ -252,10 +252,10 @@ public class MultiSecurityRealmTest {
                 return false;
             }
 
-            return Objects.equals(otherResponse.getRealm(), realm) &&
-                Objects.equals(otherResponse.getNextAuthenticationStep(), nextAuthenticationStep) &&
-                Objects.equals(otherResponse.getError(), error) &&
-                (otherResponse.getToken() == null ? token == null : true);
+            return Objects.equals(realm, otherResponse.getRealm()) &&
+                Objects.equals(nextAuthenticationStep, otherResponse.getNextAuthenticationStep()) &&
+                Objects.equals(error, otherResponse.getError()) &&
+                (token == null ? otherResponse.getToken() == null : (token.equals("ANY") || Objects.equals(token, otherResponse.getToken())));
         }
     }
 
