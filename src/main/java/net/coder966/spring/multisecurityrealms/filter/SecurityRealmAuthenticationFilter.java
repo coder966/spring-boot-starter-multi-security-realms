@@ -1,5 +1,6 @@
 package net.coder966.spring.multisecurityrealms.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
@@ -9,6 +10,8 @@ import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConv
 import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealmAnonymousAuthentication;
 import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthentication;
+import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthenticationResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,15 +21,13 @@ public class SecurityRealmAuthenticationFilter {
 
     private final SecurityRealmConfig config;
     private final SecurityRealm realm;
+    private final ObjectMapper objectMapper;
     private final AuthenticationTokenConverter authenticationTokenConverter;
-
-    // response headers
-    private final String NEXT_STEP_RESPONSE_HEADER_NAME = "X-Next-Auth-Step";
-    private final String ERROR_CODE_RESPONSE_HEADER_NAME = "X-Auth-Error-Code";
 
     public SecurityRealmAuthenticationFilter(SecurityRealmConfig config, SecurityRealm realm) {
         this.config = config;
         this.realm = realm;
+        this.objectMapper = new ObjectMapper();
         this.authenticationTokenConverter = new AuthenticationTokenConverter(config.getSigningSecret(), config.getTokenExpirationDuration());
     }
 
@@ -39,14 +40,14 @@ public class SecurityRealmAuthenticationFilter {
     }
 
     public boolean handle(HttpServletRequest request, HttpServletResponse response) {
-        Authentication authenticationExtractedFromRequest = extractAuthenticationFromRequest(request);
+        SecurityRealmAuthentication authenticationExtractedFromRequest = extractAuthenticationFromRequest(request);
         if(authenticationExtractedFromRequest != null){
             setAuthenticationInContext(authenticationExtractedFromRequest);
         }
 
 
         if(matchesLogin(request)){
-            handleLogin(request, response);
+            handleLogin(request, response, authenticationExtractedFromRequest);
             return true;
         }
 
@@ -60,47 +61,37 @@ public class SecurityRealmAuthenticationFilter {
         return false;
     }
 
-    private void handleLogin(HttpServletRequest request, HttpServletResponse response) {
-        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
-
-        SecurityRealmAuthentication currentRealmAuth = null;
-        String step = null;
-        if(currentAuth instanceof SecurityRealmAuthentication){
-            currentRealmAuth = (SecurityRealmAuthentication) currentAuth;
-            if(currentRealmAuth.getRealmName().equals(realm.getName())){
-                step = currentRealmAuth.getNextAuthStep();
-            }
-        }
+    @SneakyThrows
+    private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication authenticationExtractedFromRequest) {
+        SecurityRealmAuthenticationResponse responseBody = new SecurityRealmAuthenticationResponse();
+        responseBody.setRealm(realm.getName());
 
         try{
-            SecurityRealmAuthentication resultAuth = realm.authenticate(request, step, currentRealmAuth);
-            handleLoginAuthenticationResult(resultAuth, response);
+            SecurityRealmAuthentication resultAuth = realm.authenticate(
+                request,
+                authenticationExtractedFromRequest == null ? null : authenticationExtractedFromRequest.getNextAuthStep(),
+                authenticationExtractedFromRequest
+            );
+
+            if(resultAuth == null){
+                throw new IllegalStateException("You should not return a null SecurityRealmAuthentication. "
+                    + "To indicate authentication failure, throw exceptions of type AuthenticationException.");
+            }
+
+            resultAuth.setRealmName(realm.getName());
+            responseBody.setToken(authenticationTokenConverter.createToken(resultAuth));
+            responseBody.setNextAuthenticationStep(resultAuth.getNextAuthStep());
         }catch(AuthenticationException e){
-            response.setStatus(401);
-            response.setHeader(ERROR_CODE_RESPONSE_HEADER_NAME, e.getMessage());
+            responseBody.setError(e.getMessage());
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
+
+        response.setHeader("Content-Type", "application/json;charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+        response.getWriter().close();
     }
 
-    @SneakyThrows
-    private void handleLoginAuthenticationResult(SecurityRealmAuthentication resultAuth, HttpServletResponse response) {
-        if(resultAuth == null){
-            throw new IllegalStateException("You should not return a null SecurityRealmAuthentication. "
-                + "To indicate authentication failure, throw exceptions of type AuthenticationException.");
-        }
-
-        resultAuth.setRealmName(realm.getName());
-
-        if(resultAuth.getNextAuthStep() != null){
-            response.setHeader(NEXT_STEP_RESPONSE_HEADER_NAME, resultAuth.getNextAuthStep());
-        }
-
-        response.setHeader("Content-Type", "text/plain;charset=UTF-8");
-
-        String token = authenticationTokenConverter.createToken(resultAuth);
-        response.getWriter().write(token);
-    }
-
-    private Authentication extractAuthenticationFromRequest(HttpServletRequest request) {
+    private SecurityRealmAuthentication extractAuthenticationFromRequest(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
 
         if(authorization != null){
