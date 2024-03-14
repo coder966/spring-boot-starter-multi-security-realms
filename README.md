@@ -17,7 +17,7 @@ Configuring this in Spring can be tricky and a bit complicated.
 
 ## Why `spring-boot-starter-multi-security-realms`
 
-This library allows you to easily and declaratively define these realms. It also packs in extra features like:
+This library allows you to easily and declaratively define these realms. It also brings extra features like:
 
 - Multi steps authentication support (e.g. username & password step, then OTP step). You don't have to think about how to implement this, just use the built-in
   support.
@@ -54,38 +54,7 @@ Gradle:
 implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.0.4'
 ```
 
-### Setup
-
-Optionally, if you define a custom `SecurityFilterChain` then you need to add this filter `MultiSecurityRealmAuthenticationFilter`
-before `UsernamePasswordAuthenticationFilter`.
-
-```java
-
-@Slf4j
-@Configuration
-@EnableMethodSecurity
-@RequiredArgsConstructor
-public class SecurityConfig {
-
-    @Bean
-    protected SecurityFilterChain globalSecurityFilterChain(
-            HttpSecurity http,
-            MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter // inject this filter
-    ) throws Exception {
-
-        // this is optional. If you don't have a custom SecurityFilterChain then you don't need to do all of this
-        // A default SecurityFilterChain is configured out of the box.
-
-        // add it before AnonymousAuthenticationFilter
-        http.addFilterBefore(multiSecurityRealmAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // the reset of your configuration ....
-
-        return http.build();
-    }
-
-}
-```
+## Usage
 
 ### Define security realms
 
@@ -239,7 +208,14 @@ public class AdminUserSecurityRealm extends SecurityRealm {
 
 ### Client Application (Frontend)
 
-This image explains the authentication flow
+- The client app should call the realm login api.
+- You will receive a JWT token in the response body as a string.
+- Store this token and pass in subsequent requests in the `Authorization` header.
+- If the realm requires additional authentication steps from you (MFA),
+  you will see the required authentication step name in the response header `X-Next-Auth-Step`. Render this step form and again submit to the same login api.
+- In any case, if there is an error in the authentication (for example, bad credentials), you will receive the error in the response header `X-Auth-Error-Code`.
+
+This image explains the whole authentication flow
 ![spring-boot-starter-multi-security-realms.png](docs/spring-boot-starter-multi-security-realms.png)
 
 ### Realm Protected APIs
@@ -260,6 +236,41 @@ public class AdminUserController {
     public String myName() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
+    }
+
+}
+```
+
+## Tips
+
+### I want to define my own `SecurityFilterChain`
+
+If you want to define a custom `SecurityFilterChain` then you need to add this filter `MultiSecurityRealmAuthenticationFilter`
+before `AnonymousAuthenticationFilter`.
+
+```java
+
+@Slf4j
+@Configuration
+@EnableMethodSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    @Bean
+    protected SecurityFilterChain globalSecurityFilterChain(
+            HttpSecurity http,
+            MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter // inject this filter
+    ) throws Exception {
+
+        // this is optional. If you don't have a custom SecurityFilterChain then you don't need to do all of this
+        // A default SecurityFilterChain is configured out of the box.
+
+        // add it before AnonymousAuthenticationFilter
+        http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
+
+        // the reset of your configuration ....
+
+        return http.build();
     }
 
 }
