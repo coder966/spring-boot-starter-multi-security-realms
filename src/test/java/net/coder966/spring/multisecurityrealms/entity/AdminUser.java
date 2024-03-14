@@ -1,6 +1,7 @@
 package net.coder966.spring.multisecurityrealms.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,7 +30,7 @@ public class AdminUser {
 
     private String otp;
 
-    @OneToMany(mappedBy = "adminUser")
+    @OneToMany(mappedBy = "adminUser", fetch = FetchType.LAZY)
     private Set<Badge> badges = new HashSet<>();
 
     public AdminUser(String name, String username, String password, Set<Badge> badges) {
