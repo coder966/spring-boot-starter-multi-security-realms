@@ -1,14 +1,16 @@
 package net.coder966.spring.multisecurityrealms.autoconfigure;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.expression.PermitRealmExpressionRoot;
 import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthenticationFilter;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
+import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmHandler;
+import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmHandlerScanner;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -27,16 +29,17 @@ public class AutoConfigureMultiSecurityRealmsSupport {
 
     @ConditionalOnMissingBean(MultiSecurityRealmAuthenticationFilter.class)
     @Bean
-    public MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter(SecurityRealmConfig config, Set<SecurityRealm> realms) {
-        log.info("Creating a default MultiSecurityRealmAuthenticationFilter");
-        return new MultiSecurityRealmAuthenticationFilter(config, realms);
+    public MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter(ApplicationContext context, SecurityRealmConfig config) {
+        SecurityRealmHandlerScanner scanner = new SecurityRealmHandlerScanner();
+        Collection<SecurityRealmHandler> securityRealmHandlers = scanner.scan(context);
+        return new MultiSecurityRealmAuthenticationFilter(config, securityRealmHandlers);
     }
 
     @ConditionalOnMissingBean(SecurityFilterChain.class)
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http, MultiSecurityRealmAuthenticationFilter multiSecurityRealmAuthenticationFilter)
         throws Exception {
-        log.info("Creating a default SecurityFilterChain");
+        log.info("Creating a default SecurityFilterChain with multi realms support...");
 
         http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
         http.authorizeHttpRequests(configurer -> configurer.anyRequest().authenticated());

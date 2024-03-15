@@ -11,6 +11,7 @@ public class Constants {
 
     public interface StepNames {
 
+        String USERNAME_AND_PASSWORD = "USERNAME_AND_PASSWORD";
         String OTP = "OTP";
     }
 

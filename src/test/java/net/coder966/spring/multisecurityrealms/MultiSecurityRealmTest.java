@@ -32,7 +32,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
             .expectStatus(401)
-            .expectBody(new LoginResponse("NORMAL_USER", null, null, Constants.ErrorCodes.BAD_CREDENTIALS));
+            .expectBody(new LoginResponse("NORMAL_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
 
         client
             .request(HttpMethod.POST, "/admin-user/login")
@@ -40,7 +40,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.PASSWORD, "mpass")
             .exchange(LoginResponse.class)
             .expectStatus(401)
-            .expectBody(new LoginResponse("ADMIN_USER", null, null, Constants.ErrorCodes.BAD_CREDENTIALS));
+            .expectBody(new LoginResponse("ADMIN_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
     }
 
     @Test
@@ -53,7 +53,7 @@ public class MultiSecurityRealmTest {
             .header(Constants.Headers.PASSWORD, "wrong")
             .exchange(LoginResponse.class)
             .expectStatus(401)
-            .expectBody(new LoginResponse("ADMIN_USER", null, null, Constants.ErrorCodes.BAD_CREDENTIALS));
+            .expectBody(new LoginResponse("ADMIN_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
     }
 
     @Test

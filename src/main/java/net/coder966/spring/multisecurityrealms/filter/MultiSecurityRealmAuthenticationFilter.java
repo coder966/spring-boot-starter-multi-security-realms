@@ -5,18 +5,19 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import net.coder966.spring.multisecurityrealms.autoconfigure.SecurityRealmConfig;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealm;
+import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmHandler;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter {
 
     private final Set<SecurityRealmAuthenticationFilter> filters = new HashSet<>();
 
-    public MultiSecurityRealmAuthenticationFilter(SecurityRealmConfig config, Set<SecurityRealm> realms) {
-        realms.forEach(realm -> {
+    public MultiSecurityRealmAuthenticationFilter(SecurityRealmConfig config, Collection<SecurityRealmHandler> securityRealmHandlers) {
+        securityRealmHandlers.forEach(realm -> {
             filters.add(new SecurityRealmAuthenticationFilter(config, realm));
         });
     }
