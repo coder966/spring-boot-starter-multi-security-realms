@@ -1,5 +1,6 @@
 package net.coder966.spring.multisecurityrealms.reflection;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationTargetException;
@@ -10,14 +11,24 @@ import org.springframework.security.core.Authentication;
 
 public class AuthenticationStepInvoker {
 
+    private final ObjectMapper objectMapper;
     private final Object object;
     private final Method method;
     private final AuthenticationStepParameterType[] parameterTypes;
+    private final Object[] parameterTypesDetails;
 
-    public AuthenticationStepInvoker(Object object, Method method, AuthenticationStepParameterType[] parameterTypes) {
+    public AuthenticationStepInvoker(
+        ObjectMapper objectMapper,
+        Object object,
+        Method method,
+        AuthenticationStepParameterType[] parameterTypes,
+        Object[] parameterTypesDetails
+    ) {
+        this.objectMapper = objectMapper;
         this.object = object;
         this.method = method;
         this.parameterTypes = parameterTypes;
+        this.parameterTypesDetails = parameterTypesDetails;
     }
 
     @SneakyThrows
@@ -30,7 +41,7 @@ public class AuthenticationStepInvoker {
                 case REQUEST -> args[i] = request;
                 case RESPONSE -> args[i] = response;
                 case AUTHENTICATION -> args[i] = authentication;
-                case BODY -> args[i] = null;
+                case BODY -> args[i] = readBody(request, (Class<?>) parameterTypesDetails[i]);
                 case HEADERS -> args[i] = null;
             }
         }
@@ -40,5 +51,10 @@ public class AuthenticationStepInvoker {
         }catch(InvocationTargetException invokeE){
             throw invokeE.getTargetException();
         }
+    }
+
+    @SneakyThrows
+    private Object readBody(HttpServletRequest request, Class<?> type) {
+        return objectMapper.readValue(request.getInputStream(), type);
     }
 }

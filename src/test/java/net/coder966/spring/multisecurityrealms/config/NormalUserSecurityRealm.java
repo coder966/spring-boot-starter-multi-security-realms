@@ -1,19 +1,20 @@
 package net.coder966.spring.multisecurityrealms.config;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.annotation.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
+import net.coder966.spring.multisecurityrealms.dto.AuthOtpStepRequest;
+import net.coder966.spring.multisecurityrealms.dto.AuthUsernameAndPasswordStepRequest;
 import net.coder966.spring.multisecurityrealms.entity.NormalUser;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationException;
 import net.coder966.spring.multisecurityrealms.other.Constants.ErrorCodes;
-import net.coder966.spring.multisecurityrealms.other.Constants.Headers;
 import net.coder966.spring.multisecurityrealms.other.Constants.StepNames;
 import net.coder966.spring.multisecurityrealms.repo.NormalUserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Slf4j
 @SecurityRealm(
@@ -32,11 +33,8 @@ public class NormalUserSecurityRealm {
 
     @Transactional
     @AuthenticationStep(StepNames.USERNAME_AND_PASSWORD)
-    public SecurityRealmAuthentication firstAuthenticationStep(HttpServletRequest request) {
-        String username = request.getHeader(Headers.USERNAME);
-        String password = request.getHeader(Headers.PASSWORD);
-
-        Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(username);
+    public SecurityRealmAuthentication firstAuthenticationStep(@RequestBody AuthUsernameAndPasswordStepRequest request) {
+        Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(request.getUsername());
         if(optionalUser.isEmpty()){
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
         }
@@ -44,7 +42,7 @@ public class NormalUserSecurityRealm {
 
 
         // WARNING: FOR DEMO PURPOSE ONLY
-        if(!user.getPassword().equals(password)){
+        if(!user.getPassword().equals(request.getPassword())){
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
         }
 
@@ -60,8 +58,8 @@ public class NormalUserSecurityRealm {
 
     @Transactional
     @AuthenticationStep(StepNames.OTP)
-    public SecurityRealmAuthentication otpAuthenticationStep(HttpServletRequest request, SecurityRealmAuthentication previousStepAuth) {
-        String otp = request.getHeader(Headers.OTP);
+    public SecurityRealmAuthentication otpAuthenticationStep(@RequestBody AuthOtpStepRequest request, SecurityRealmAuthentication previousStepAuth) {
+        String otp = request.getOtp();
 
         NormalUser user = normalUserRepo.findByUsername(previousStepAuth.getName()).get();
 

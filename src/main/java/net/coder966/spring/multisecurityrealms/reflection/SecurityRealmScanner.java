@@ -1,5 +1,6 @@
 package net.coder966.spring.multisecurityrealms.reflection;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import java.lang.reflect.Method;
@@ -24,9 +25,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public class SecurityRealmScanner {
 
     private final ApplicationContext context;
+    private final ObjectMapper objectMapper;
 
     public SecurityRealmScanner(ApplicationContext context) {
         this.context = context;
+        this.objectMapper = context.getBean(ObjectMapper.class);
     }
 
     public Collection<SecurityRealmDescriptor> scan() {
@@ -104,6 +107,7 @@ public class SecurityRealmScanner {
 
             Parameter[] parameters = method.getParameters();
             AuthenticationStepParameterType[] parameterTypes = new AuthenticationStepParameterType[parameters.length];
+            Object[] parameterTypesDetails = new Object[parameters.length];
 
             for(int i = 0; i < parameters.length; i++){
                 Parameter parameter = parameters[i];
@@ -115,10 +119,12 @@ public class SecurityRealmScanner {
                     parameterType = AuthenticationStepParameterType.RESPONSE;
                 }else if(Authentication.class.isAssignableFrom(parameter.getType())){
                     parameterType = AuthenticationStepParameterType.AUTHENTICATION;
-                }else if(parameter.getType().getAnnotation(RequestBody.class) != null){
+                }else if(parameter.getAnnotation(RequestBody.class) != null){
                     parameterType = AuthenticationStepParameterType.BODY;
-                }else if(parameter.getType().getAnnotation(RequestHeader.class) != null && Map.class.isAssignableFrom(parameter.getType())){
+                    parameterTypesDetails[i] = parameter.getType();
+                }else if(parameter.getAnnotation(RequestHeader.class) != null){
                     parameterType = AuthenticationStepParameterType.HEADERS;
+                    parameterTypesDetails[i] = parameter.getType();
                 }else{
                     parameterType = AuthenticationStepParameterType.UNKNOWN;
                 }
@@ -128,7 +134,13 @@ public class SecurityRealmScanner {
 
 
             // each step name should have a config to call
-            AuthenticationStepInvoker authenticationStepInvoker = new AuthenticationStepInvoker(realmBean, method, parameterTypes);
+            AuthenticationStepInvoker authenticationStepInvoker = new AuthenticationStepInvoker(
+                objectMapper,
+                realmBean,
+                method,
+                parameterTypes,
+                parameterTypesDetails
+            );
             stepInvoker.put(stepName, authenticationStepInvoker);
         }
 

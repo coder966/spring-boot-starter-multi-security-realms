@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.coder966.spring.multisecurityrealms.converter.BrowserEmulatorTestHttpClient;
+import net.coder966.spring.multisecurityrealms.dto.AuthOtpStepRequest;
+import net.coder966.spring.multisecurityrealms.dto.AuthUsernameAndPasswordStepRequest;
 import net.coder966.spring.multisecurityrealms.other.Constants;
 import net.coder966.spring.multisecurityrealms.other.Constants.ErrorCodes;
 import org.junit.jupiter.api.Test;
@@ -28,16 +30,14 @@ public class MultiSecurityRealmTest {
 
         client
             .request(HttpMethod.POST, "/normal-user/auth")
-            .header(Constants.Headers.USERNAME, "khalid")
-            .header(Constants.Headers.PASSWORD, "kpass")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(LoginResponse.class)
             .expectStatus(401)
             .expectBody(new LoginResponse("NORMAL_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
 
         client
             .request(HttpMethod.POST, "/admin-user/auth")
-            .header(Constants.Headers.USERNAME, "mohammed")
-            .header(Constants.Headers.PASSWORD, "mpass")
+            .body(new AuthUsernameAndPasswordStepRequest("mohammed", "mpass"))
             .exchange(LoginResponse.class)
             .expectStatus(401)
             .expectBody(new LoginResponse("ADMIN_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
@@ -49,8 +49,7 @@ public class MultiSecurityRealmTest {
 
         client
             .request(HttpMethod.POST, "/admin-user/auth")
-            .header(Constants.Headers.USERNAME, "tester")
-            .header(Constants.Headers.PASSWORD, "wrong")
+            .body(new AuthUsernameAndPasswordStepRequest("tester", "wrong"))
             .exchange(LoginResponse.class)
             .expectStatus(401)
             .expectBody(new LoginResponse("ADMIN_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
@@ -62,8 +61,7 @@ public class MultiSecurityRealmTest {
 
         client
             .request(HttpMethod.POST, "/admin-user/auth")
-            .header(Constants.Headers.USERNAME, "khalid")
-            .header(Constants.Headers.PASSWORD, "kpass")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(LoginResponse.class)
             .expectStatus(200)
             .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null));
@@ -75,8 +73,7 @@ public class MultiSecurityRealmTest {
 
         LoginResponse loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")
-            .header(Constants.Headers.USERNAME, "khalid")
-            .header(Constants.Headers.PASSWORD, "kpass")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(LoginResponse.class)
             .expectStatus(200)
             .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
@@ -85,7 +82,7 @@ public class MultiSecurityRealmTest {
         client
             .request(HttpMethod.POST, "/admin-user/auth")
             .header("Authorization", loginResponse.getToken())
-            .header(Constants.Headers.OTP, "0000")
+            .body(new AuthOtpStepRequest("0000"))
             .exchange(LoginResponse.class)
             .expectStatus(401)
             .expectBody(new LoginResponse("ADMIN_USER", loginResponse.getToken(), Constants.StepNames.OTP, ErrorCodes.BAD_OTP));
@@ -97,8 +94,7 @@ public class MultiSecurityRealmTest {
 
         LoginResponse loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")
-            .header(Constants.Headers.USERNAME, "khalid")
-            .header(Constants.Headers.PASSWORD, "kpass")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(LoginResponse.class)
             .expectStatus(200)
             .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
@@ -107,7 +103,7 @@ public class MultiSecurityRealmTest {
         client
             .request(HttpMethod.POST, "/admin-user/auth")
             .header("Authorization", loginResponse.getToken())
-            .header(Constants.Headers.OTP, "1234")
+            .body(new AuthOtpStepRequest("1234"))
             .exchange(LoginResponse.class)
             .expectStatus(200)
             .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null));
@@ -124,8 +120,7 @@ public class MultiSecurityRealmTest {
 
         LoginResponse loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")
-            .header(Constants.Headers.USERNAME, "khalid")
-            .header(Constants.Headers.PASSWORD, "kpass")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(LoginResponse.class)
             .expectStatus(200)
             .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
@@ -134,7 +129,7 @@ public class MultiSecurityRealmTest {
         loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")
             .header("Authorization", loginResponse.getToken())
-            .header(Constants.Headers.OTP, "1234")
+            .body(new AuthOtpStepRequest("1234"))
             .exchange(LoginResponse.class)
             .expectStatus(200)
             .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
@@ -194,8 +189,7 @@ public class MultiSecurityRealmTest {
 
         LoginResponse loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")
-            .header(Constants.Headers.USERNAME, "khalid")
-            .header(Constants.Headers.PASSWORD, "kpass")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(LoginResponse.class)
             .expectStatus(200)
             .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
@@ -216,7 +210,7 @@ public class MultiSecurityRealmTest {
         loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")
             .header("Authorization", loginResponse.getToken())
-            .header(Constants.Headers.OTP, "1234")
+            .body(new AuthOtpStepRequest("1234"))
             .exchange(LoginResponse.class)
             .expectStatus(200)
             .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
