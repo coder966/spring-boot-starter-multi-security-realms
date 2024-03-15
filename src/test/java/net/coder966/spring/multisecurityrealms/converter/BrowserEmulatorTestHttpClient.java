@@ -39,6 +39,7 @@ public class BrowserEmulatorTestHttpClient {
         private final String uri;
         private final HttpMethod method;
         private final MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        private Object body;
 
         Request(BrowserEmulatorTestHttpClient client, HttpMethod method, String uri) {
             this.client = client;
@@ -66,7 +67,7 @@ public class BrowserEmulatorTestHttpClient {
             ResponseEntity<T> response = client.testRestTemplate.exchange(
                 "http://localhost:" + client.port + uri,
                 method,
-                new HttpEntity<>(mergedHeaders),
+                new HttpEntity<>(body, mergedHeaders),
                 clazz
             );
 
@@ -80,6 +81,11 @@ public class BrowserEmulatorTestHttpClient {
 
         public Request header(String key, String value) {
             headers.add(key, value);
+            return this;
+        }
+
+        public Request body(Object body) {
+            this.body = body;
             return this;
         }
     }
