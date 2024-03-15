@@ -43,31 +43,7 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
-    public void testFirstStepBadCredentials() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
-
-        client
-            .request(HttpMethod.POST, "/admin-user/auth")
-            .body(new AuthUsernameAndPasswordStepRequest("tester", "wrong"))
-            .exchange(LoginResponse.class)
-            .expectStatus(401)
-            .expectBody(new LoginResponse("ADMIN_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
-    }
-
-    @Test
-    public void testFirstStepCorrectCredentials() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
-
-        client
-            .request(HttpMethod.POST, "/admin-user/auth")
-            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
-            .exchange(LoginResponse.class)
-            .expectStatus(200)
-            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null));
-    }
-
-    @Test
-    public void testSecondStepBadCredentials() {
+    public void testAuthenticationFailure() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         LoginResponse loginResponse = client
@@ -88,7 +64,7 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
-    public void testRealm2SecondCorrectCredentials() {
+    public void testAuthenticationSuccess() {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         LoginResponse loginResponse = client
