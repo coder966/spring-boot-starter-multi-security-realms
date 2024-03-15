@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
     authenticationEndpoint = "/admin-user/auth",
     firstStepName = StepNames.USERNAME_AND_PASSWORD,
     publicApis = {
-        "/admin-user/my-first-open-api",
-        "/admin-user/my-second-open-api"
+        "/my-first-open-api",
+        "/my-second-open-api"
     }
 )
 public class AdminUserSecurityRealm {

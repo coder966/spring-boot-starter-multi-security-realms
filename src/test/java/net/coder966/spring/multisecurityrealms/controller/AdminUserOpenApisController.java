@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AdminUserOpenApisController {
 
-    @GetMapping("/admin-user/my-first-open-api")
+    @GetMapping("/my-first-open-api")
     public String myFirstOpenApi() {
         return "Admin User Open API";
     }
 
-    @GetMapping("/admin-user/my-second-open-api")
+    @GetMapping("/my-second-open-api")
     public String mySecondOpenApi() {
         return "Admin User Open API";
     }

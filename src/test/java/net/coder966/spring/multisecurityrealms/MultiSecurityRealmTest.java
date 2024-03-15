@@ -154,25 +154,25 @@ public class MultiSecurityRealmTest {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
-            .request(HttpMethod.GET, "/normal-user/my-first-open-api")
+            .request(HttpMethod.GET, "/my-third-open-api")
             .exchange(String.class)
             .expectStatus(200)
             .expectBody("Normal User Open API");
 
         client
-            .request(HttpMethod.GET, "/normal-user/my-second-open-api")
+            .request(HttpMethod.GET, "/my-forth-open-api")
             .exchange(String.class)
             .expectStatus(200)
             .expectBody("Normal User Open API");
 
         client
-            .request(HttpMethod.GET, "/admin-user/my-first-open-api")
+            .request(HttpMethod.GET, "/my-first-open-api")
             .exchange(String.class)
             .expectStatus(200)
             .expectBody("Admin User Open API");
 
         client
-            .request(HttpMethod.GET, "/admin-user/my-second-open-api")
+            .request(HttpMethod.GET, "/my-second-open-api")
             .exchange(String.class)
             .expectStatus(200)
             .expectBody("Admin User Open API");
