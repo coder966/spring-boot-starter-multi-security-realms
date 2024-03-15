@@ -4,8 +4,8 @@
 
 - Annotation driven implementation. Refer to README file for examples.
 - Added `permitRealm` security expression to check for the authenticated realm.
-- Authentication is now stateless, using JWT tokens passed in the Authorization request header. This drops the logout api, and the principal in
-  SecurityRealmAuthentication.
+- Authentication is now stateless, using JWT tokens passed in the `Authorization` request header. This drops the logout api, and the `principal` in
+  `SecurityRealmAuthentication`.
 - Now the authentication endpoint returns all the details in the body (token, realm, error, next authentication step), instead of headers.
 - Other minor enhancements and cleanups.
 - Tests: enhancements.
