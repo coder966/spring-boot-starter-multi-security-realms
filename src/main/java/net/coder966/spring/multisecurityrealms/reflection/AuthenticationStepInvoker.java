@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,7 +44,8 @@ public class AuthenticationStepInvoker {
                 case RESPONSE -> args[i] = response;
                 case AUTHENTICATION -> args[i] = authentication;
                 case BODY -> args[i] = readBody(request, (Class<?>) param.getDetails("class"));
-                case HEADER -> args[i] = readHeader(request, (Class<?>) param.getDetails("class"), (String) param.getDetails("headerName"));
+                case HEADER -> args[i] = readHeader(request, (Class<?>) param.getDetails("class"), (String) param.getDetails("name"));
+                case REQUEST_PARAM -> args[i] = readRequestParam(request, (Class<?>) param.getDetails("class"), (String) param.getDetails("name"));
             }
         }
 
@@ -67,7 +69,21 @@ public class AuthenticationStepInvoker {
                 .stream()
                 .collect(Collectors.toMap(
                     Function.identity(),
-                    h -> Collections.list(request.getHeaders(h))
+                    h -> List.of(request.getHeaders(h))
+                ));
+        }
+        return null;
+    }
+
+    private Object readRequestParam(HttpServletRequest request, Class<?> type, String paramName) {
+        if(paramName != null && !paramName.isBlank()){
+            return request.getParameter(paramName);
+        }else if(type.isAssignableFrom(Map.class)){
+            return Collections.list(request.getParameterNames())
+                .stream()
+                .collect(Collectors.toMap(
+                    Function.identity(),
+                    p -> List.of(request.getParameterValues(p))
                 ));
         }
         return null;

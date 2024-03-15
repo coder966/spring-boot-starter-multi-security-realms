@@ -20,6 +20,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Component
 public class SecurityRealmScanner {
@@ -123,7 +124,11 @@ public class SecurityRealmScanner {
                 }else if(parameter.getAnnotation(RequestHeader.class) != null){
                     parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.HEADER)
                         .withDetails("class", parameter.getType())
-                        .withDetails("headerName", parameter.getAnnotation(RequestHeader.class).value());
+                        .withDetails("name", parameter.getAnnotation(RequestHeader.class).value());
+                }else if(parameter.getAnnotation(RequestParam.class) != null){
+                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.REQUEST_PARAM)
+                        .withDetails("class", parameter.getType())
+                        .withDetails("name", parameter.getAnnotation(RequestParam.class).value());
                 }else{
                     parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.UNKNOWN);
                 }

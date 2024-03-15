@@ -7,4 +7,5 @@ public enum AuthenticationStepParameterType {
     AUTHENTICATION,
     BODY,
     HEADER,
+    REQUEST_PARAM,
 }
