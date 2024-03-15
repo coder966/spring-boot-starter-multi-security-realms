@@ -96,11 +96,15 @@ public class SecurityRealmScanner {
 
         for(Method method : realmBean.getClass().getSuperclass().getDeclaredMethods()){
             AuthenticationStep stepAnnotation = method.getAnnotation(AuthenticationStep.class);
-            String stepName = stepAnnotation.value();
+            if(stepAnnotation == null){
+                continue;
+            }
 
+            String stepName = stepAnnotation.value();
             if(stepName == null || stepName.trim().length() != stepName.length() || stepName.isBlank()){
                 throw new IllegalArgumentException("Invalid AuthenticationStep name (" + stepName + ") for SecurityRealm (" + realmName + ")");
             }
+            
             if(!method.getReturnType().isAssignableFrom(SecurityRealmAuthentication.class)){
                 throw new IllegalArgumentException("Invalid return type (" + method.getReturnType().getCanonicalName() + ") "
                     + "of AuthenticationStep (" + stepName + ") for SecurityRealm (" + realmName + ")");
