@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.coder966.spring.multisecurityrealms.converter.BrowserEmulatorTestHttpClient;
 import net.coder966.spring.multisecurityrealms.dto.AuthOtpStepRequest;
 import net.coder966.spring.multisecurityrealms.dto.AuthUsernameAndPasswordStepRequest;
 import net.coder966.spring.multisecurityrealms.other.Constants;

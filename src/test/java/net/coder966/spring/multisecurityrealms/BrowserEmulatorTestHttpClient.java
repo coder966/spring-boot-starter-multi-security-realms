@@ -1,4 +1,4 @@
-package net.coder966.spring.multisecurityrealms.converter;
+package net.coder966.spring.multisecurityrealms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
