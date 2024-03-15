@@ -106,30 +106,28 @@ public class SecurityRealmScanner {
             }
 
             Parameter[] parameters = method.getParameters();
-            AuthenticationStepParameterType[] parameterTypes = new AuthenticationStepParameterType[parameters.length];
-            Object[] parameterTypesDetails = new Object[parameters.length];
+            AuthenticationStepParameterDetails[] parameterDetails = new AuthenticationStepParameterDetails[parameters.length];
 
             for(int i = 0; i < parameters.length; i++){
                 Parameter parameter = parameters[i];
-                AuthenticationStepParameterType parameterType;
 
                 if(ServletRequest.class.isAssignableFrom(parameter.getType())){
-                    parameterType = AuthenticationStepParameterType.REQUEST;
+                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.REQUEST);
                 }else if(ServletResponse.class.isAssignableFrom(parameter.getType())){
-                    parameterType = AuthenticationStepParameterType.RESPONSE;
+                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.RESPONSE);
                 }else if(Authentication.class.isAssignableFrom(parameter.getType())){
-                    parameterType = AuthenticationStepParameterType.AUTHENTICATION;
+                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.AUTHENTICATION);
                 }else if(parameter.getAnnotation(RequestBody.class) != null){
-                    parameterType = AuthenticationStepParameterType.BODY;
-                    parameterTypesDetails[i] = parameter.getType();
+                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.BODY)
+                        .withDetails("class", parameter.getType());
                 }else if(parameter.getAnnotation(RequestHeader.class) != null){
-                    parameterType = AuthenticationStepParameterType.HEADERS;
-                    parameterTypesDetails[i] = parameter.getType();
+                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.HEADER)
+                        .withDetails("class", parameter.getType())
+                        .withDetails("headerName", parameter.getAnnotation(RequestHeader.class).value());
                 }else{
-                    parameterType = AuthenticationStepParameterType.UNKNOWN;
+                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.UNKNOWN);
                 }
 
-                parameterTypes[i] = parameterType;
             }
 
 
@@ -138,8 +136,7 @@ public class SecurityRealmScanner {
                 objectMapper,
                 realmBean,
                 method,
-                parameterTypes,
-                parameterTypesDetails
+                parameterDetails
             );
             stepInvoker.put(stepName, authenticationStepInvoker);
         }

@@ -6,5 +6,5 @@ public enum AuthenticationStepParameterType {
     RESPONSE,
     AUTHENTICATION,
     BODY,
-    HEADERS,
+    HEADER,
 }
