@@ -10,13 +10,20 @@ import java.util.HashSet;
 import java.util.Set;
 import net.coder966.spring.multisecurityrealms.autoconfigure.SecurityRealmConfig;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmHandler;
+import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmHandlerScanner;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Component
 public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter {
 
-    private final Set<SecurityRealmAuthenticationFilter> filters = new HashSet<>();
+    private Set<SecurityRealmAuthenticationFilter> filters = new HashSet<>();
 
-    public MultiSecurityRealmAuthenticationFilter(SecurityRealmConfig config, Collection<SecurityRealmHandler> securityRealmHandlers) {
+    public MultiSecurityRealmAuthenticationFilter(ApplicationContext context, SecurityRealmConfig config) {
+        SecurityRealmHandlerScanner scanner = new SecurityRealmHandlerScanner();
+        Collection<SecurityRealmHandler> securityRealmHandlers = scanner.scan(context);
+
         securityRealmHandlers.forEach(realm -> {
             filters.add(new SecurityRealmAuthenticationFilter(config, realm));
         });
