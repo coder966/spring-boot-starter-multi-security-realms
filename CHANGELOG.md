@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.0.5] - 2024-03-16
+
+- Annotation driven implementation. Refer to README file for examples.
+- Added `permitRealm` security expression to check for the authenticated realm.
+- Authentication is now stateless, using JWT tokens passed in the Authorization request header. This drops the logout api, and the principal in
+  SecurityRealmAuthentication.
+- Now the authentication endpoint returns all the details in the body (token, realm, error, next authentication step), instead of headers.
+- Other minor enhancements and cleanups.
+- Tests: enhancements.
+- Docs: enhancements.
+
 ## [0.0.4] - 2023-12-30
 
 - support joining JPA sessions in the authentication handler. Meaning annotating the authentication handler with `@Transactional` is now possible.
