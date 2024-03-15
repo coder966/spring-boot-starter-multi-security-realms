@@ -40,7 +40,6 @@ public class AdminUserSecurityRealm {
         }
         AdminUser user = optionalUser.get();
 
-
         // Don't remove me. I am an assertion to test that the code here runs inside a JPA session.
         log.info("user badges size {}", user.getBadges().size());
 
@@ -65,6 +64,12 @@ public class AdminUserSecurityRealm {
         String otp = request.getOtp();
 
         AdminUser user = adminUserRepo.findByUsername(previousStepAuth.getName()).get();
+
+        // this might seem to be the incorrect place to update the counter and save
+        // but I put it here to test @Transactional support
+        user.setLoginCounter(user.getLoginCounter() + 1);
+        adminUserRepo.save(user);
+
 
         if(!user.getOtp().equals(otp)){
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_OTP);

@@ -1,16 +1,11 @@
 package net.coder966.spring.multisecurityrealms.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.HashSet;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -29,6 +24,8 @@ public class AdminUser {
     private String password;
 
     private String otp;
+
+    private int loginCounter = 0;
 
     @OneToMany(mappedBy = "adminUser", fetch = FetchType.LAZY)
     private Set<Badge> badges = new HashSet<>();

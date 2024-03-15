@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.dto.AuthOtpStepRequest;
 import net.coder966.spring.multisecurityrealms.dto.AuthUsernameAndPasswordStepRequest;
 import net.coder966.spring.multisecurityrealms.other.Constants;
 import net.coder966.spring.multisecurityrealms.other.Constants.ErrorCodes;
+import net.coder966.spring.multisecurityrealms.other.Constants.StepNames;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpMethod;
 
+@Slf4j
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class MultiSecurityRealmTest {
@@ -203,6 +206,73 @@ public class MultiSecurityRealmTest {
             .header("Authorization", loginResponse.getToken())
             .exchange(String.class)
             .expectStatus(200);
+    }
+
+    @Test
+    public void testTransactionalSupport() {
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+
+        // Login to read the current counter
+
+        LoginResponse loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
+            .exchange(LoginResponse.class)
+            .expectStatus(200)
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
+            .readBody();
+
+        loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .header("Authorization", loginResponse.getToken())
+            .body(new AuthOtpStepRequest("1234"))
+            .exchange(LoginResponse.class)
+            .expectStatus(200)
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
+            .readBody();
+
+        int loginCounter = client
+            .request(HttpMethod.GET, "/admin-user/my-login-counter")
+            .header("Authorization", loginResponse.getToken())
+            .exchange(Integer.class)
+            .expectStatus(200)
+            .readBody();
+
+        // now attempt a failed login, and then read the counter
+
+        loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
+            .exchange(LoginResponse.class)
+            .expectStatus(200)
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
+            .readBody();
+
+        loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .header("Authorization", loginResponse.getToken())
+            .body(new AuthOtpStepRequest("0000"))
+            .exchange(LoginResponse.class)
+            .expectStatus(401)
+            .expectBody(new LoginResponse("ADMIN_USER", loginResponse.getToken(), StepNames.OTP, ErrorCodes.BAD_OTP))
+            .readBody();
+
+        loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .header("Authorization", loginResponse.getToken())
+            .body(new AuthOtpStepRequest("1234"))
+            .exchange(LoginResponse.class)
+            .expectStatus(200)
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
+            .readBody();
+
+        loginCounter = client
+            .request(HttpMethod.GET, "/admin-user/my-login-counter")
+            .header("Authorization", loginResponse.getToken())
+            .exchange(Integer.class)
+            .expectStatus(200)
+            .expectBody(loginCounter + 1)
+            .readBody();
     }
 
     @Setter
