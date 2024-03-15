@@ -9,6 +9,8 @@ import net.coder966.spring.multisecurityrealms.dto.AuthOtpStepRequest;
 import net.coder966.spring.multisecurityrealms.dto.AuthUsernameAndPasswordStepRequest;
 import net.coder966.spring.multisecurityrealms.entity.NormalUser;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationException;
+import net.coder966.spring.multisecurityrealms.noop.TestClass;
+import net.coder966.spring.multisecurityrealms.noop.TestInterface;
 import net.coder966.spring.multisecurityrealms.other.Constants.ErrorCodes;
 import net.coder966.spring.multisecurityrealms.other.Constants.StepNames;
 import net.coder966.spring.multisecurityrealms.repo.NormalUserRepo;
@@ -26,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
         "/my-forth-open-api"
     }
 )
-public class NormalUserSecurityRealm {
+public class NormalUserSecurityRealm extends TestClass implements TestInterface {
 
     @Autowired
     private NormalUserRepo normalUserRepo;
@@ -72,5 +74,10 @@ public class NormalUserSecurityRealm {
         user = normalUserRepo.save(user);
 
         return new SecurityRealmAuthentication(user.getUsername(), null);
+    }
+
+    @Override
+    public void foo() {
+        log.debug("foo");
     }
 }
