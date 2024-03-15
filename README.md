@@ -89,7 +89,6 @@ public class NormalUserSecurityRealm {
         }
         NormalUser user = optionalUser.get();
 
-
         // WARNING: FOR DEMO PURPOSE ONLY
         if (!user.getPassword().equals(request.getPassword())) {
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
@@ -151,10 +150,6 @@ public class AdminUserSecurityRealm {
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
         }
         AdminUser user = optionalUser.get();
-
-
-        // Don't remove me. I am an assertion to test that the code here runs inside a JPA session.
-        log.info("user badges size {}", user.getBadges().size());
 
         // WARNING: FOR DEMO PURPOSE ONLY
         if (!user.getPassword().equals(request.getPassword())) {
