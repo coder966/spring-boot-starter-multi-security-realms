@@ -71,8 +71,8 @@ Here in this example, we define two realms (normal-user & admin-user).
         authenticationEndpoint = "/normal-user/auth",
         firstStepName = StepNames.USERNAME_AND_PASSWORD,
         publicApis = {
-                "/my-first-open-api",
-                "/my-second-open-api"
+                "/my-third-open-api",
+                "/my-forth-open-api"
         }
 )
 public class NormalUserSecurityRealm {
@@ -82,11 +82,8 @@ public class NormalUserSecurityRealm {
 
     @Transactional
     @AuthenticationStep(StepNames.USERNAME_AND_PASSWORD)
-    public SecurityRealmAuthentication firstAuthenticationStep(HttpServletRequest request) {
-        String username = request.getHeader(Headers.USERNAME);
-        String password = request.getHeader(Headers.PASSWORD);
-
-        Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(username);
+    public SecurityRealmAuthentication firstAuthenticationStep(@RequestBody AuthUsernameAndPasswordStepRequest request) {
+        Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(request.getUsername());
         if (optionalUser.isEmpty()) {
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
         }
@@ -94,7 +91,7 @@ public class NormalUserSecurityRealm {
 
 
         // WARNING: FOR DEMO PURPOSE ONLY
-        if (!user.getPassword().equals(password)) {
+        if (!user.getPassword().equals(request.getPassword())) {
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
         }
 
@@ -110,8 +107,8 @@ public class NormalUserSecurityRealm {
 
     @Transactional
     @AuthenticationStep(StepNames.OTP)
-    public SecurityRealmAuthentication otpAuthenticationStep(HttpServletRequest request, SecurityRealmAuthentication previousStepAuth) {
-        String otp = request.getHeader(Headers.OTP);
+    public SecurityRealmAuthentication otpAuthenticationStep(@RequestBody AuthOtpStepRequest request, SecurityRealmAuthentication previousStepAuth) {
+        String otp = request.getOtp();
 
         NormalUser user = normalUserRepo.findByUsername(previousStepAuth.getName()).get();
 
@@ -136,9 +133,9 @@ public class NormalUserSecurityRealm {
         name = "ADMIN_USER",
         authenticationEndpoint = "/admin-user/auth",
         firstStepName = StepNames.USERNAME_AND_PASSWORD,
-        publicApis = { // optional
-                "/my-third-open-api",
-                "/my-forth-open-api"
+        publicApis = {
+                "/my-first-open-api",
+                "/my-second-open-api"
         }
 )
 public class AdminUserSecurityRealm {
@@ -148,11 +145,8 @@ public class AdminUserSecurityRealm {
 
     @Transactional
     @AuthenticationStep(StepNames.USERNAME_AND_PASSWORD)
-    public SecurityRealmAuthentication firstAuthenticationStep(HttpServletRequest request) {
-        String username = request.getHeader(Headers.USERNAME);
-        String password = request.getHeader(Headers.PASSWORD);
-
-        Optional<AdminUser> optionalUser = adminUserRepo.findByUsername(username);
+    public SecurityRealmAuthentication firstAuthenticationStep(@RequestBody AuthUsernameAndPasswordStepRequest request) {
+        Optional<AdminUser> optionalUser = adminUserRepo.findByUsername(request.getUsername());
         if (optionalUser.isEmpty()) {
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
         }
@@ -163,7 +157,7 @@ public class AdminUserSecurityRealm {
         log.info("user badges size {}", user.getBadges().size());
 
         // WARNING: FOR DEMO PURPOSE ONLY
-        if (!user.getPassword().equals(password)) {
+        if (!user.getPassword().equals(request.getPassword())) {
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
         }
 
@@ -179,8 +173,8 @@ public class AdminUserSecurityRealm {
 
     @Transactional
     @AuthenticationStep(StepNames.OTP)
-    public SecurityRealmAuthentication otpAuthenticationStep(HttpServletRequest request, SecurityRealmAuthentication previousStepAuth) {
-        String otp = request.getHeader(Headers.OTP);
+    public SecurityRealmAuthentication otpAuthenticationStep(@RequestBody AuthOtpStepRequest request, SecurityRealmAuthentication previousStepAuth) {
+        String otp = request.getOtp();
 
         AdminUser user = adminUserRepo.findByUsername(previousStepAuth.getName()).get();
 
