@@ -5,13 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.coder966.spring.multisecurityrealms.autoconfigure.SecurityRealmConfig;
+import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAnonymousAuthentication;
+import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAnonymousAuthentication;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthentication;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthenticationResponse;
+import net.coder966.spring.multisecurityrealms.dto.AuthenticationResponse;
 import net.coder966.spring.multisecurityrealms.reflection.AuthenticationStepInvoker;
-import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmHandler;
+import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -20,24 +19,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @Slf4j
 public class SecurityRealmAuthenticationFilter {
 
-    private final SecurityRealmConfig config;
-    private final SecurityRealmHandler handler;
+    private final SecurityRealmDescriptor descriptor;
     private final ObjectMapper objectMapper;
     private final AuthenticationTokenConverter authenticationTokenConverter;
 
-    public SecurityRealmAuthenticationFilter(SecurityRealmConfig config, SecurityRealmHandler handler) {
-        this.config = config;
-        this.handler = handler;
-        this.objectMapper = new ObjectMapper();
-        this.authenticationTokenConverter = new AuthenticationTokenConverter(config.getSigningSecret(), config.getTokenExpirationDuration());
+    public SecurityRealmAuthenticationFilter(
+        SecurityRealmDescriptor descriptor,
+        AuthenticationTokenConverter authenticationTokenConverter,
+        ObjectMapper objectMapper
+    ) {
+        this.descriptor = descriptor;
+        this.objectMapper = objectMapper;
+        this.authenticationTokenConverter = authenticationTokenConverter;
     }
 
     private boolean matchesLogin(HttpServletRequest request) {
-        return request.getMethod().equals("POST") && handler.getAuthenticationEndpointRequestMatcher().matches(request);
+        return request.getMethod().equals("POST") && descriptor.getAuthenticationEndpointRequestMatcher().matches(request);
     }
 
     private boolean matchesPublicApi(HttpServletRequest request) {
-        return handler.getPublicApisRequestMatchers().stream().anyMatch(requestMatcher -> requestMatcher.matches(request));
+        return descriptor.getPublicApisRequestMatchers().stream().anyMatch(requestMatcher -> requestMatcher.matches(request));
     }
 
     public boolean handle(HttpServletRequest request, HttpServletResponse response) {
@@ -64,12 +65,13 @@ public class SecurityRealmAuthenticationFilter {
 
     @SneakyThrows
     private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication authenticationExtractedFromRequest) {
-        String step = authenticationExtractedFromRequest == null ? handler.getFirstStepName() : authenticationExtractedFromRequest.getNextAuthenticationStep();
-        SecurityRealmAuthenticationResponse responseBody = new SecurityRealmAuthenticationResponse();
-        responseBody.setRealm(handler.getName());
+        String step =
+            authenticationExtractedFromRequest == null ? descriptor.getFirstStepName() : authenticationExtractedFromRequest.getNextAuthenticationStep();
+        AuthenticationResponse responseBody = new AuthenticationResponse();
+        responseBody.setRealm(descriptor.getName());
 
         try{
-            AuthenticationStepInvoker stepInvoker = handler.getAuthenticationStepInvokers().get(step);
+            AuthenticationStepInvoker stepInvoker = descriptor.getAuthenticationStepInvokers().get(step);
             SecurityRealmAuthentication resultAuth = stepInvoker.invoke(request, response, authenticationExtractedFromRequest);
 
             if(resultAuth == null){
@@ -77,7 +79,7 @@ public class SecurityRealmAuthenticationFilter {
                     + "To indicate authentication failure, throw exceptions of type AuthenticationException.");
             }
 
-            resultAuth.setRealmName(handler.getName());
+            resultAuth.setRealmName(descriptor.getName());
             responseBody.setToken(authenticationTokenConverter.createToken(resultAuth));
             responseBody.setNextAuthenticationStep(resultAuth.getNextAuthenticationStep());
         }catch(AuthenticationException e){
@@ -97,7 +99,7 @@ public class SecurityRealmAuthenticationFilter {
 
         if(authorization != null){
             SecurityRealmAuthentication authentication = authenticationTokenConverter.verifyToken(authorization);
-            if(authentication != null && authentication.getRealmName().equals(handler.getName())){
+            if(authentication != null && authentication.getRealmName().equals(descriptor.getName())){
                 return authentication;
             }
         }

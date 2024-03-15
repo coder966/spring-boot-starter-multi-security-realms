@@ -1,5 +1,6 @@
 package net.coder966.spring.multisecurityrealms.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,24 +9,27 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import net.coder966.spring.multisecurityrealms.autoconfigure.SecurityRealmConfig;
-import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmHandler;
-import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmHandlerScanner;
-import org.springframework.context.ApplicationContext;
+import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
+import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
+import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmScanner;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter {
 
-    private Set<SecurityRealmAuthenticationFilter> filters = new HashSet<>();
+    private final Set<SecurityRealmAuthenticationFilter> filters = new HashSet<>();
 
-    public MultiSecurityRealmAuthenticationFilter(ApplicationContext context, SecurityRealmConfig config) {
-        SecurityRealmHandlerScanner scanner = new SecurityRealmHandlerScanner();
-        Collection<SecurityRealmHandler> securityRealmHandlers = scanner.scan(context);
+    public MultiSecurityRealmAuthenticationFilter(
+        SecurityRealmScanner scanner,
+        AuthenticationTokenConverter authenticationTokenConverter,
+        ObjectMapper objectMapper
+    ) {
 
-        securityRealmHandlers.forEach(realm -> {
-            filters.add(new SecurityRealmAuthenticationFilter(config, realm));
+        Collection<SecurityRealmDescriptor> securityRealmDescriptors = scanner.scan();
+
+        securityRealmDescriptors.forEach(realm -> {
+            filters.add(new SecurityRealmAuthenticationFilter(realm, authenticationTokenConverter, objectMapper));
         });
     }
 

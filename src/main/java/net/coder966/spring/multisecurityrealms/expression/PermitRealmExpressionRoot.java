@@ -1,6 +1,6 @@
 package net.coder966.spring.multisecurityrealms.expression;
 
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthentication;
+import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.core.Authentication;
 

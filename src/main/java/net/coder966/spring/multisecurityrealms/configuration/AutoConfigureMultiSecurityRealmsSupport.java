@@ -1,4 +1,4 @@
-package net.coder966.spring.multisecurityrealms.autoconfigure;
+package net.coder966.spring.multisecurityrealms.configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthenticationFilter;

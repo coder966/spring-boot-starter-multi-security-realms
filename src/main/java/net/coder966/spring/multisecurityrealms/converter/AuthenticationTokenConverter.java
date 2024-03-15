@@ -9,21 +9,31 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthentication;
+import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
+import net.coder966.spring.multisecurityrealms.configuration.SecurityRealmConfigurationProperties;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
 
 @Slf4j
-public class AuthenticationTokenConverter {
+@Component
+public class AuthenticationTokenConverter implements InitializingBean {
 
-    private final Algorithm algorithm;
-    private final JWTVerifier verifier;
+    private final String secret;
     private final Duration tokenExpirationDuration;
+    private Algorithm algorithm;
+    private JWTVerifier verifier;
 
-    public AuthenticationTokenConverter(String secret, Duration tokenExpirationDuration) {
+    public AuthenticationTokenConverter(SecurityRealmConfigurationProperties config) {
+        this.secret = config.getSigningSecret();
+        this.tokenExpirationDuration = config.getTokenExpirationDuration();
+    }
+
+    @Override
+    public void afterPropertiesSet() {
         this.algorithm = Algorithm.HMAC512(secret);
         this.verifier = JWT.require(algorithm).build();
-        this.tokenExpirationDuration = tokenExpirationDuration;
     }
 
     public String createToken(SecurityRealmAuthentication authentication) {

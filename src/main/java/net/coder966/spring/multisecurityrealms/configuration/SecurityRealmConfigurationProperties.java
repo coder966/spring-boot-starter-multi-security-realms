@@ -1,4 +1,4 @@
-package net.coder966.spring.multisecurityrealms.autoconfigure;
+package net.coder966.spring.multisecurityrealms.configuration;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 @Configuration
 @ConfigurationProperties(prefix = "security-realm")
-public class SecurityRealmConfig implements InitializingBean {
+public class SecurityRealmConfigurationProperties implements InitializingBean {
 
     private String signingSecret;
     private Duration tokenExpirationDuration;

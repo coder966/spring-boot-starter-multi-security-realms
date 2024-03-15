@@ -1,4 +1,4 @@
-package net.coder966.spring.multisecurityrealms.model;
+package net.coder966.spring.multisecurityrealms.authentication;
 
 import java.util.Collection;
 import java.util.Collections;

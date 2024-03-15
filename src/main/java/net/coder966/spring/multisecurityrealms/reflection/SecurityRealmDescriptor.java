@@ -8,7 +8,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Getter
 @AllArgsConstructor
-public class SecurityRealmHandler {
+public class SecurityRealmDescriptor {
 
     private final String name;
     private final RequestMatcher authenticationEndpointRequestMatcher;

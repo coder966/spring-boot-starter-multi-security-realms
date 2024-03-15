@@ -1,1 +1,1 @@
-net.coder966.spring.multisecurityrealms.autoconfigure.AutoConfigureMultiSecurityRealmsSupport
+net.coder966.spring.multisecurityrealms.configuration.AutoConfigureMultiSecurityRealmsSupport

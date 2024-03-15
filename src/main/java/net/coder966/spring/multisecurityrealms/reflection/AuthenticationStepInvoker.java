@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import lombok.SneakyThrows;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthentication;
+import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import org.springframework.security.core.Authentication;
 
 public class AuthenticationStepInvoker {

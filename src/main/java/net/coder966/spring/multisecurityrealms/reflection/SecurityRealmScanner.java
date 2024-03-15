@@ -11,23 +11,31 @@ import java.util.List;
 import java.util.Map;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.annotation.SecurityRealm;
-import net.coder966.spring.multisecurityrealms.model.SecurityRealmAuthentication;
+import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-public class SecurityRealmHandlerScanner {
+@Component
+public class SecurityRealmScanner {
 
-    public Collection<SecurityRealmHandler> scan(ApplicationContext context) {
-        Map<String, Object> beans = context.getBeansWithAnnotation(SecurityRealm.class);
-        return buildHandlers(beans.values());
+    private final ApplicationContext context;
+
+    public SecurityRealmScanner(ApplicationContext context) {
+        this.context = context;
     }
 
-    private Collection<SecurityRealmHandler> buildHandlers(Collection<Object> beans) {
-        Map<String, SecurityRealmHandler> handlers = new HashMap<>();
+    public Collection<SecurityRealmDescriptor> scan() {
+        Map<String, Object> beans = context.getBeansWithAnnotation(SecurityRealm.class);
+        return buildDescriptors(beans.values());
+    }
+
+    private Collection<SecurityRealmDescriptor> buildDescriptors(Collection<Object> beans) {
+        Map<String, SecurityRealmDescriptor> descriptors = new HashMap<>();
 
         for(Object bean : beans){
             SecurityRealm realmAnnotation = bean.getClass().getSuperclass().getAnnotation(SecurityRealm.class);
@@ -41,7 +49,7 @@ public class SecurityRealmHandlerScanner {
             if(name == null || name.trim().length() != name.length()){
                 throw new IllegalArgumentException("Invalid SecurityRealm name (" + name + ")");
             }
-            if(handlers.containsKey(name)){
+            if(descriptors.containsKey(name)){
                 throw new IllegalArgumentException("Invalid SecurityRealm name (" + name + ")");
             }
 
@@ -65,7 +73,7 @@ public class SecurityRealmHandlerScanner {
                 }
             }
 
-            SecurityRealmHandler handler = new SecurityRealmHandler(
+            SecurityRealmDescriptor descriptor = new SecurityRealmDescriptor(
                 name,
                 authenticationEndpointRequestMatcher,
                 firstStepName,
@@ -73,10 +81,10 @@ public class SecurityRealmHandlerScanner {
                 authenticationStepInvokers
             );
 
-            handlers.put(name, handler);
+            descriptors.put(name, descriptor);
         }
 
-        return handlers.values();
+        return descriptors.values();
     }
 
     private Map<String, AuthenticationStepInvoker> buildAuthenticationStepInvokers(String realmName, Object realmBean) {
