@@ -64,7 +64,7 @@ public class SecurityRealmAuthenticationFilter {
 
     @SneakyThrows
     private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication authenticationExtractedFromRequest) {
-        String step = authenticationExtractedFromRequest == null ? handler.getFirstStepName() : authenticationExtractedFromRequest.getNextAuthStep();
+        String step = authenticationExtractedFromRequest == null ? handler.getFirstStepName() : authenticationExtractedFromRequest.getNextAuthenticationStep();
         SecurityRealmAuthenticationResponse responseBody = new SecurityRealmAuthenticationResponse();
         responseBody.setRealm(handler.getName());
 
@@ -79,7 +79,7 @@ public class SecurityRealmAuthenticationFilter {
 
             resultAuth.setRealmName(handler.getName());
             responseBody.setToken(authenticationTokenConverter.createToken(resultAuth));
-            responseBody.setNextAuthenticationStep(resultAuth.getNextAuthStep());
+            responseBody.setNextAuthenticationStep(resultAuth.getNextAuthenticationStep());
         }catch(AuthenticationException e){
             responseBody.setToken(extractTokenFromRequest(request));
             responseBody.setNextAuthenticationStep(step);

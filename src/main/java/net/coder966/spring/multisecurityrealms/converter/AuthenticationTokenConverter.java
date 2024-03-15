@@ -31,7 +31,7 @@ public class AuthenticationTokenConverter {
             .create()
             .withSubject(authentication.getName())
             .withClaim("realm", authentication.getRealmName())
-            .withClaim("nextAuthStep", authentication.getNextAuthStep())
+            .withClaim("nextAuthenticationStep", authentication.getNextAuthenticationStep())
             .withClaim("authorities", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
             .withExpiresAt(Instant.now().plus(tokenExpirationDuration))
             .sign(algorithm);
@@ -41,9 +41,9 @@ public class AuthenticationTokenConverter {
         try{
             DecodedJWT decodedJWT = verifier.verify(token);
 
-            String nextAuthStep = decodedJWT.getClaim("nextAuthStep").asString();
-            String realmName = decodedJWT.getClaim("realm").asString();
             String username = decodedJWT.getSubject();
+            String realmName = decodedJWT.getClaim("realm").asString();
+            String nextAuthenticationStep = decodedJWT.getClaim("nextAuthenticationStep").asString();
             Set<GrantedAuthority> authorities = decodedJWT
                 .getClaim("authorities")
                 .asList(String.class)
@@ -51,7 +51,7 @@ public class AuthenticationTokenConverter {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
 
-            SecurityRealmAuthentication authentication = new SecurityRealmAuthentication(username, authorities, nextAuthStep);
+            SecurityRealmAuthentication authentication = new SecurityRealmAuthentication(username, authorities, nextAuthenticationStep);
             authentication.setRealmName(realmName);
             return authentication;
         }catch(Exception e){

@@ -14,7 +14,7 @@ public class SecurityRealmAuthentication implements Authentication {
     private String name;
     private Set<GrantedAuthority> authorities;
     private boolean isAuthenticated;
-    private String nextAuthStep;
+    private String nextAuthenticationStep;
 
     /**
      * USe this when the user is fully authenticated.
@@ -23,17 +23,17 @@ public class SecurityRealmAuthentication implements Authentication {
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
         this.isAuthenticated = true;
-        this.nextAuthStep = null;
+        this.nextAuthenticationStep = null;
     }
 
     /**
      * USe this when the user is not fully authenticated and needs to proceed to the another auth step.
      */
-    public SecurityRealmAuthentication(String name, Set<GrantedAuthority> authorities, String nextAuthStep) {
+    public SecurityRealmAuthentication(String name, Set<GrantedAuthority> authorities, String nextAuthenticationStep) {
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
-        this.isAuthenticated = nextAuthStep == null;
-        this.nextAuthStep = nextAuthStep;
+        this.isAuthenticated = nextAuthenticationStep == null;
+        this.nextAuthenticationStep = nextAuthenticationStep;
     }
 
     @Override

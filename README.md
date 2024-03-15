@@ -1,5 +1,7 @@
 # Spring Multi Security Realms
 
+[![Maven Central](https://img.shields.io/maven-central/v/net.coder966.spring/spring-boot-starter-multi-security-realms)](https://central.sonatype.com/artifact/net.coder966.spring/spring-boot-starter-multi-security-realms)
+
 Support multiple security realms in a single Spring Boot application.
 
 ## What is a Security Realm
@@ -20,7 +22,8 @@ manually.
 
 This library allows you to easily and declaratively define these realms. It also brings extra features like:
 
-- Multi steps authentication support (aka MFA). For example: username & password step, then OTP step, etc... You don't have to think about how to implement
+- Multi steps authentication support (aka Multi-Factor Authentication MFA). For example: username & password step, then OTP step, etc... You don't have to think
+  about how to implement
   this, just use the built-in
   support.
 - Ability to define public apis per realm without the need to access and update the `SecurityFilterChain` manually.
@@ -65,11 +68,11 @@ Here in this example, we define two realms (normal-user & admin-user).
 @Slf4j
 @SecurityRealm(
         name = "NORMAL_USER",
-        authenticationEndpoint = "/normal-user/login",
+        authenticationEndpoint = "/normal-user/auth",
         firstStepName = StepNames.USERNAME_AND_PASSWORD,
         publicApis = {
-                "/normal-user/my-first-open-api",
-                "/normal-user/my-second-open-api"
+                "/my-first-open-api",
+                "/my-second-open-api"
         }
 )
 public class NormalUserSecurityRealm {
@@ -100,6 +103,8 @@ public class NormalUserSecurityRealm {
         user.setOtp(otp);
         user = normalUserRepo.save(user);
 
+        // here we specify the next step name in the SecurityRealmAuthentication
+        // if this is the last step, then don't specify the next step name, or send null
         return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP);
     }
 
@@ -129,11 +134,11 @@ public class NormalUserSecurityRealm {
 @Slf4j
 @SecurityRealm(
         name = "ADMIN_USER",
-        authenticationEndpoint = "/admin-user/login",
+        authenticationEndpoint = "/admin-user/auth",
         firstStepName = StepNames.USERNAME_AND_PASSWORD,
-        publicApis = {
-                "/admin-user/my-first-open-api",
-                "/admin-user/my-second-open-api"
+        publicApis = { // optional
+                "/my-third-open-api",
+                "/my-forth-open-api"
         }
 )
 public class AdminUserSecurityRealm {
@@ -167,6 +172,8 @@ public class AdminUserSecurityRealm {
         user.setOtp(otp);
         user = adminUserRepo.save(user);
 
+        // here we specify the next step name in the SecurityRealmAuthentication
+        // if this is the last step, then don't specify the next step name, or send null
         return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP);
     }
 
@@ -192,15 +199,14 @@ public class AdminUserSecurityRealm {
 
 ### Client Application (Frontend)
 
-- The client app should call the realm login api.
+- The client app should call the realm authentication endpoint.
 - You will receive a JWT token in the response body as a string.
 - Store this token and pass in subsequent requests in the `Authorization` header.
 - If the realm requires additional authentication steps from you (MFA),
-  you will see the required authentication step name in the response header `X-Next-Auth-Step`. Render this step form and again submit to the same login api.
-- In any case, if there is an error in the authentication (for example, bad credentials), you will receive the error in the response header `X-Auth-Error-Code`.
+  you will see the required authentication step name in the response body `nextAuthenticationStep`. Render this step form and again submit to the same
+  authentication endpoint.
+- In any case, if there is an error in the authentication (for example, bad credentials), you will receive the error in the response body `error`.
 
-This image explains the whole authentication flow
-![spring-boot-starter-multi-security-realms.png](docs/spring-boot-starter-multi-security-realms.png)
 
 ### Realm Protected APIs
 

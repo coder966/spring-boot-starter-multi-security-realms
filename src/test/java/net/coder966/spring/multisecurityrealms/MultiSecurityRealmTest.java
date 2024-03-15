@@ -27,7 +27,7 @@ public class MultiSecurityRealmTest {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
-            .request(HttpMethod.POST, "/normal-user/login")
+            .request(HttpMethod.POST, "/normal-user/auth")
             .header(Constants.Headers.USERNAME, "khalid")
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
@@ -35,7 +35,7 @@ public class MultiSecurityRealmTest {
             .expectBody(new LoginResponse("NORMAL_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
 
         client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header(Constants.Headers.USERNAME, "mohammed")
             .header(Constants.Headers.PASSWORD, "mpass")
             .exchange(LoginResponse.class)
@@ -48,7 +48,7 @@ public class MultiSecurityRealmTest {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header(Constants.Headers.USERNAME, "tester")
             .header(Constants.Headers.PASSWORD, "wrong")
             .exchange(LoginResponse.class)
@@ -61,7 +61,7 @@ public class MultiSecurityRealmTest {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header(Constants.Headers.USERNAME, "khalid")
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
@@ -74,7 +74,7 @@ public class MultiSecurityRealmTest {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         LoginResponse loginResponse = client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header(Constants.Headers.USERNAME, "khalid")
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
@@ -83,7 +83,7 @@ public class MultiSecurityRealmTest {
             .readBody();
 
         client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header("Authorization", loginResponse.getToken())
             .header(Constants.Headers.OTP, "0000")
             .exchange(LoginResponse.class)
@@ -96,7 +96,7 @@ public class MultiSecurityRealmTest {
         BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
 
         LoginResponse loginResponse = client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header(Constants.Headers.USERNAME, "khalid")
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
@@ -105,7 +105,7 @@ public class MultiSecurityRealmTest {
             .readBody();
 
         client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header("Authorization", loginResponse.getToken())
             .header(Constants.Headers.OTP, "1234")
             .exchange(LoginResponse.class)
@@ -123,7 +123,7 @@ public class MultiSecurityRealmTest {
             .expectStatus(403);
 
         LoginResponse loginResponse = client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header(Constants.Headers.USERNAME, "khalid")
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
@@ -132,7 +132,7 @@ public class MultiSecurityRealmTest {
             .readBody();
 
         loginResponse = client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header("Authorization", loginResponse.getToken())
             .header(Constants.Headers.OTP, "1234")
             .exchange(LoginResponse.class)
@@ -193,7 +193,7 @@ public class MultiSecurityRealmTest {
             .expectStatus(403);
 
         LoginResponse loginResponse = client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header(Constants.Headers.USERNAME, "khalid")
             .header(Constants.Headers.PASSWORD, "kpass")
             .exchange(LoginResponse.class)
@@ -214,7 +214,7 @@ public class MultiSecurityRealmTest {
             .expectStatus(403);
 
         loginResponse = client
-            .request(HttpMethod.POST, "/admin-user/login")
+            .request(HttpMethod.POST, "/admin-user/auth")
             .header("Authorization", loginResponse.getToken())
             .header(Constants.Headers.OTP, "1234")
             .exchange(LoginResponse.class)

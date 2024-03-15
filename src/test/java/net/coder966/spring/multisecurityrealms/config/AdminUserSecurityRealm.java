@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @SecurityRealm(
     name = "ADMIN_USER",
-    authenticationEndpoint = "/admin-user/login",
+    authenticationEndpoint = "/admin-user/auth",
     firstStepName = StepNames.USERNAME_AND_PASSWORD,
     publicApis = {
         "/admin-user/my-first-open-api",
@@ -56,6 +56,8 @@ public class AdminUserSecurityRealm {
         user.setOtp(otp);
         user = adminUserRepo.save(user);
 
+        // here we specify the next step name in the SecurityRealmAuthentication
+        // if this is the last step, then don't specify the next step name, or send null
         return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP);
     }
 
