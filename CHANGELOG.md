@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.9] - 2024-03-16
+
+- Handle the scenario when the user attempts to authenticate while already fully authenticated.
+
 ## [0.0.8] - 2024-03-16
 
 - Align `SecurityRealmAuthentication` and `SecurityRealmAnonymousAuthentication` with the built-in `Authentication` objects behaviours to increase
