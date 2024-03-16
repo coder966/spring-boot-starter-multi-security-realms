@@ -111,10 +111,10 @@ public class SecurityRealmAuthenticationFilter {
         String authorization = request.getHeader("Authorization");
 
         if(authorization != null){
-            if(authorization.startsWith("Bearer ")){
-                authorization = authorization.substring(6);
+            if(authorization.toUpperCase().startsWith("BEARER ")){
+                authorization = authorization.substring(7);
             }
-            return authorization;
+            return authorization.trim();
         }
 
         return null;
