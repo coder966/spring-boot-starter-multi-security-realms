@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.8] - 2024-03-16
+
+- Align `SecurityRealmAuthentication` and `SecurityRealmAnonymousAuthentication` with the built-in `Authentication` objects behaviours to increase
+  compatibility.
+- Register a null `AuthenticationManagerResolver` to prevent Spring Boot form configuring a default
+  in-memory `UserDetailsService` (`InMemoryUserDetailsManager`).
+
 ## [0.0.7] - 2024-03-16
 
 - added properties metadata.
