@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.6] - 2024-03-16
+
+- fix `SecurityRealmAuthentication` unable to accept authorities set of subtypes of `GrantedAuthority`.
+- fix auto configurations.
+
 ## [0.0.5] - 2024-03-16
 
 - Annotation driven implementation. Refer to README file for examples.
