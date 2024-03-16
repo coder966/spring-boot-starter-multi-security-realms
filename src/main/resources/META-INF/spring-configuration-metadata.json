@@ -1,0 +1,12 @@
+{
+    "properties": [
+        {
+            "name": "security-realm.signing-secret",
+            "type": "java.lang.String"
+        },
+        {
+            "name": "security-realm.token-expiration-duration",
+            "type": "java.time.Duration"
+        }
+    ]
+}
