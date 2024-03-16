@@ -19,7 +19,7 @@ public class SecurityRealmConfigurationProperties implements InitializingBean {
     public void afterPropertiesSet() {
         if(signingSecret == null){
             throw new IllegalArgumentException(
-                "You must specify the signing secret in your application properties file. Key: security-realm.token-expiration-duration");
+                "You must specify the signing secret in your application properties file. Key: security-realm.signing-secret");
         }
 
         if(tokenExpirationDuration == null){
