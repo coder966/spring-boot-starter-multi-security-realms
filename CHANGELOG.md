@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.7] - 2024-03-16
+
+- added properties metadata.
+- fix token in `Authorization` header not detected if the word `Bearer` is present.
+
 ## [0.0.6] - 2024-03-16
 
 - fix `SecurityRealmAuthentication` unable to accept authorities set of subtypes of `GrantedAuthority`.
