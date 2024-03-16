@@ -42,19 +42,19 @@ public class SecurityRealmAuthenticationFilter {
     }
 
     public boolean handle(HttpServletRequest request, HttpServletResponse response) {
-        SecurityRealmAuthentication authenticationExtractedFromRequest = extractAuthenticationFromRequest(request);
-        if(authenticationExtractedFromRequest != null){
-            setAuthenticationInContext(authenticationExtractedFromRequest);
+        SecurityRealmAuthentication auth = extractAuthenticationFromRequest(request);
+        if(auth != null){
+            setAuthenticationInContext(auth);
         }
 
 
         if(matchesLogin(request)){
-            handleLogin(request, response, authenticationExtractedFromRequest);
+            handleLogin(request, response, auth);
             return true;
         }
 
 
-        if(matchesPublicApi(request) && authenticationExtractedFromRequest == null){
+        if(matchesPublicApi(request) && auth == null){
             // don't use AnonymousAuthenticationToken because it will be rejected down via AuthorizationFilter
             setAuthenticationInContext(new SecurityRealmAnonymousAuthentication());
             // don't return, we need to continue the filter chain on order to reach the servlet controller
@@ -64,15 +64,14 @@ public class SecurityRealmAuthenticationFilter {
     }
 
     @SneakyThrows
-    private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication authenticationExtractedFromRequest) {
-        String step =
-            authenticationExtractedFromRequest == null ? descriptor.getFirstStepName() : authenticationExtractedFromRequest.getNextAuthenticationStep();
+    private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) {
+        String step = auth == null ? descriptor.getFirstStepName() : auth.getNextAuthenticationStep();
         AuthenticationResponse responseBody = new AuthenticationResponse();
         responseBody.setRealm(descriptor.getName());
 
         try{
             AuthenticationStepInvoker stepInvoker = descriptor.getAuthenticationStepInvokers().get(step);
-            SecurityRealmAuthentication resultAuth = stepInvoker.invoke(request, response, authenticationExtractedFromRequest);
+            SecurityRealmAuthentication resultAuth = stepInvoker.invoke(request, response, auth);
 
             if(resultAuth == null){
                 throw new IllegalStateException("You should not return a null SecurityRealmAuthentication. "
