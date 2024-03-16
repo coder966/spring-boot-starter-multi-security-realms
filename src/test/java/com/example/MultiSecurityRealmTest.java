@@ -273,6 +273,37 @@ public class MultiSecurityRealmTest {
             .readBody();
     }
 
+    @Test
+    public void loginAgainAfterCompleteSuccessfulLogin() {
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+
+        LoginResponse loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
+            .exchange(LoginResponse.class)
+            .expectStatus(200)
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
+            .readBody();
+
+        loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .header("Authorization", loginResponse.getToken())
+            .body(new AuthOtpStepRequest("1234"))
+            .exchange(LoginResponse.class)
+            .expectStatus(200)
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
+            .readBody();
+
+        loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .header("Authorization", loginResponse.getToken())
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
+            .exchange(LoginResponse.class)
+            .expectStatus(400)
+            .expectBody(new LoginResponse("ADMIN_USER", null, null, "Already fully authenticated"))
+            .readBody();
+    }
+
     @Setter
     @Getter
     @ToString

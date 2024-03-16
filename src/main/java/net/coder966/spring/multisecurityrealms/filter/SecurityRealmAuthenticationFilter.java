@@ -63,11 +63,17 @@ public class SecurityRealmAuthenticationFilter {
         return false;
     }
 
-    @SneakyThrows
     private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) {
-        String step = auth == null ? descriptor.getFirstStepName() : auth.getNextAuthenticationStep();
         AuthenticationResponse responseBody = new AuthenticationResponse();
         responseBody.setRealm(descriptor.getName());
+
+        if(auth != null && auth.isAuthenticated()){
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            responseBody.setError("Already fully authenticated");
+            writeAuthenticationResponse(responseBody, response);
+            return;
+        }
+        String step = auth == null ? descriptor.getFirstStepName() : auth.getNextAuthenticationStep();
 
         try{
             AuthenticationStepInvoker stepInvoker = descriptor.getAuthenticationStepInvokers().get(step);
@@ -88,9 +94,7 @@ public class SecurityRealmAuthenticationFilter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
 
-        response.setHeader("Content-Type", "application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
-        response.getWriter().close();
+        writeAuthenticationResponse(responseBody, response);
     }
 
     private SecurityRealmAuthentication extractAuthenticationFromRequest(HttpServletRequest request) {
@@ -121,6 +125,13 @@ public class SecurityRealmAuthenticationFilter {
 
     private void setAuthenticationInContext(Authentication authentication) {
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    @SneakyThrows
+    private void writeAuthenticationResponse(AuthenticationResponse responseBody, HttpServletResponse response) {
+        response.setHeader("Content-Type", "application/json;charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+        response.getWriter().close();
     }
 
 }
