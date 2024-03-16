@@ -247,6 +247,12 @@ public class SecurityConfig {
         // add it before AnonymousAuthenticationFilter
         http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
 
+
+        // disable csrf, because JWT token is not stored in the cookies, so CSRF protection is not needed
+        // you can still enable it, but you have to support it in your client application (frontend)
+        http.csrf(AbstractHttpConfigurer::disable);
+
+
         // the reset of your configuration ....
 
         return http.build();
