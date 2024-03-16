@@ -53,7 +53,7 @@ public class SecurityRealmAuthentication implements Authentication {
 
     @Override
     public Object getPrincipal() {
-        return null;
+        return realmName + ":" + name;
     }
 
     @Override
@@ -69,5 +69,18 @@ public class SecurityRealmAuthentication implements Authentication {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof SecurityRealmAuthentication test){
+            return (this.getPrincipal().equals(test.getPrincipal()));
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getPrincipal().hashCode();
     }
 }
