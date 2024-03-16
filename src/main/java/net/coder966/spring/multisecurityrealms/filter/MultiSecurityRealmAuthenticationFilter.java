@@ -12,10 +12,8 @@ import java.util.Set;
 import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmScanner;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
 public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter {
 
     private final Set<SecurityRealmAuthenticationFilter> filters = new HashSet<>();

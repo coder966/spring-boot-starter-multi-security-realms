@@ -14,10 +14,8 @@ import net.coder966.spring.multisecurityrealms.configuration.SecurityRealmConfig
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Component;
 
 @Slf4j
-@Component
 public class AuthenticationTokenConverter implements InitializingBean {
 
     private final String secret;
