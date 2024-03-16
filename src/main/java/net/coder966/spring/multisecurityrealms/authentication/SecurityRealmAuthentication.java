@@ -12,14 +12,14 @@ import org.springframework.security.core.GrantedAuthority;
 public class SecurityRealmAuthentication implements Authentication {
     private String realmName;
     private String name;
-    private Set<GrantedAuthority> authorities;
+    private Set<? extends GrantedAuthority> authorities;
     private boolean isAuthenticated;
     private String nextAuthenticationStep;
 
     /**
      * USe this when the user is fully authenticated.
      */
-    public SecurityRealmAuthentication(String name, Set<GrantedAuthority> authorities) {
+    public SecurityRealmAuthentication(String name, Set<? extends GrantedAuthority> authorities) {
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
         this.isAuthenticated = true;
@@ -29,7 +29,7 @@ public class SecurityRealmAuthentication implements Authentication {
     /**
      * USe this when the user is not fully authenticated and needs to proceed to the another auth step.
      */
-    public SecurityRealmAuthentication(String name, Set<GrantedAuthority> authorities, String nextAuthenticationStep) {
+    public SecurityRealmAuthentication(String name, Set<? extends GrantedAuthority> authorities, String nextAuthenticationStep) {
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
         this.isAuthenticated = nextAuthenticationStep == null;
@@ -37,7 +37,7 @@ public class SecurityRealmAuthentication implements Authentication {
     }
 
     @Override
-    public Set<GrantedAuthority> getAuthorities() {
+    public Set<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
 
