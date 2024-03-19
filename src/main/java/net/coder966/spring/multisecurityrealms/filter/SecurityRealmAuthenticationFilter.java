@@ -66,6 +66,7 @@ public class SecurityRealmAuthenticationFilter {
     private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) {
         AuthenticationResponse responseBody = new AuthenticationResponse();
         responseBody.setRealm(descriptor.getName());
+        responseBody.setName(auth == null ? null : auth.getName());
 
         if(auth != null && auth.isAuthenticated()){
             response.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -85,8 +86,14 @@ public class SecurityRealmAuthenticationFilter {
             }
 
             resultAuth.setRealmName(descriptor.getName());
+
+            responseBody.setName(resultAuth.getName());
             responseBody.setToken(authenticationTokenConverter.createToken(resultAuth));
             responseBody.setNextAuthenticationStep(resultAuth.getNextAuthenticationStep());
+
+            if(resultAuth.getNextAuthenticationStep() == null){
+                responseBody.setAuthorities(resultAuth.getAuthorities());
+            }
         }catch(AuthenticationException e){
             responseBody.setToken(extractTokenFromRequest(request));
             responseBody.setNextAuthenticationStep(step);
