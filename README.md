@@ -248,6 +248,10 @@ public class SecurityConfig {
         http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
 
 
+        // session should be disabled
+        http.sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+
         // disable csrf, because JWT token is not stored in the cookies, so CSRF protection is not needed
         // you can still enable it, but you have to support it in your client application (frontend)
         http.csrf(AbstractHttpConfigurer::disable);
