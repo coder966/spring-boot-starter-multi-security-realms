@@ -8,13 +8,13 @@ Support multiple security realms in a single Spring Boot application.
 
 A realm is a scope of operations. A security realm is a security scope which defines protected resources and users in that realm.
 
-For example, suppose you have a multi-tenant online e-store application. This application probably have these types of users:
+For example, suppose you have a multi-tenant online e-store application. This application probably support these types of users:
 
-- admin users / support users (realm)
+- admin users / helpdesk users (realm)
 - store owner users (realm)
 - store customer users (realm)
 
-These different user types are probably authenticated (login mechanism/flow/steps) and authorized (different protected APIs) differently.
+These different user types are probably authenticated (login mechanism/flow/steps) and authorized (protected APIs) differently.
 Configuring this in Spring can be tricky and a bit complicated. You can even potentially introduce security bugs if you try to implement these features
 manually.
 
@@ -22,10 +22,8 @@ manually.
 
 This library allows you to easily and declaratively define these realms. It also brings extra features like:
 
-- Multi steps authentication support (aka Multi-Factor Authentication MFA). For example: username & password step, then OTP step, etc... You don't have to think
-  about how to implement
-  this, just use the built-in
-  support.
+- Multi-steps authentication support (aka Multi-Factor Authentication MFA). For example: username & password step, then OTP step, etc... You don't have to think
+  about how to implement this, just use the built-in support.
 - Ability to define public apis per realm without the need to access and update the `SecurityFilterChain` manually.
   This is helpful if your application is huge, and you want to define public apis in segregated modules without the need to define them in a central place.
 - You still have full control and can define custom `SecurityFilterChain`s if you wish. By default,
@@ -60,7 +58,7 @@ implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.
 
 ### Define security realms
 
-To define a realm, simply create a bean of type `SecurityRealm`.
+To define a realm, simply create a Spring component and annotate it with `@SecurityRealm`.
 Here in this example, we define two realms (normal-user & admin-user).
 
 #### NormalUserSecurityRealm.java
@@ -190,7 +188,7 @@ public class AdminUserSecurityRealm {
 
 - The client app should call the realm authentication endpoint.
 - You will receive a JWT token in the response body as a string.
-- Store this token and pass in subsequent requests in the `Authorization` header.
+- Store this token and pass in all subsequent requests in the `Authorization` header.
 - If the realm requires additional authentication steps from you (MFA),
   you will see the required authentication step name in the response body `nextAuthenticationStep`. Render this step form and again submit to the same
   authentication endpoint.
