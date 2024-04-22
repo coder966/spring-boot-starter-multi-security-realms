@@ -14,6 +14,7 @@ import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescripto
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @Slf4j
@@ -54,12 +55,17 @@ public class SecurityRealmAuthenticationFilter {
         }
 
 
-        if(matchesPublicApi(request) && auth == null){
-            // don't use AnonymousAuthenticationToken because it will be rejected down via AuthorizationFilter
-            setAuthenticationInContext(new SecurityRealmAnonymousAuthentication());
-            // don't return, we need to continue the filter chain on order to reach the servlet controller
+        if(matchesPublicApi(request)){
+            if(auth == null || !auth.isAuthenticated()){
+                // don't use AnonymousAuthenticationToken because it will be rejected down via AuthorizationFilter
+                setAuthenticationInContext(new SecurityRealmAnonymousAuthentication());
+            }
+
+            // don't return true; as we need to continue the filter chain on order to reach the servlet controller
+            return false;
         }
 
+        // anything else
         return false;
     }
 
@@ -131,7 +137,9 @@ public class SecurityRealmAuthenticationFilter {
     }
 
     private void setAuthenticationInContext(Authentication authentication) {
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        SecurityContext newContext = SecurityContextHolder.createEmptyContext();
+        newContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(newContext);
     }
 
     @SneakyThrows

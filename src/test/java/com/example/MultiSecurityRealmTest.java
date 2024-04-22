@@ -304,6 +304,62 @@ public class MultiSecurityRealmTest {
             .readBody();
     }
 
+    @Test
+    public void authenticatedUserCanAccessPublicApi() {
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "authenticatedUserCanAccessPublicApi");
+
+        // partially authenticated
+        LoginResponse loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
+            .exchange(LoginResponse.class)
+            .expectStatus(200)
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
+            .readBody();
+
+        // public api from the same realm
+        client
+            .request(HttpMethod.GET, "/my-first-open-api")
+            .header("Authorization", loginResponse.getToken())
+            .exchange(String.class)
+            .expectStatus(200)
+            .expectBody("Admin User Open API");
+
+        // public api from the another realm
+        client
+            .request(HttpMethod.GET, "/my-forth-open-api")
+            .header("Authorization", loginResponse.getToken())
+            .exchange(String.class)
+            .expectStatus(200)
+            .expectBody("Normal User Open API");
+
+        // fully authenticated
+        loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .header("Authorization", loginResponse.getToken())
+            .body(new AuthOtpStepRequest("1234"))
+            .exchange(LoginResponse.class)
+            .expectStatus(200)
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
+            .readBody();
+
+        // public api from the same realm
+        client
+            .request(HttpMethod.GET, "/my-first-open-api")
+            .header("Authorization", loginResponse.getToken())
+            .exchange(String.class)
+            .expectStatus(200)
+            .expectBody("Admin User Open API");
+
+        // public api from the another realm
+        client
+            .request(HttpMethod.GET, "/my-forth-open-api")
+            .header("Authorization", loginResponse.getToken())
+            .exchange(String.class)
+            .expectStatus(200)
+            .expectBody("Normal User Open API");
+    }
+
     @Setter
     @Getter
     @ToString
