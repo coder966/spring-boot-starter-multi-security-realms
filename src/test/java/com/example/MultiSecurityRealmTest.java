@@ -26,7 +26,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testLoginWithUserFromDifferentRealm() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "testLoginWithUserFromDifferentRealm");
 
         client
             .request(HttpMethod.POST, "/normal-user/auth")
@@ -45,7 +45,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testAuthenticationFailure() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "testAuthenticationFailure");
 
         LoginResponse loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")
@@ -66,7 +66,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testAuthenticationSuccess() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "testAuthenticationSuccess");
 
         LoginResponse loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")
@@ -87,7 +87,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testAccessingProtectedApiFromAnotherRealm() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "testAccessingProtectedApiFromAnotherRealm");
 
         client
             .request(HttpMethod.GET, "/admin-user/my-name")
@@ -127,7 +127,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testAccessingOpenApis() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "testAccessingOpenApis");
 
         client
             .request(HttpMethod.GET, "/my-third-open-api")
@@ -156,7 +156,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testAccessingProtectedApisWithAuthenticationNotFinishedAllSteps() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "testAccessingProtectedApisWithAuthenticationNotFinishedAllSteps");
 
         client
             .request(HttpMethod.GET, "/admin-user/my-name")
@@ -208,7 +208,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void testTransactionalSupport() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "testTransactionalSupport");
 
         // Login to read the current counter
 
@@ -275,7 +275,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void loginAgainAfterCompleteSuccessfulLogin() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port);
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "loginAgainAfterCompleteSuccessfulLogin");
 
         LoginResponse loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")

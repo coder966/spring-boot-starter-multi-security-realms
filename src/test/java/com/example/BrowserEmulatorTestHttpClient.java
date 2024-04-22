@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -14,15 +15,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+@Slf4j
 public class BrowserEmulatorTestHttpClient {
 
+    final String clientId;
     final int port;
     final TestRestTemplate testRestTemplate = new TestRestTemplate();
     final List<String> cookies = new ArrayList<>();
 
 
-    public BrowserEmulatorTestHttpClient(int port) {
+    public BrowserEmulatorTestHttpClient(int port, String clientId) {
         this.port = port;
+        this.clientId = clientId;
 
         // simulate visiting the homepage
         // essential to obtain the CSRF token
@@ -54,6 +58,7 @@ public class BrowserEmulatorTestHttpClient {
         public <T> ResponseSpec<T> exchange(Class<T> clazz) {
             LinkedMultiValueMap<String, String> mergedHeaders = new LinkedMultiValueMap<>();
             mergedHeaders.addAll(headers);
+            mergedHeaders.add("X-Client-Id", client.clientId);
 
             client.cookies.forEach(header -> {
                 mergedHeaders.add("Cookie", header);
@@ -73,6 +78,7 @@ public class BrowserEmulatorTestHttpClient {
 
             List<String> cookiesHeader = response.getHeaders().get("Set-Cookie");
             if(cookiesHeader != null){
+                log.info("Client {} Received Cookies: {}", client.clientId, cookiesHeader);
                 client.cookies.addAll(cookiesHeader);
             }
 
