@@ -137,10 +137,29 @@ public class SecurityRealmAuthenticationFilter {
     }
 
     private void setAuthenticationInContext(Authentication authentication) {
+        if(doesContextHoldStrongerAuthentication(authentication)){
+            return;
+        }
+
         SecurityContext newContext = SecurityContextHolder.createEmptyContext();
         newContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(newContext);
     }
+
+    private boolean doesContextHoldStrongerAuthentication(Authentication newAuth) {
+        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+
+        if(currentAuth == null){
+            return false;
+        }
+
+        if(!currentAuth.isAuthenticated() && newAuth.isAuthenticated()){
+            return false;
+        }
+
+        return true;
+    }
+
 
     @SneakyThrows
     private void writeAuthenticationResponse(AuthenticationResponse responseBody, HttpServletResponse response) {
