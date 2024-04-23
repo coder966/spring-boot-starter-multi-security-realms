@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.0] - 2024-04-23
+
+- Added `name` and `authorities` to the authentication response.
+- Disable cookies by default.
+- Fix partially authenticated users cannot access public apis from the same realm using their authentication token.
+- Fix race condition where the order of realms discovery could lead to unstable behaviour.
+- Improve tests.
+- Improve docs.
+
 ## [0.0.9] - 2024-03-16
 
 - Handle the scenario when the user attempts to authenticate while already fully authenticated.
