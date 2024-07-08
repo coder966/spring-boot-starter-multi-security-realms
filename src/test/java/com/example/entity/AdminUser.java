@@ -1,4 +1,4 @@
-package com.example.spring.multisecurityrealms.entity;
+package com.example.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,9 +33,9 @@ public class AdminUser {
     private int loginCounter = 0;
 
     @OneToMany(mappedBy = "adminUser", fetch = FetchType.LAZY)
-    private Set<com.example.spring.multisecurityrealms.entity.Badge> badges = new HashSet<>();
+    private Set<com.example.entity.Badge> badges = new HashSet<>();
 
-    public AdminUser(String name, String username, String password, Set<com.example.spring.multisecurityrealms.entity.Badge> badges) {
+    public AdminUser(String name, String username, String password, Set<com.example.entity.Badge> badges) {
         this.name = name;
         this.username = username;
         this.password = password;

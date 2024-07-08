@@ -1,8 +1,8 @@
 package com.example;
 
-import com.example.spring.multisecurityrealms.dto.AuthOtpStepRequest;
-import com.example.spring.multisecurityrealms.dto.AuthUsernameAndPasswordStepRequest;
-import com.example.spring.multisecurityrealms.other.Constants;
+import com.example.dto.AuthOtpStepRequest;
+import com.example.dto.AuthUsernameAndPasswordStepRequest;
+import com.example.other.Constants;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.example.spring.multisecurityrealms.config;
+package com.example.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

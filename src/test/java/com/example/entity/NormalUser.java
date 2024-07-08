@@ -1,4 +1,4 @@
-package com.example.spring.multisecurityrealms.entity;
+package com.example.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

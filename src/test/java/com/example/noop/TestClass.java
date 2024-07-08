@@ -1,4 +1,4 @@
-package com.example.spring.multisecurityrealms.noop;
+package com.example.noop;
 
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,6 +1,6 @@
-package com.example.spring.multisecurityrealms.repo;
+package com.example.repo;
 
-import com.example.spring.multisecurityrealms.entity.NormalUser;
+import com.example.entity.NormalUser;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

@@ -1,4 +1,4 @@
-package com.example.spring.multisecurityrealms.noop;
+package com.example.noop;
 
 /**
  * We want to test for when the SecurityRealm implements an interface.

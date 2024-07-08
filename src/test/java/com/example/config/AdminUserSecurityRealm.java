@@ -1,10 +1,10 @@
-package com.example.spring.multisecurityrealms.config;
+package com.example.config;
 
-import com.example.spring.multisecurityrealms.dto.AuthOtpStepRequest;
-import com.example.spring.multisecurityrealms.dto.AuthUsernameAndPasswordStepRequest;
-import com.example.spring.multisecurityrealms.entity.AdminUser;
-import com.example.spring.multisecurityrealms.other.Constants;
-import com.example.spring.multisecurityrealms.repo.AdminUserRepo;
+import com.example.dto.AuthOtpStepRequest;
+import com.example.dto.AuthUsernameAndPasswordStepRequest;
+import com.example.entity.AdminUser;
+import com.example.other.Constants;
+import com.example.repo.AdminUserRepo;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;

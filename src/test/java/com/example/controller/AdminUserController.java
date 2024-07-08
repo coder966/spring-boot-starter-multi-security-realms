@@ -1,7 +1,7 @@
-package com.example.spring.multisecurityrealms.controller;
+package com.example.controller;
 
-import com.example.spring.multisecurityrealms.entity.AdminUser;
-import com.example.spring.multisecurityrealms.repo.AdminUserRepo;
+import com.example.entity.AdminUser;
+import com.example.repo.AdminUserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;

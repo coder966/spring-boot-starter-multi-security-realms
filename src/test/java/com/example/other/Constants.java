@@ -1,4 +1,4 @@
-package com.example.spring.multisecurityrealms.other;
+package com.example.other;
 
 public class Constants {
 

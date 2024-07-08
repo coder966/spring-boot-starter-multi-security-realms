@@ -1,13 +1,13 @@
-package com.example.spring.multisecurityrealms.config;
+package com.example.config;
 
-import com.example.spring.multisecurityrealms.dto.AuthOtpStepRequest;
-import com.example.spring.multisecurityrealms.dto.AuthUsernameAndPasswordStepRequest;
-import com.example.spring.multisecurityrealms.entity.NormalUser;
-import com.example.spring.multisecurityrealms.noop.TestClass;
-import com.example.spring.multisecurityrealms.noop.TestInterface;
-import com.example.spring.multisecurityrealms.other.Constants.ErrorCodes;
-import com.example.spring.multisecurityrealms.other.Constants.StepNames;
-import com.example.spring.multisecurityrealms.repo.NormalUserRepo;
+import com.example.dto.AuthOtpStepRequest;
+import com.example.dto.AuthUsernameAndPasswordStepRequest;
+import com.example.entity.NormalUser;
+import com.example.noop.TestClass;
+import com.example.noop.TestInterface;
+import com.example.other.Constants.ErrorCodes;
+import com.example.other.Constants.StepNames;
+import com.example.repo.NormalUserRepo;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;

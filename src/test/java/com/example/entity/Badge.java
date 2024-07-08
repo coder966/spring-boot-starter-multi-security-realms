@@ -1,4 +1,4 @@
-package com.example.spring.multisecurityrealms.entity;
+package com.example.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +22,7 @@ public class Badge {
     private String name;
 
     @ManyToOne
-    private com.example.spring.multisecurityrealms.entity.AdminUser adminUser;
+    private com.example.entity.AdminUser adminUser;
 
     public Badge(String name) {
         this.name = name;

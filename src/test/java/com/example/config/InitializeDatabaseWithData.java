@@ -1,11 +1,11 @@
-package com.example.spring.multisecurityrealms.config;
+package com.example.config;
 
-import com.example.spring.multisecurityrealms.entity.AdminUser;
-import com.example.spring.multisecurityrealms.entity.Badge;
-import com.example.spring.multisecurityrealms.entity.NormalUser;
-import com.example.spring.multisecurityrealms.repo.AdminUserRepo;
-import com.example.spring.multisecurityrealms.repo.BadgeRepo;
-import com.example.spring.multisecurityrealms.repo.NormalUserRepo;
+import com.example.entity.AdminUser;
+import com.example.entity.Badge;
+import com.example.entity.NormalUser;
+import com.example.repo.AdminUserRepo;
+import com.example.repo.BadgeRepo;
+import com.example.repo.NormalUserRepo;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

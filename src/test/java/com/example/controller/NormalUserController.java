@@ -1,4 +1,4 @@
-package com.example.spring.multisecurityrealms.controller;
+package com.example.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
