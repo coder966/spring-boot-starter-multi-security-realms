@@ -105,7 +105,8 @@ public class SecurityRealmScanner {
             
             if(!method.getReturnType().isAssignableFrom(SecurityRealmAuthentication.class)){
                 throw new IllegalArgumentException("Invalid return type (" + method.getReturnType().getCanonicalName() + ") "
-                    + "of AuthenticationStep (" + stepName + ") for SecurityRealm (" + realmName + ")");
+                    + "of AuthenticationStep (" + stepName + ") for SecurityRealm (" + realmName + "). "
+                    + "It should be SecurityRealmAuthentication.");
             }
 
             Parameter[] parameters = method.getParameters();
