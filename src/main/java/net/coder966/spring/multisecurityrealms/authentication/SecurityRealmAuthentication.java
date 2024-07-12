@@ -19,7 +19,10 @@ public class SecurityRealmAuthentication implements Authentication {
     private final Set<? extends GrantedAuthority> authorities;
     private final String nextAuthenticationStep;
 
-    @Setter
+    @Setter // the setter is for internal use only
+    private String realm;
+
+    @Setter // the setter is for internal use only
     private String error;
 
 
@@ -38,6 +41,7 @@ public class SecurityRealmAuthentication implements Authentication {
         this.authorities = authorities == null ? new HashSet<>() : authorities;
         this.isAuthenticated = nextAuthenticationStep == null;
         this.nextAuthenticationStep = nextAuthenticationStep;
+        this.realm = SecurityRealmContext.getDescriptor() == null ? null : SecurityRealmContext.getDescriptor().getName();
     }
 
     @Override
@@ -88,11 +92,10 @@ public class SecurityRealmAuthentication implements Authentication {
         return this.getPrincipal().hashCode();
     }
 
-    public String getRealm() {
-        return SecurityRealmContext.getDescriptor().getName();
-    }
-
     public String getToken() {
+        if(SecurityRealmContext.getDescriptor() == null){
+            return null;
+        }
         return SecurityRealmContext.getDescriptor().getAuthenticationTokenConverter().createToken(this);
     }
 }
