@@ -1,20 +1,24 @@
 package net.coder966.spring.multisecurityrealms.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAnonymousAuthentication;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
-import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationException;
-import net.coder966.spring.multisecurityrealms.reflection.AuthenticationStepInvoker;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 @Slf4j
 public class SecurityRealmAuthenticationFilter {
@@ -69,6 +73,7 @@ public class SecurityRealmAuthenticationFilter {
         return false;
     }
 
+    @SneakyThrows
     private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) {
         if(auth != null && auth.isAuthenticated()){
             SecurityRealmAuthentication resultAuth = new SecurityRealmAuthentication(auth.getName(), auth.getAuthorities());
@@ -78,27 +83,27 @@ public class SecurityRealmAuthenticationFilter {
             return;
         }
 
-        try{
-            AuthenticationStepInvoker stepInvoker = descriptor.getAuthenticationStepInvokers().get(SecurityRealmContext.getCurrentStep());
-            SecurityRealmAuthentication resultAuth = stepInvoker.invoke(request, response, auth);
 
-            if(resultAuth == null){
-                throw new IllegalStateException("You should not return a null SecurityRealmAuthentication. "
-                    + "To indicate authentication failure, throw exceptions of type SecurityRealmAuthenticationException.");
+        HttpServletRequestWrapper wrapped = new HttpServletRequestWrapper(request) {
+            @Override
+            public String getParameter(String name) {
+                return super.getParameter(name);
             }
 
-            writeAuthenticationResponse(resultAuth, response);
-        }catch(SecurityRealmAuthenticationException e){
-            SecurityRealmAuthentication resultAuth = new SecurityRealmAuthentication(
-                auth == null ? null : auth.getName(),
-                auth == null ? null : auth.getAuthorities(),
-                auth == null ? SecurityRealmContext.getCurrentStep() : auth.getNextAuthenticationStep()
-            );
-            resultAuth.setError(e.getMessage());
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            writeAuthenticationResponse(resultAuth, response);
-        }
+            @Override
+            public Map<String, String[]> getParameterMap() {
+                // DON'T copy old params, or at lease copy old except the ones that start with "AuthenticationStep-"
+                // not to allow the client to jump to incorrect/future step forcefully.
+                Map<String, String[]> params = new HashMap<>();
+                params.put("AuthenticationStep-" + SecurityRealmContext.getCurrentStep(), new String[]{UUID.randomUUID().toString()});
+                return params;
+            }
+        };
 
+        WebApplicationContextUtils
+            .findWebApplicationContext(request.getServletContext())
+            .getBean(HttpServlet.class)
+            .service(wrapped, response);
     }
 
     private SecurityRealmAuthentication extractAuthenticationFromRequest(HttpServletRequest request) {

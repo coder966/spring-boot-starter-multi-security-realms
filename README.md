@@ -104,7 +104,9 @@ public class NormalUserSecurityRealm {
 
     @Transactional
     @AuthenticationStep(StepNames.OTP)
-    public SecurityRealmAuthentication otpAuthenticationStep(@RequestBody AuthOtpStepRequest request, SecurityRealmAuthentication previousStepAuth) {
+    public SecurityRealmAuthentication otpAuthenticationStep(@RequestBody AuthOtpStepRequest request) {
+        SecurityRealmAuthentication previousStepAuth = (SecurityRealmAuthentication) SecurityContextHolder.getContext().getAuthentication();
+
         String otp = request.getOtp();
 
         NormalUser user = normalUserRepo.findByUsername(previousStepAuth.getName()).get();
@@ -166,7 +168,9 @@ public class AdminUserSecurityRealm {
 
     @Transactional
     @AuthenticationStep(StepNames.OTP)
-    public SecurityRealmAuthentication otpAuthenticationStep(@RequestBody AuthOtpStepRequest request, SecurityRealmAuthentication previousStepAuth) {
+    public SecurityRealmAuthentication otpAuthenticationStep(@RequestBody AuthOtpStepRequest request) {
+        SecurityRealmAuthentication previousStepAuth = (SecurityRealmAuthentication) SecurityContextHolder.getContext().getAuthentication();
+
         String otp = request.getOtp();
 
         AdminUser user = adminUserRepo.findByUsername(previousStepAuth.getName()).get();

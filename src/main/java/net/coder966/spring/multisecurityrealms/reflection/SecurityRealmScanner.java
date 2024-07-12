@@ -1,36 +1,31 @@
 package net.coder966.spring.multisecurityrealms.reflection;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.annotation.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 public class SecurityRealmScanner {
 
     private final ApplicationContext context;
-    private final ObjectMapper objectMapper;
     private final AuthenticationTokenConverter authenticationTokenConverter;
 
     public SecurityRealmScanner(ApplicationContext context) {
         this.context = context;
-        this.objectMapper = context.getBean(ObjectMapper.class);
         this.authenticationTokenConverter = context.getBean(AuthenticationTokenConverter.class);
     }
 
@@ -49,7 +44,7 @@ public class SecurityRealmScanner {
             String firstStepName = realmAnnotation.firstStepName();
             String[] publicApis = realmAnnotation.publicApis();
 
-            Map<String, AuthenticationStepInvoker> authenticationStepInvokers = buildAuthenticationStepInvokers(name, bean);
+            registerAuthenticationStepHandlers(name, authenticationEndpoint, bean);
 
             if(name == null || name.trim().length() != name.length()){
                 throw new IllegalArgumentException("Invalid SecurityRealm name (" + name + ")");
@@ -63,10 +58,6 @@ public class SecurityRealmScanner {
                 authenticationEndpointRequestMatcher = new AntPathRequestMatcher(authenticationEndpoint);
             }catch(Exception e){
                 throw new IllegalArgumentException("Invalid authenticationEndpoint (" + authenticationEndpoint + ") for SecurityRealm (" + name + ")");
-            }
-
-            if(firstStepName == null || !authenticationStepInvokers.containsKey(firstStepName)){
-                throw new IllegalArgumentException("Invalid firstStepName (" + firstStepName + ") for SecurityRealm (" + name + ")");
             }
 
             List<RequestMatcher> publicApisRequestMatchers = new ArrayList<>(publicApis.length);
@@ -83,7 +74,6 @@ public class SecurityRealmScanner {
                 authenticationEndpointRequestMatcher,
                 firstStepName,
                 publicApisRequestMatchers,
-                authenticationStepInvokers,
                 authenticationTokenConverter
             );
 
@@ -93,8 +83,8 @@ public class SecurityRealmScanner {
         return descriptors.values();
     }
 
-    private Map<String, AuthenticationStepInvoker> buildAuthenticationStepInvokers(String realmName, Object realmBean) {
-        Map<String, AuthenticationStepInvoker> stepInvoker = new HashMap<>();
+    private void registerAuthenticationStepHandlers(String realmName, String authenticationEndpoint, Object realmBean) {
+        Set<String> stepNames = new HashSet<>();
 
         for(Method method : realmBean.getClass().getSuperclass().getDeclaredMethods()){
             AuthenticationStep stepAnnotation = method.getAnnotation(AuthenticationStep.class);
@@ -106,53 +96,27 @@ public class SecurityRealmScanner {
             if(stepName == null || stepName.trim().length() != stepName.length() || stepName.isBlank()){
                 throw new IllegalArgumentException("Invalid AuthenticationStep name (" + stepName + ") for SecurityRealm (" + realmName + ")");
             }
-            
+
+            if(stepNames.contains(stepName)){
+                throw new IllegalArgumentException(
+                    "Found more than one AuthenticationStep with the same name (" + stepName + ") for SecurityRealm (" + realmName + ")");
+            }
+
             if(!method.getReturnType().isAssignableFrom(SecurityRealmAuthentication.class)){
                 throw new IllegalArgumentException("Invalid return type (" + method.getReturnType().getCanonicalName() + ") "
                     + "of AuthenticationStep (" + stepName + ") for SecurityRealm (" + realmName + "). "
                     + "It should be SecurityRealmAuthentication.");
             }
 
-            Parameter[] parameters = method.getParameters();
-            AuthenticationStepParameterDetails[] parameterDetails = new AuthenticationStepParameterDetails[parameters.length];
+            stepNames.add(stepName);
 
-            for(int i = 0; i < parameters.length; i++){
-                Parameter parameter = parameters[i];
-
-                if(ServletRequest.class.isAssignableFrom(parameter.getType())){
-                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.REQUEST);
-                }else if(ServletResponse.class.isAssignableFrom(parameter.getType())){
-                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.RESPONSE);
-                }else if(Authentication.class.isAssignableFrom(parameter.getType())){
-                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.AUTHENTICATION);
-                }else if(parameter.getAnnotation(RequestBody.class) != null){
-                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.BODY)
-                        .withDetails("class", parameter.getType());
-                }else if(parameter.getAnnotation(RequestHeader.class) != null){
-                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.HEADER)
-                        .withDetails("class", parameter.getType())
-                        .withDetails("name", parameter.getAnnotation(RequestHeader.class).value());
-                }else if(parameter.getAnnotation(RequestParam.class) != null){
-                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.REQUEST_PARAM)
-                        .withDetails("class", parameter.getType())
-                        .withDetails("name", parameter.getAnnotation(RequestParam.class).value());
-                }else{
-                    parameterDetails[i] = new AuthenticationStepParameterDetails(AuthenticationStepParameterType.UNKNOWN);
-                }
-
-            }
-
-
-            // each step name should have a config to call
-            AuthenticationStepInvoker authenticationStepInvoker = new AuthenticationStepInvoker(
-                objectMapper,
-                realmBean,
-                method,
-                parameterDetails
-            );
-            stepInvoker.put(stepName, authenticationStepInvoker);
+            RequestMappingInfo mappingInfo = RequestMappingInfo
+                .paths(authenticationEndpoint)
+                .methods(RequestMethod.POST)
+                .params("AuthenticationStep-" + stepName)
+                .build();
+            RequestMappingHandlerMapping requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
+            requestMappingHandlerMapping.registerMapping(mappingInfo, realmBean, method);
         }
-
-        return stepInvoker;
     }
 }

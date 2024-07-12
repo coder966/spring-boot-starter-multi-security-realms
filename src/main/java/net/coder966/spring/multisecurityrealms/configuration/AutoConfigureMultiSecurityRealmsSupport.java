@@ -2,6 +2,7 @@ package net.coder966.spring.multisecurityrealms.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.coder966.spring.multisecurityrealms.advice.SecurityRealmControllerAdvice;
 import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
 import net.coder966.spring.multisecurityrealms.expression.PermitRealmMethodSecurityExpressionHandler;
 import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthenticationFilter;
@@ -34,6 +35,12 @@ public class AutoConfigureMultiSecurityRealmsSupport {
     public AuthenticationTokenConverter defaultAuthenticationTokenConverter(SecurityRealmConfigurationProperties properties) {
         return new AuthenticationTokenConverter(properties);
     }
+
+    @Bean
+    public SecurityRealmControllerAdvice defaultSecurityRealmControllerAdvice() {
+        return new SecurityRealmControllerAdvice();
+    }
+
 
     @Bean
     public SecurityRealmScanner defaultSecurityRealmScanner(ApplicationContext context) {
