@@ -43,12 +43,10 @@ public class AutoConfigureMultiSecurityRealmsSupport {
     @Bean
     public MultiSecurityRealmAuthenticationFilter defaultMultiSecurityRealmAuthenticationFilter(
         SecurityRealmScanner securityRealmScanner,
-        AuthenticationTokenConverter authenticationTokenConverter,
         ObjectMapper objectMapper
     ) {
         return new MultiSecurityRealmAuthenticationFilter(
             securityRealmScanner,
-            authenticationTokenConverter,
             objectMapper
         );
     }

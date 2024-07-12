@@ -13,6 +13,7 @@ import java.util.Map;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.annotation.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
+import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -25,10 +26,12 @@ public class SecurityRealmScanner {
 
     private final ApplicationContext context;
     private final ObjectMapper objectMapper;
+    private final AuthenticationTokenConverter authenticationTokenConverter;
 
     public SecurityRealmScanner(ApplicationContext context) {
         this.context = context;
         this.objectMapper = context.getBean(ObjectMapper.class);
+        this.authenticationTokenConverter = context.getBean(AuthenticationTokenConverter.class);
     }
 
     public Collection<SecurityRealmDescriptor> scan() {
@@ -80,7 +83,8 @@ public class SecurityRealmScanner {
                 authenticationEndpointRequestMatcher,
                 firstStepName,
                 publicApisRequestMatchers,
-                authenticationStepInvokers
+                authenticationStepInvokers,
+                authenticationTokenConverter
             );
 
             descriptors.put(name, descriptor);

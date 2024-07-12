@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmScanner;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,14 +19,13 @@ public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter
 
     public MultiSecurityRealmAuthenticationFilter(
         SecurityRealmScanner scanner,
-        AuthenticationTokenConverter authenticationTokenConverter,
         ObjectMapper objectMapper
     ) {
 
         Collection<SecurityRealmDescriptor> securityRealmDescriptors = scanner.scan();
 
         securityRealmDescriptors.forEach(realm -> {
-            filters.add(new SecurityRealmAuthenticationFilter(realm, authenticationTokenConverter, objectMapper));
+            filters.add(new SecurityRealmAuthenticationFilter(realm, objectMapper));
         });
     }
 

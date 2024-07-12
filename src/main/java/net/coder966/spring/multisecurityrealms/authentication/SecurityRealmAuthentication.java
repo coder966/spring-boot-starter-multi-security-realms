@@ -5,36 +5,33 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-@Setter
 @Getter
 @JsonIgnoreProperties({"authenticated", "credentials", "details", "principal"})
 public class SecurityRealmAuthentication implements Authentication {
 
     private boolean isAuthenticated;
 
-    private String realm;
-    private String name;
-    private Set<? extends GrantedAuthority> authorities;
-    private String nextAuthenticationStep;
-    private String token;
+    private final String name;
+    private final Set<? extends GrantedAuthority> authorities;
+    private final String nextAuthenticationStep;
+
+    @Setter
     private String error;
 
 
     /**
-     * USe this when the user is fully authenticated.
+     * Use this when the user is fully authenticated.
      */
     public SecurityRealmAuthentication(String name, Set<? extends GrantedAuthority> authorities) {
-        this.name = name;
-        this.authorities = authorities == null ? new HashSet<>() : authorities;
-        this.isAuthenticated = true;
-        this.nextAuthenticationStep = null;
+        this(name, authorities, null);
     }
 
     /**
-     * USe this when the user is not fully authenticated and needs to proceed to the another auth step.
+     * Use this when the user is not fully authenticated and needs to proceed to the another auth step.
      */
     public SecurityRealmAuthentication(String name, Set<? extends GrantedAuthority> authorities, String nextAuthenticationStep) {
         this.name = name;
@@ -60,7 +57,7 @@ public class SecurityRealmAuthentication implements Authentication {
 
     @Override
     public Object getPrincipal() {
-        return realm + ":" + name;
+        return getRealm() + ":" + name;
     }
 
     @Override
@@ -89,5 +86,13 @@ public class SecurityRealmAuthentication implements Authentication {
     @Override
     public int hashCode() {
         return this.getPrincipal().hashCode();
+    }
+
+    public String getRealm() {
+        return SecurityRealmContext.getDescriptor().getName();
+    }
+
+    public String getToken() {
+        return SecurityRealmContext.getDescriptor().getAuthenticationTokenConverter().createToken(this);
     }
 }

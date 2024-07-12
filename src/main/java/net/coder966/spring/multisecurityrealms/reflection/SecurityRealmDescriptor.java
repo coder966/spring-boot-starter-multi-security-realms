@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Getter
@@ -15,4 +16,5 @@ public class SecurityRealmDescriptor {
     private final String firstStepName;
     private final List<RequestMatcher> publicApisRequestMatchers;
     private final Map<String, AuthenticationStepInvoker> authenticationStepInvokers;
+    private final AuthenticationTokenConverter authenticationTokenConverter;
 }

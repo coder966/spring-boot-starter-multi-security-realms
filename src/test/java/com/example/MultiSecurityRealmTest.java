@@ -33,14 +33,14 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(LoginResponse.class)
             .expectStatus(401)
-            .expectBody(new LoginResponse("NORMAL_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
+            .expectBody(new LoginResponse("NORMAL_USER", "ANY", Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
 
         client
             .request(HttpMethod.POST, "/admin-user/auth")
             .body(new AuthUsernameAndPasswordStepRequest("mohammed", "mpass"))
             .exchange(LoginResponse.class)
             .expectStatus(401)
-            .expectBody(new LoginResponse("ADMIN_USER", null, Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", Constants.StepNames.USERNAME_AND_PASSWORD, Constants.ErrorCodes.BAD_CREDENTIALS));
     }
 
     @Test
