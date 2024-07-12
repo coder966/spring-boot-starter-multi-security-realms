@@ -8,12 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAnonymousAuthentication;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
-import net.coder966.spring.multisecurityrealms.dto.AuthenticationResponse;
+import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationException;
 import net.coder966.spring.multisecurityrealms.reflection.AuthenticationStepInvoker;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -70,16 +69,17 @@ public class SecurityRealmAuthenticationFilter {
     }
 
     private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) {
-        AuthenticationResponse responseBody = new AuthenticationResponse();
-        responseBody.setRealm(descriptor.getName());
-        responseBody.setName(auth == null ? null : auth.getName());
-
         if(auth != null && auth.isAuthenticated()){
+            SecurityRealmAuthentication resultAuth = new SecurityRealmAuthentication(null, null);
+            resultAuth.setRealm(descriptor.getName());
+            resultAuth.setName(auth.getName());
+            resultAuth.setToken(extractTokenFromRequest(request));
+            resultAuth.setError("Already fully authenticated");
             response.setStatus(HttpStatus.BAD_REQUEST.value());
-            responseBody.setError("Already fully authenticated");
-            writeAuthenticationResponse(responseBody, response);
+            writeAuthenticationResponse(resultAuth, response);
             return;
         }
+
         String step = auth == null ? descriptor.getFirstStepName() : auth.getNextAuthenticationStep();
 
         try{
@@ -88,26 +88,22 @@ public class SecurityRealmAuthenticationFilter {
 
             if(resultAuth == null){
                 throw new IllegalStateException("You should not return a null SecurityRealmAuthentication. "
-                    + "To indicate authentication failure, throw exceptions of type AuthenticationException.");
+                    + "To indicate authentication failure, throw exceptions of type SecurityRealmAuthenticationException.");
             }
 
-            resultAuth.setRealmName(descriptor.getName());
-
-            responseBody.setName(resultAuth.getName());
-            responseBody.setToken(authenticationTokenConverter.createToken(resultAuth));
-            responseBody.setNextAuthenticationStep(resultAuth.getNextAuthenticationStep());
-
-            if(resultAuth.getNextAuthenticationStep() == null){
-                responseBody.setAuthorities(resultAuth.getAuthorities());
-            }
-        }catch(AuthenticationException e){
-            responseBody.setToken(extractTokenFromRequest(request));
-            responseBody.setNextAuthenticationStep(step);
-            responseBody.setError(e.getMessage());
+            resultAuth.setRealm(descriptor.getName());
+            resultAuth.setToken(authenticationTokenConverter.createToken(resultAuth));
+            writeAuthenticationResponse(resultAuth, response);
+        }catch(SecurityRealmAuthenticationException e){
+            SecurityRealmAuthentication resultAuth = new SecurityRealmAuthentication(null, null);
+            resultAuth.setRealm(descriptor.getName());
+            resultAuth.setToken(extractTokenFromRequest(request));
+            resultAuth.setNextAuthenticationStep(step);
+            resultAuth.setError(e.getMessage());
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            writeAuthenticationResponse(resultAuth, response);
         }
 
-        writeAuthenticationResponse(responseBody, response);
     }
 
     private SecurityRealmAuthentication extractAuthenticationFromRequest(HttpServletRequest request) {
@@ -115,7 +111,7 @@ public class SecurityRealmAuthenticationFilter {
 
         if(authorization != null){
             SecurityRealmAuthentication authentication = authenticationTokenConverter.verifyToken(authorization);
-            if(authentication != null && authentication.getRealmName().equals(descriptor.getName())){
+            if(authentication != null && authentication.getRealm().equals(descriptor.getName())){
                 return authentication;
             }
         }
@@ -162,9 +158,9 @@ public class SecurityRealmAuthenticationFilter {
 
 
     @SneakyThrows
-    private void writeAuthenticationResponse(AuthenticationResponse responseBody, HttpServletResponse response) {
+    private void writeAuthenticationResponse(SecurityRealmAuthentication authentication, HttpServletResponse response) {
         response.setHeader("Content-Type", "application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+        response.getWriter().write(objectMapper.writeValueAsString(authentication));
         response.getWriter().close();
     }
 

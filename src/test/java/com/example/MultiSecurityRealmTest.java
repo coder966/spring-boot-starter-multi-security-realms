@@ -300,7 +300,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(LoginResponse.class)
             .expectStatus(400)
-            .expectBody(new LoginResponse("ADMIN_USER", null, null, "Already fully authenticated"))
+            .expectBody(new LoginResponse("ADMIN_USER", loginResponse.getToken(), null, "Already fully authenticated"))
             .readBody();
     }
 

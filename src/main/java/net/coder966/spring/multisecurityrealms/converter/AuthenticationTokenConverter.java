@@ -38,7 +38,7 @@ public class AuthenticationTokenConverter implements InitializingBean {
         return JWT
             .create()
             .withSubject(authentication.getName())
-            .withClaim("realm", authentication.getRealmName())
+            .withClaim("realm", authentication.getRealm())
             .withClaim("nextAuthenticationStep", authentication.getNextAuthenticationStep())
             .withClaim("authorities", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
             .withExpiresAt(Instant.now().plus(tokenExpirationDuration))
@@ -60,7 +60,7 @@ public class AuthenticationTokenConverter implements InitializingBean {
                 .collect(Collectors.toSet());
 
             SecurityRealmAuthentication authentication = new SecurityRealmAuthentication(username, authorities, nextAuthenticationStep);
-            authentication.setRealmName(realmName);
+            authentication.setRealm(realmName);
             return authentication;
         }catch(Exception e){
             return null;

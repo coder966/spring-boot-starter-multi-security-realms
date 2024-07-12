@@ -1,5 +1,6 @@
 package net.coder966.spring.multisecurityrealms.authentication;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
@@ -9,12 +10,18 @@ import org.springframework.security.core.GrantedAuthority;
 
 @Setter
 @Getter
+@JsonIgnoreProperties({"authenticated", "credentials", "details", "principal"})
 public class SecurityRealmAuthentication implements Authentication {
-    private String realmName;
+
+    private boolean isAuthenticated;
+
+    private String realm;
     private String name;
     private Set<? extends GrantedAuthority> authorities;
-    private boolean isAuthenticated;
     private String nextAuthenticationStep;
+    private String token;
+    private String error;
+
 
     /**
      * USe this when the user is fully authenticated.
@@ -53,7 +60,7 @@ public class SecurityRealmAuthentication implements Authentication {
 
     @Override
     public Object getPrincipal() {
-        return realmName + ":" + name;
+        return realm + ":" + name;
     }
 
     @Override
