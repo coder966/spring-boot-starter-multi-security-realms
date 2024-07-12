@@ -294,13 +294,14 @@ public class MultiSecurityRealmTest {
             .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
+        // already logged in, idempotent operation
         loginResponse = client
             .request(HttpMethod.POST, "/admin-user/auth")
             .header("Authorization", loginResponse.getToken())
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(LoginResponse.class)
-            .expectStatus(400)
-            .expectBody(new LoginResponse("ADMIN_USER", loginResponse.getToken(), null, "Already fully authenticated"))
+            .expectStatus(200)
+            .expectBody(new LoginResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
     }
 

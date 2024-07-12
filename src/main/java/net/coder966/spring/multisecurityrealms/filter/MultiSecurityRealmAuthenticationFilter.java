@@ -1,6 +1,5 @@
 package net.coder966.spring.multisecurityrealms.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,16 +17,9 @@ public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter
 
     private final Set<SecurityRealmAuthenticationFilter> filters = new HashSet<>();
 
-    public MultiSecurityRealmAuthenticationFilter(
-        SecurityRealmScanner scanner,
-        ObjectMapper objectMapper
-    ) {
-
+    public MultiSecurityRealmAuthenticationFilter(SecurityRealmScanner scanner) {
         Collection<SecurityRealmDescriptor> securityRealmDescriptors = scanner.scan();
-
-        securityRealmDescriptors.forEach(realm -> {
-            filters.add(new SecurityRealmAuthenticationFilter(realm, objectMapper));
-        });
+        securityRealmDescriptors.forEach(realm -> filters.add(new SecurityRealmAuthenticationFilter(realm)));
     }
 
     @Override

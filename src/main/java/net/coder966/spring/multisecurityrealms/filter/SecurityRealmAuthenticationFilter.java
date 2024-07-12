@@ -1,6 +1,5 @@
 package net.coder966.spring.multisecurityrealms.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
@@ -13,25 +12,21 @@ import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAnonymousAuthentication;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
+import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationAlreadyAuthenticatedException;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Slf4j
 public class SecurityRealmAuthenticationFilter {
 
     private final SecurityRealmDescriptor descriptor;
-    private final ObjectMapper objectMapper;
 
-    public SecurityRealmAuthenticationFilter(
-        SecurityRealmDescriptor descriptor,
-        ObjectMapper objectMapper
-    ) {
+    public SecurityRealmAuthenticationFilter(SecurityRealmDescriptor descriptor) {
         this.descriptor = descriptor;
-        this.objectMapper = objectMapper;
     }
 
     private boolean matchesLogin(HttpServletRequest request) {
@@ -76,11 +71,12 @@ public class SecurityRealmAuthenticationFilter {
     @SneakyThrows
     private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) {
         if(auth != null && auth.isAuthenticated()){
-            SecurityRealmAuthentication resultAuth = new SecurityRealmAuthentication(auth.getName(), auth.getAuthorities());
-            resultAuth.setError("Already fully authenticated");
-            response.setStatus(HttpStatus.BAD_REQUEST.value());
-            writeAuthenticationResponse(resultAuth, response);
-            return;
+//            throw new SecurityRealmAuthenticationAlreadyAuthenticatedException();
+            WebApplicationContextUtils
+                .findWebApplicationContext(request.getServletContext())
+                .getBeansOfType(HandlerExceptionResolver.class)
+                .values()
+                .forEach(resolver -> resolver.resolveException(request, response, null, new SecurityRealmAuthenticationAlreadyAuthenticatedException()));
         }
 
 
@@ -154,14 +150,6 @@ public class SecurityRealmAuthenticationFilter {
         }
 
         return true;
-    }
-
-
-    @SneakyThrows
-    private void writeAuthenticationResponse(SecurityRealmAuthentication authentication, HttpServletResponse response) {
-        response.setHeader("Content-Type", "application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(authentication));
-        response.getWriter().close();
     }
 
 }
