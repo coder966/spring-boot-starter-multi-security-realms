@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.1] - 2024-07-12
+
+- Internal enhancements.
+
 ## [0.1.0] - 2024-04-23
 
 - Added `name` and `authorities` to the authentication response.
