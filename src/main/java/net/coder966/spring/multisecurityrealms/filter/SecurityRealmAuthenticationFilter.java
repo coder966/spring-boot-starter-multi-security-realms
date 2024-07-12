@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -14,19 +15,23 @@ import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthe
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationAlreadyAuthenticatedException;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Slf4j
 public class SecurityRealmAuthenticationFilter {
 
     private final SecurityRealmDescriptor descriptor;
+    private final HttpServlet httpServlet;
+    private final Collection<HandlerExceptionResolver> exceptionResolvers;
 
-    public SecurityRealmAuthenticationFilter(SecurityRealmDescriptor descriptor) {
+    public SecurityRealmAuthenticationFilter(ApplicationContext context, SecurityRealmDescriptor descriptor) {
         this.descriptor = descriptor;
+        this.httpServlet = context.getBean(HttpServlet.class);
+        this.exceptionResolvers = context.getBeansOfType(HandlerExceptionResolver.class).values();
     }
 
     private boolean matchesLogin(HttpServletRequest request) {
@@ -71,11 +76,7 @@ public class SecurityRealmAuthenticationFilter {
     @SneakyThrows
     private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) {
         if(auth != null && auth.isAuthenticated()){
-//            throw new SecurityRealmAuthenticationAlreadyAuthenticatedException();
-            WebApplicationContextUtils
-                .findWebApplicationContext(request.getServletContext())
-                .getBeansOfType(HandlerExceptionResolver.class)
-                .values()
+            exceptionResolvers
                 .forEach(resolver -> resolver.resolveException(request, response, null, new SecurityRealmAuthenticationAlreadyAuthenticatedException()));
         }
 
@@ -96,10 +97,7 @@ public class SecurityRealmAuthenticationFilter {
             }
         };
 
-        WebApplicationContextUtils
-            .findWebApplicationContext(request.getServletContext())
-            .getBean(HttpServlet.class)
-            .service(wrapped, response);
+        httpServlet.service(wrapped, response);
     }
 
     private SecurityRealmAuthentication extractAuthenticationFromRequest(HttpServletRequest request) {

@@ -11,15 +11,16 @@ import java.util.Set;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmScanner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter {
 
     private final Set<SecurityRealmAuthenticationFilter> filters = new HashSet<>();
 
-    public MultiSecurityRealmAuthenticationFilter(SecurityRealmScanner scanner) {
+    public MultiSecurityRealmAuthenticationFilter(ApplicationContext context, SecurityRealmScanner scanner) {
         Collection<SecurityRealmDescriptor> securityRealmDescriptors = scanner.scan();
-        securityRealmDescriptors.forEach(realm -> filters.add(new SecurityRealmAuthenticationFilter(realm)));
+        securityRealmDescriptors.forEach(realm -> filters.add(new SecurityRealmAuthenticationFilter(context, realm)));
     }
 
     @Override

@@ -22,10 +22,12 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public class SecurityRealmScanner {
 
     private final ApplicationContext context;
+    private final RequestMappingHandlerMapping requestMappingHandlerMapping;
     private final AuthenticationTokenConverter authenticationTokenConverter;
 
     public SecurityRealmScanner(ApplicationContext context) {
         this.context = context;
+        this.requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
         this.authenticationTokenConverter = context.getBean(AuthenticationTokenConverter.class);
     }
 
@@ -115,7 +117,7 @@ public class SecurityRealmScanner {
                 .methods(RequestMethod.POST)
                 .params("AuthenticationStep-" + stepName)
                 .build();
-            RequestMappingHandlerMapping requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
+            
             requestMappingHandlerMapping.registerMapping(mappingInfo, realmBean, method);
         }
     }

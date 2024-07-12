@@ -46,8 +46,10 @@ public class AutoConfigureMultiSecurityRealmsSupport {
     }
 
     @Bean
-    public MultiSecurityRealmAuthenticationFilter defaultMultiSecurityRealmAuthenticationFilter(SecurityRealmScanner securityRealmScanner) {
-        return new MultiSecurityRealmAuthenticationFilter(securityRealmScanner);
+    public MultiSecurityRealmAuthenticationFilter defaultMultiSecurityRealmAuthenticationFilter(
+        ApplicationContext context, SecurityRealmScanner securityRealmScanner
+    ) {
+        return new MultiSecurityRealmAuthenticationFilter(context, securityRealmScanner);
     }
 
     @Bean
