@@ -361,6 +361,19 @@ public class MultiSecurityRealmTest {
             .expectBody("Normal User Open API");
     }
 
+    @Test
+    public void canAccessActuators() {
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "canAccessActuators");
+
+        String healthResponse = client
+            .request(HttpMethod.GET, "/actuator/health")
+            .exchange(String.class)
+            .expectStatus(200)
+            .readBody();
+
+        System.out.println(healthResponse);
+    }
+
     @Setter
     @Getter
     @ToString

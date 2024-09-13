@@ -22,13 +22,17 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public class SecurityRealmScanner {
 
     private final ApplicationContext context;
-    private final RequestMappingHandlerMapping requestMappingHandlerMapping;
     private final AuthenticationTokenConverter authenticationTokenConverter;
+    private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     public SecurityRealmScanner(ApplicationContext context) {
         this.context = context;
-        this.requestMappingHandlerMapping = context.getBean(RequestMappingHandlerMapping.class);
         this.authenticationTokenConverter = context.getBean(AuthenticationTokenConverter.class);
+
+        // there could be multiple beans of this type, for example, when you include spring-boot-starter-actuator
+        // We only need one handler to register authentication endpoints, we prefer to use the application "regular" handler
+        // which has order=0 See WebMvcConfigurationSupport from spring-webmvc.
+        this.requestMappingHandlerMapping = context.getBeansOfType(RequestMappingHandlerMapping.class).values().stream().findFirst().get();
     }
 
     public Collection<SecurityRealmDescriptor> scan() {

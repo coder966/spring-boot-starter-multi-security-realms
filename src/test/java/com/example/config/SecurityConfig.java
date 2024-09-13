@@ -22,7 +22,10 @@ public class SecurityConfig {
         throws Exception {
 
         http.addFilterBefore(multiSecurityRealmAuthenticationFilter, AnonymousAuthenticationFilter.class);
-        http.authorizeHttpRequests(configurer -> configurer.anyRequest().authenticated());
+        http.authorizeHttpRequests(configurer -> configurer
+            .requestMatchers("/actuator/health").permitAll()
+            .anyRequest().authenticated()
+        );
         http.csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
