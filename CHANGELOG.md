@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.2] - 2024-09-13
+
+- Fix application not starting when `spring-boot-starter-actuator` is present in the classpath.
+
 ## [0.1.1] - 2024-07-12
 
 - Internal enhancements.
