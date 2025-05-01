@@ -202,6 +202,42 @@ public class AdminUserSecurityRealm {
   authentication endpoint.
 - In any case, if there is an error in the authentication (for example, bad credentials), you will receive the error in the response body `error`.
 
+#### Sample Response (success)
+
+```json
+{
+    "name": "khalid",
+    "authorities": [],
+    "nextAuthenticationStep": "OTP",
+    "realm": "ADMIN_USER",
+    "error": null,
+    "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjoiT1RQIiwiYXV0aG9yaXRpZXMiOltdLCJleHAiOjE3NDYxMzcwMDN9.T-C2LO5DmawUXG6XuhyqTH9hxc8VIE4nF1u2_u2a_Xqw4SRbMpJ7Aq--AwcEA-jzSj6Si9_O1V21P-mkKU31FQ"
+}
+```
+
+```json
+{
+    "name": "khalid",
+    "authorities": [],
+    "nextAuthenticationStep": null,
+    "realm": "ADMIN_USER",
+    "error": null,
+    "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjpudWxsLCJhdXRob3JpdGllcyI6W10sImV4cCI6MTc0NjEzNzA3OX0.OYwacoHwO6iS-t3JXe0Fw0xKMIjBTypaasNJIghrdPW9RZMGzaghxCw1GYSz5p6E7c8dIubLKkvRf-QAhGIxVA"
+}
+```
+
+#### Sample Response (error)
+
+```json
+{
+    "name": null,
+    "authorities": [],
+    "nextAuthenticationStep": "USERNAME_AND_PASSWORD",
+    "realm": "ADMIN_USER",
+    "error": "BAD_CREDENTIALS",
+    "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOm51bGwsInJlYWxtIjoiQURNSU5fVVNFUiIsIm5leHRBdXRoZW50aWNhdGlvblN0ZXAiOiJVU0VSTkFNRV9BTkRfUEFTU1dPUkQiLCJhdXRob3JpdGllcyI6W10sImV4cCI6MTc0NjEzNDM4NX0.k-zw8IKbtrLXTg-fCkjbgL7mUUYap8sTMRnDYEth9rKGT0B95iTCI6cuMVbpRaalwnMOgfJPPoMNm0vPPjp6xQ"
+}
+```
 
 ### Realm Protected APIs
 
