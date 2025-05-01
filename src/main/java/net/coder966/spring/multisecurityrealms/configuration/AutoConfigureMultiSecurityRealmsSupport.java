@@ -2,7 +2,6 @@ package net.coder966.spring.multisecurityrealms.configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.advice.SecurityRealmControllerAdvice;
-import net.coder966.spring.multisecurityrealms.converter.SecurityRealmTokenCodec;
 import net.coder966.spring.multisecurityrealms.expression.PermitRealmMethodSecurityExpressionHandler;
 import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthenticationFilter;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmScanner;
@@ -10,6 +9,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -31,18 +31,13 @@ public class AutoConfigureMultiSecurityRealmsSupport {
     }
 
     @Bean
-    public SecurityRealmTokenCodec defaultSecurityRealmTokenCodec(SecurityRealmConfigurationProperties properties) {
-        return new SecurityRealmTokenCodec(properties);
-    }
-
-    @Bean
     public SecurityRealmControllerAdvice defaultSecurityRealmControllerAdvice() {
         return new SecurityRealmControllerAdvice();
     }
 
     @Bean
-    public SecurityRealmScanner defaultSecurityRealmScanner(ApplicationContext context) {
-        return new SecurityRealmScanner(context);
+    public SecurityRealmScanner defaultSecurityRealmScanner(ApplicationContext context, Environment env) {
+        return new SecurityRealmScanner(context, env);
     }
 
     @Bean

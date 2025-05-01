@@ -10,26 +10,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
-import net.coder966.spring.multisecurityrealms.configuration.SecurityRealmConfigurationProperties;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Slf4j
-public class SecurityRealmTokenCodec implements InitializingBean {
+public class SecurityRealmTokenCodec {
 
-    private final String secret;
-    private final Duration tokenExpirationDuration;
-    private Algorithm algorithm;
-    private JWTVerifier verifier;
+    private final Duration ttl;
+    private final Algorithm algorithm;
+    private final JWTVerifier verifier;
 
-    public SecurityRealmTokenCodec(SecurityRealmConfigurationProperties config) {
-        this.secret = config.getSigningSecret();
-        this.tokenExpirationDuration = config.getTokenExpirationDuration();
-    }
-
-    @Override
-    public void afterPropertiesSet() {
+    public SecurityRealmTokenCodec(String secret, Duration ttl) {
+        this.ttl = ttl;
         this.algorithm = Algorithm.HMAC512(secret);
         this.verifier = JWT.require(algorithm).build();
     }
@@ -41,7 +33,7 @@ public class SecurityRealmTokenCodec implements InitializingBean {
             .withClaim("realm", authentication.getRealm())
             .withClaim("nextAuthenticationStep", authentication.getNextAuthenticationStep())
             .withClaim("authorities", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-            .withExpiresAt(Instant.now().plus(tokenExpirationDuration))
+            .withExpiresAt(Instant.now().plus(ttl))
             .sign(algorithm);
     }
 

@@ -1,6 +1,7 @@
 package net.coder966.spring.multisecurityrealms.reflection;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,26 +9,31 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.annotation.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
+import net.coder966.spring.multisecurityrealms.configuration.SecurityRealmConfigurationProperties;
 import net.coder966.spring.multisecurityrealms.converter.SecurityRealmTokenCodec;
+import org.springframework.boot.convert.DurationStyle;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+@Slf4j
 public class SecurityRealmScanner {
 
     private final ApplicationContext context;
-    private final SecurityRealmTokenCodec securityRealmTokenCodec;
+    private final Environment env;
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
-    public SecurityRealmScanner(ApplicationContext context) {
+    public SecurityRealmScanner(ApplicationContext context, Environment env) {
         this.context = context;
-        this.securityRealmTokenCodec = context.getBean(SecurityRealmTokenCodec.class);
+        this.env = env;
 
         // there could be multiple beans of this type, for example, when you include spring-boot-starter-actuator
         // We only need one handler to register authentication endpoints, we prefer to use the application "regular" handler
@@ -49,11 +55,11 @@ public class SecurityRealmScanner {
             validateRealmAnnotation(realmAnnotation);
 
             SecurityRealmDescriptor descriptor = new SecurityRealmDescriptor(
-                    realmAnnotation.name(),
-                    buildAuthenticationEndpointRequestMatcher(realmAnnotation),
-                    realmAnnotation.firstStepName(),
-                    buildPublicApisRequestMatchers(realmAnnotation),
-                    securityRealmTokenCodec
+                realmAnnotation.name(),
+                buildAuthenticationEndpointRequestMatcher(realmAnnotation),
+                realmAnnotation.firstStepName(),
+                buildPublicApisRequestMatchers(realmAnnotation),
+                buildSecurityRealmTokenCodec(realmAnnotation)
             );
 
             registerAuthenticationStepHandlers(realmAnnotation, bean);
@@ -134,5 +140,35 @@ public class SecurityRealmScanner {
             }
         }
         return requestMatchers;
+    }
+
+    private SecurityRealmTokenCodec buildSecurityRealmTokenCodec(SecurityRealm realmAnnotation) {
+        SecurityRealmConfigurationProperties defaultProperties = context.getBean(SecurityRealmConfigurationProperties.class);
+
+        String signingSecret = realmAnnotation.signingSecret();
+        if(signingSecret == null || signingSecret.trim().isEmpty()){
+            log.warn("SecurityRealm (" + realmAnnotation.name() + ") does not specify a signing secret,"
+                + " will use the default specified under the configuration property security-realm.signing-secret");
+            signingSecret = defaultProperties.getSigningSecret();
+        }
+        signingSecret = env.resolveRequiredPlaceholders(signingSecret);
+
+        String tokenExpirationDurationString = realmAnnotation.tokenExpirationDuration();
+        if(tokenExpirationDurationString == null || tokenExpirationDurationString.trim().isEmpty()){
+            log.warn("SecurityRealm (" + realmAnnotation.name() + ") does not specify a token expiration duration,"
+                + " will use the default specified under the configuration property security-realm.token-expiration-duration");
+            tokenExpirationDurationString = defaultProperties.getTokenExpirationDuration().toString();
+        }
+        tokenExpirationDurationString = env.resolvePlaceholders(tokenExpirationDurationString);
+        Duration tokenExpirationDuration;
+        try{
+            tokenExpirationDuration = DurationStyle.detectAndParse(tokenExpirationDurationString);
+        }catch(Exception e){
+            throw new IllegalArgumentException(
+                "Invalid tokenExpirationDuration (" + tokenExpirationDurationString + ") for SecurityRealm (" + realmAnnotation.name() + ")"
+            );
+        }
+
+        return new SecurityRealmTokenCodec(signingSecret, tokenExpirationDuration);
     }
 }

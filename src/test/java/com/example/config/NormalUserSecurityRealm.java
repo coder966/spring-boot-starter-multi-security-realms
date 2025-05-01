@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
     name = "NORMAL_USER",
     authenticationEndpoint = "/normal-user/auth",
     firstStepName = StepNames.USERNAME_AND_PASSWORD,
+//    signingSecret = "", // not specified, will use default configured under security-realm.*
+//    tokenExpirationDuration = "", // not specified, will use default configured under security-realm.*
     publicApis = {
         "/my-third-open-api",
         "/my-forth-open-api"

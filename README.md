@@ -68,6 +68,8 @@ Here in this example, we define two realms (normal-user & admin-user).
         name = "NORMAL_USER",
         authenticationEndpoint = "/normal-user/auth",
         firstStepName = StepNames.USERNAME_AND_PASSWORD,
+        //    signingSecret = "", // not specified, will use default configured under security-realm.*
+        //    tokenExpirationDuration = "", // not specified, will use default configured under security-realm.*
         publicApis = {
                 "/my-third-open-api",
                 "/my-forth-open-api"
@@ -132,6 +134,8 @@ public class NormalUserSecurityRealm {
         name = "ADMIN_USER",
         authenticationEndpoint = "/admin-user/auth",
         firstStepName = StepNames.USERNAME_AND_PASSWORD,
+        signingSecret = "${my-app.admin-realm-jwt-secret}",
+        tokenExpirationDuration = "5m", // 5 minutes
         publicApis = {
                 "/my-first-open-api",
                 "/my-second-open-api"
@@ -223,6 +227,14 @@ public class AdminUserController {
 ```
 
 ## Tips
+
+### Configure JWT secret and TTL
+
+You can specify a different signing secret and a TTL for each realm separately (using the `@SecurityRealm` annotation).
+You can also specify global values using the configuration properties:
+
+- `security-realm.signing-secret`
+- `security-realm.token-expiration-duration`
 
 ### I want to define my own `SecurityFilterChain`
 
