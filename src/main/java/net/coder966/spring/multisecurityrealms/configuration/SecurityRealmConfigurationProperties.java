@@ -2,11 +2,14 @@ package net.coder966.spring.multisecurityrealms.configuration;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+@Log4j2
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "security-realm")
@@ -18,11 +21,17 @@ public class SecurityRealmConfigurationProperties implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         if(signingSecret == null){
-            throw new IllegalArgumentException(
-                "You must specify the signing secret in your application properties file. Key: security-realm.signing-secret");
+            log.warn(
+                "Security Realm signing secret is not provided (security-realm.signing-secret). Will use auto generated secret."
+                    + " Consider setting one because users authenticated on this app instance will not be recognized on other running instances."
+            );
+            signingSecret = UUID.randomUUID().toString() + UUID.randomUUID().toString();
         }
 
         if(tokenExpirationDuration == null){
+            log.warn(
+                "Security Realm token expiration duration is not provided (security-realm.token-expiration-duration). Will use 3 hours."
+            );
             tokenExpirationDuration = Duration.of(3, ChronoUnit.HOURS);
         }
     }
