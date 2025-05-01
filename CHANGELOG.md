@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0] - 2025-05-02
+
+- You can now specify a different JWT signing secret and a TTL for each realm separately (using the `@SecurityRealm` annotation).
+- Warn and use auto generated JWT secret instead of failing when the user does not provide `security-realm.signing-secret`.
+- Internal enhancements.
+
 ## [0.1.2] - 2024-09-13
 
 - Fix application not starting when `spring-boot-starter-actuator` is present in the classpath.

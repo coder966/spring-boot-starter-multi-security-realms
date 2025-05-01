@@ -44,14 +44,14 @@ Maven:
 <dependency>
     <groupId>net.coder966.spring</groupId>
     <artifactId>spring-boot-starter-multi-security-realms</artifactId>
-    <version>0.1.2</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```groovy
-implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.1.2'
+implementation 'net.coder966.spring:spring-boot-starter-multi-security-realms:0.2.0'
 ```
 
 ## Usage
