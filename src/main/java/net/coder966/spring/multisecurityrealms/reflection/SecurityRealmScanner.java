@@ -44,52 +44,38 @@ public class SecurityRealmScanner {
         Map<String, SecurityRealmDescriptor> descriptors = new HashMap<>();
 
         for(Object bean : beans){
-            SecurityRealm realmAnnotation = bean.getClass().getSuperclass().getAnnotation(SecurityRealm.class);
-            String name = realmAnnotation.name();
-            String authenticationEndpoint = realmAnnotation.authenticationEndpoint();
-            String firstStepName = realmAnnotation.firstStepName();
-            String[] publicApis = realmAnnotation.publicApis();
+            final SecurityRealm realmAnnotation = bean.getClass().getSuperclass().getAnnotation(SecurityRealm.class);
 
-            registerAuthenticationStepHandlers(name, authenticationEndpoint, bean);
-
-            if(name == null || name.trim().length() != name.length()){
-                throw new IllegalArgumentException("Invalid SecurityRealm name (" + name + ")");
-            }
-            if(descriptors.containsKey(name)){
-                throw new IllegalArgumentException("Invalid SecurityRealm name (" + name + ")");
-            }
-
-            RequestMatcher authenticationEndpointRequestMatcher;
-            try{
-                authenticationEndpointRequestMatcher = new AntPathRequestMatcher(authenticationEndpoint);
-            }catch(Exception e){
-                throw new IllegalArgumentException("Invalid authenticationEndpoint (" + authenticationEndpoint + ") for SecurityRealm (" + name + ")");
-            }
-
-            List<RequestMatcher> publicApisRequestMatchers = new ArrayList<>(publicApis.length);
-            for(String pattern : publicApis){
-                try{
-                    publicApisRequestMatchers.add(new AntPathRequestMatcher(pattern));
-                }catch(Exception e){
-                    throw new IllegalArgumentException("Invalid publicApis (" + pattern + ") for SecurityRealm (" + name + ").");
-                }
-            }
+            validateRealmAnnotation(realmAnnotation);
 
             SecurityRealmDescriptor descriptor = new SecurityRealmDescriptor(
-                name,
-                authenticationEndpointRequestMatcher,
-                firstStepName,
-                publicApisRequestMatchers,
+                    realmAnnotation.name(),
+                    buildAuthenticationEndpointRequestMatcher(realmAnnotation),
+                    realmAnnotation.firstStepName(),
+                    buildPublicApisRequestMatchers(realmAnnotation),
                     securityRealmTokenCodec
             );
 
-            descriptors.put(name, descriptor);
+            registerAuthenticationStepHandlers(realmAnnotation, bean);
+
+            if(descriptors.containsKey(realmAnnotation.name())){
+                throw new IllegalArgumentException("Invalid SecurityRealm name (" + realmAnnotation.name() + "). Realm name should be unique.");
+            }
+            descriptors.put(realmAnnotation.name(), descriptor);
         }
 
         return descriptors.values();
     }
 
-    private void registerAuthenticationStepHandlers(String realmName, String authenticationEndpoint, Object realmBean) {
+    private void validateRealmAnnotation(SecurityRealm realmAnnotation) {
+        String name = realmAnnotation.name();
+
+        if(name == null || name.trim().length() != name.length()){
+            throw new IllegalArgumentException("Invalid SecurityRealm name (" + name + ")");
+        }
+    }
+
+    private void registerAuthenticationStepHandlers(SecurityRealm realmAnnotation, Object realmBean) {
         Set<String> stepNames = new HashSet<>();
 
         for(Method method : realmBean.getClass().getSuperclass().getDeclaredMethods()){
@@ -100,29 +86,53 @@ public class SecurityRealmScanner {
 
             String stepName = stepAnnotation.value();
             if(stepName == null || stepName.trim().length() != stepName.length() || stepName.isBlank()){
-                throw new IllegalArgumentException("Invalid AuthenticationStep name (" + stepName + ") for SecurityRealm (" + realmName + ")");
+                throw new IllegalArgumentException("Invalid AuthenticationStep name (" + stepName + ") for SecurityRealm (" + realmAnnotation.name() + ")");
             }
 
             if(stepNames.contains(stepName)){
                 throw new IllegalArgumentException(
-                    "Found more than one AuthenticationStep with the same name (" + stepName + ") for SecurityRealm (" + realmName + ")");
+                        "Found more than one AuthenticationStep with the same name (" + stepName + ") for SecurityRealm (" + realmAnnotation.name() + ")");
             }
 
             if(!method.getReturnType().isAssignableFrom(SecurityRealmAuthentication.class)){
                 throw new IllegalArgumentException("Invalid return type (" + method.getReturnType().getCanonicalName() + ") "
-                    + "of AuthenticationStep (" + stepName + ") for SecurityRealm (" + realmName + "). "
+                        + "of AuthenticationStep (" + stepName + ") for SecurityRealm (" + realmAnnotation.name() + "). "
                     + "It should be SecurityRealmAuthentication.");
             }
 
             stepNames.add(stepName);
 
             RequestMappingInfo mappingInfo = RequestMappingInfo
-                .paths(authenticationEndpoint)
+                    .paths(realmAnnotation.authenticationEndpoint())
                 .methods(RequestMethod.POST)
                 .params("AuthenticationStep-" + stepName)
                 .build();
             
             requestMappingHandlerMapping.registerMapping(mappingInfo, realmBean, method);
         }
+    }
+
+    private RequestMatcher buildAuthenticationEndpointRequestMatcher(SecurityRealm realmAnnotation) {
+        try{
+            return new AntPathRequestMatcher(realmAnnotation.authenticationEndpoint());
+        }catch(Exception e){
+            throw new IllegalArgumentException(
+                    "Invalid authenticationEndpoint (" + realmAnnotation.authenticationEndpoint() + ") for SecurityRealm (" + realmAnnotation.name() + ")"
+            );
+        }
+    }
+
+    private List<RequestMatcher> buildPublicApisRequestMatchers(SecurityRealm realmAnnotation) {
+        List<RequestMatcher> requestMatchers = new ArrayList<>(realmAnnotation.publicApis().length);
+        for(String pattern : realmAnnotation.publicApis()){
+            try{
+                requestMatchers.add(new AntPathRequestMatcher(pattern));
+            }catch(Exception e){
+                throw new IllegalArgumentException(
+                        "Invalid publicApis (" + pattern + ") for SecurityRealm (" + realmAnnotation.name() + ")"
+                );
+            }
+        }
+        return requestMatchers;
     }
 }
