@@ -11,7 +11,7 @@ import java.util.Set;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.annotation.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
-import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
+import net.coder966.spring.multisecurityrealms.converter.SecurityRealmTokenCodec;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -22,12 +22,12 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public class SecurityRealmScanner {
 
     private final ApplicationContext context;
-    private final AuthenticationTokenConverter authenticationTokenConverter;
+    private final SecurityRealmTokenCodec securityRealmTokenCodec;
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     public SecurityRealmScanner(ApplicationContext context) {
         this.context = context;
-        this.authenticationTokenConverter = context.getBean(AuthenticationTokenConverter.class);
+        this.securityRealmTokenCodec = context.getBean(SecurityRealmTokenCodec.class);
 
         // there could be multiple beans of this type, for example, when you include spring-boot-starter-actuator
         // We only need one handler to register authentication endpoints, we prefer to use the application "regular" handler
@@ -80,7 +80,7 @@ public class SecurityRealmScanner {
                 authenticationEndpointRequestMatcher,
                 firstStepName,
                 publicApisRequestMatchers,
-                authenticationTokenConverter
+                    securityRealmTokenCodec
             );
 
             descriptors.put(name, descriptor);

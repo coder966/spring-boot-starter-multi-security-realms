@@ -16,14 +16,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Slf4j
-public class AuthenticationTokenConverter implements InitializingBean {
+public class SecurityRealmTokenCodec implements InitializingBean {
 
     private final String secret;
     private final Duration tokenExpirationDuration;
     private Algorithm algorithm;
     private JWTVerifier verifier;
 
-    public AuthenticationTokenConverter(SecurityRealmConfigurationProperties config) {
+    public SecurityRealmTokenCodec(SecurityRealmConfigurationProperties config) {
         this.secret = config.getSigningSecret();
         this.tokenExpirationDuration = config.getTokenExpirationDuration();
     }
@@ -34,7 +34,7 @@ public class AuthenticationTokenConverter implements InitializingBean {
         this.verifier = JWT.require(algorithm).build();
     }
 
-    public String createToken(SecurityRealmAuthentication authentication) {
+    public String encode(SecurityRealmAuthentication authentication) {
         return JWT
             .create()
             .withSubject(authentication.getName())
@@ -45,7 +45,7 @@ public class AuthenticationTokenConverter implements InitializingBean {
             .sign(algorithm);
     }
 
-    public SecurityRealmAuthentication verifyToken(String token) {
+    public SecurityRealmAuthentication decode(String token) {
         try{
             DecodedJWT decodedJWT = verifier.verify(token);
 

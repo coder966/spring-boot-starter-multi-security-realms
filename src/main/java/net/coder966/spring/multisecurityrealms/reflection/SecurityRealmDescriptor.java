@@ -3,7 +3,7 @@ package net.coder966.spring.multisecurityrealms.reflection;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.coder966.spring.multisecurityrealms.converter.AuthenticationTokenConverter;
+import net.coder966.spring.multisecurityrealms.converter.SecurityRealmTokenCodec;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Getter
@@ -14,5 +14,5 @@ public class SecurityRealmDescriptor {
     private final RequestMatcher authenticationEndpointRequestMatcher;
     private final String firstStepName;
     private final List<RequestMatcher> publicApisRequestMatchers;
-    private final AuthenticationTokenConverter authenticationTokenConverter;
+    private final SecurityRealmTokenCodec securityRealmTokenCodec;
 }

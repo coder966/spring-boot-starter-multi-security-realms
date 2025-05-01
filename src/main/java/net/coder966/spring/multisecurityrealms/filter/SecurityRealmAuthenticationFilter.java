@@ -104,7 +104,7 @@ public class SecurityRealmAuthenticationFilter {
         String authorization = extractTokenFromRequest(request);
 
         if(authorization != null){
-            SecurityRealmAuthentication authentication = descriptor.getAuthenticationTokenConverter().verifyToken(authorization);
+            SecurityRealmAuthentication authentication = descriptor.getSecurityRealmTokenCodec().decode(authorization);
             if(authentication != null && authentication.getRealm().equals(descriptor.getName())){
                 return authentication;
             }

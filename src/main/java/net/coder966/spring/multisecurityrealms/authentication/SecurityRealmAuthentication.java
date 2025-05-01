@@ -96,6 +96,6 @@ public class SecurityRealmAuthentication implements Authentication {
         if(SecurityRealmContext.getDescriptor() == null){
             return null;
         }
-        return SecurityRealmContext.getDescriptor().getAuthenticationTokenConverter().createToken(this);
+        return SecurityRealmContext.getDescriptor().getSecurityRealmTokenCodec().encode(this);
     }
 }
