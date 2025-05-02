@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1] - 2025-05-03
+
+- Fix the default exception handler for `SecurityRealmAuthenticationException` was not invoked if the user defines a custom `@ControllerAdvice`, even if they
+  don't specify a handler for this specific exception, but a super class like `RuntimeException` would block it.
+- Fix "library source does not match the bytecode for class".
+
 ## [0.2.0] - 2025-05-02
 
 - You can now specify a different JWT signing secret and a TTL for each realm separately (using the `@SecurityRealm` annotation).
