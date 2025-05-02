@@ -3,17 +3,19 @@ package net.coder966.spring.multisecurityrealms.authentication;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
-import lombok.Getter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class SecurityRealmAnonymousAuthentication implements Authentication {
 
-    @Getter
     private final String anonymousKey = UUID.randomUUID().toString();
     
     private final Set<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));
+
+    public String getAnonymousKey() {
+        return anonymousKey;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

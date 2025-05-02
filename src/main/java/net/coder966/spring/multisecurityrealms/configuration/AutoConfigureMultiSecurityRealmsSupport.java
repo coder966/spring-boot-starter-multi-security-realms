@@ -1,10 +1,11 @@
 package net.coder966.spring.multisecurityrealms.configuration;
 
-import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.advice.SecurityRealmControllerAdvice;
 import net.coder966.spring.multisecurityrealms.expression.PermitRealmMethodSecurityExpressionHandler;
 import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthenticationFilter;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -20,9 +21,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
-@Slf4j
 @AutoConfiguration
 public class AutoConfigureMultiSecurityRealmsSupport {
+
+    private static final Logger log = LoggerFactory.getLogger(AutoConfigureMultiSecurityRealmsSupport.class);
 
     @Bean
     @ConditionalOnMissingBean(SecurityRealmConfigurationProperties.class)

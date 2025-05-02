@@ -3,13 +3,10 @@ package net.coder966.spring.multisecurityrealms.authentication;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.HashSet;
 import java.util.Set;
-import lombok.Getter;
-import lombok.Setter;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-@Getter
 @JsonIgnoreProperties({"authenticated", "credentials", "details", "principal"})
 public class SecurityRealmAuthentication implements Authentication {
 
@@ -19,10 +16,8 @@ public class SecurityRealmAuthentication implements Authentication {
     private final Set<? extends GrantedAuthority> authorities;
     private final String nextAuthenticationStep;
 
-    @Setter // the setter is for internal use only
     private String realm;
 
-    @Setter // the setter is for internal use only
     private String error;
 
 
@@ -42,6 +37,29 @@ public class SecurityRealmAuthentication implements Authentication {
         this.isAuthenticated = nextAuthenticationStep == null;
         this.nextAuthenticationStep = nextAuthenticationStep;
         this.realm = SecurityRealmContext.getDescriptor() == null ? null : SecurityRealmContext.getDescriptor().getName();
+    }
+
+    public String getRealm() {
+        return realm;
+    }
+
+    public void setRealm(String realm) {
+        this.realm = realm;
+    }
+
+    public String getNextAuthenticationStep() {
+        return nextAuthenticationStep;
+    }
+
+    /**
+     * to appear in the JSON response
+     */
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 
     @Override

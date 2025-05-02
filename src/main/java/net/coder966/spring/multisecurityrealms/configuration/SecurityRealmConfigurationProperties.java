@@ -3,17 +3,15 @@ package net.coder966.spring.multisecurityrealms.configuration;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Slf4j
-@Getter
-@Setter
 @ConfigurationProperties(prefix = "security-realm")
 public class SecurityRealmConfigurationProperties implements InitializingBean {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityRealmConfigurationProperties.class);
 
     private String signingSecret;
     private Duration tokenExpirationDuration;
@@ -34,5 +32,21 @@ public class SecurityRealmConfigurationProperties implements InitializingBean {
             );
             tokenExpirationDuration = Duration.of(3, ChronoUnit.HOURS);
         }
+    }
+
+    public String getSigningSecret() {
+        return signingSecret;
+    }
+
+    public void setSigningSecret(String signingSecret) {
+        this.signingSecret = signingSecret;
+    }
+
+    public Duration getTokenExpirationDuration() {
+        return tokenExpirationDuration;
+    }
+
+    public void setTokenExpirationDuration(Duration tokenExpirationDuration) {
+        this.tokenExpirationDuration = tokenExpirationDuration;
     }
 }

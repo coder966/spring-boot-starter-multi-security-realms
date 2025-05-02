@@ -37,13 +37,6 @@
             <version>4.4.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.32</version>
-            <scope>provided</scope>
-        </dependency>
-
 
         <!-- test -->
         <dependency>
@@ -71,6 +64,13 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.32</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <!-- to fix issue: https://stackoverflow.com/a/52390104 -->
         <dependency>
