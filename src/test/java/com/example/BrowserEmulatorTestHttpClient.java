@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class BrowserEmulatorTestHttpClient {
             return exchange(Object.class);
         }
 
-        public <T> ResponseSpec<T> exchange(Class<T> clazz) {
+        public <T> ResponseSpec<T> exchange(@Nullable Class<T> clazz) {
             LinkedMultiValueMap<String, String> mergedHeaders = new LinkedMultiValueMap<>();
             mergedHeaders.addAll(headers);
             mergedHeaders.add("X-Client-Id", client.clientId);

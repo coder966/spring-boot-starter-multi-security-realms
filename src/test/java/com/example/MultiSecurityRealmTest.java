@@ -121,7 +121,7 @@ public class MultiSecurityRealmTest {
         client
             .request(HttpMethod.GET, "/normal-user/my-name")
             .header("Authorization", loginResponse.getToken())
-            .exchange(LoginResponse.class)
+            .exchange(null)
             .expectStatus(403);
     }
 

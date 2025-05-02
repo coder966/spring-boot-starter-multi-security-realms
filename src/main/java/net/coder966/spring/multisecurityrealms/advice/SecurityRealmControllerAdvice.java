@@ -4,12 +4,15 @@ import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthe
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationAlreadyAuthenticatedException;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationException;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+@Order(Ordered.HIGHEST_PRECEDENCE + 100) // + 100 to allow user some room to override this if they want
 @ControllerAdvice
 public class SecurityRealmControllerAdvice {
 
