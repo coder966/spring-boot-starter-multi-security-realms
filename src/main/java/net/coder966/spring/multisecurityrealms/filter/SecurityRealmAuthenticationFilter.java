@@ -1,15 +1,15 @@
 package net.coder966.spring.multisecurityrealms.filter;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAnonymousAuthentication;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
@@ -21,7 +21,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-@Slf4j
 public class SecurityRealmAuthenticationFilter {
 
     private final SecurityRealmDescriptor descriptor;
@@ -42,7 +41,7 @@ public class SecurityRealmAuthenticationFilter {
         return descriptor.getPublicApisRequestMatchers().stream().anyMatch(requestMatcher -> requestMatcher.matches(request));
     }
 
-    public boolean handle(HttpServletRequest request, HttpServletResponse response) {
+    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         SecurityRealmContext.setDescriptor(descriptor);
 
         SecurityRealmAuthentication auth = extractAuthenticationFromRequest(request);
@@ -73,8 +72,7 @@ public class SecurityRealmAuthenticationFilter {
         return false;
     }
 
-    @SneakyThrows
-    private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) {
+    private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) throws ServletException, IOException {
         if(auth != null && auth.isAuthenticated()){
             exceptionResolvers
                 .forEach(resolver -> resolver.resolveException(request, response, null, new SecurityRealmAuthenticationAlreadyAuthenticatedException()));

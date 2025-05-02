@@ -69,11 +69,14 @@ public class AutoConfigureMultiSecurityRealmsSupport {
     }
 
     @Bean
-    @ConditionalOnMissingBean(value = {AuthenticationManager.class, AuthenticationProvider.class, UserDetailsService.class,
-        AuthenticationManagerResolver.class}, type = "org.springframework.security.oauth2.jwt.JwtDecoder")
+    @ConditionalOnMissingBean(value = {
+        AuthenticationManager.class, AuthenticationProvider.class, UserDetailsService.class, AuthenticationManagerResolver.class
+    }, type = "org.springframework.security.oauth2.jwt.JwtDecoder")
     protected AuthenticationManagerResolver<?> nullAuthenticationManagerResolver() {
+
         log.debug("registering a null AuthenticationManagerResolver to prevent spring boot form configuring a default"
             + " in-memory UserDetailsService (InMemoryUserDetailsManager)");
+        
         return context -> null;
     }
 }

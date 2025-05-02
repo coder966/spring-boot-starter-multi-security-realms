@@ -61,7 +61,7 @@ public class SecurityRealmAuthentication implements Authentication {
 
     @Override
     public Object getPrincipal() {
-        return getRealm() + ":" + name;
+        return realm + ":" + name;
     }
 
     @Override
@@ -92,6 +92,9 @@ public class SecurityRealmAuthentication implements Authentication {
         return this.getPrincipal().hashCode();
     }
 
+    /**
+     * to appear in the JSON response
+     */
     public String getToken() {
         if(SecurityRealmContext.getDescriptor() == null){
             return null;
