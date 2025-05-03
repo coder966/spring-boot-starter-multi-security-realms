@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.1] - 2025-05-04
+
+- Support tokens generated before "extras" feature was introduced.
+
 ## [0.3.0] - 2025-05-03
 
 - **Breaking**: Error response from authentication endpoints now has HTTP status `400` instead of `401`.
