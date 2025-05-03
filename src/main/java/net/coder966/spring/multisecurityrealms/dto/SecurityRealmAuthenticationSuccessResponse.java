@@ -8,6 +8,8 @@ public class SecurityRealmAuthenticationSuccessResponse {
     public String realm;
 
     public String token;
+    public String tokenType;
+    public long expiresInSeconds;
 
     public String name;
     public Set<String> authorities;

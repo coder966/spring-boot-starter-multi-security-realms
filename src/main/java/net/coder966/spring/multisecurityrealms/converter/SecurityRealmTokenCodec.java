@@ -24,6 +24,10 @@ public class SecurityRealmTokenCodec {
         this.verifier = JWT.require(algorithm).build();
     }
 
+    public Duration getTtl() {
+        return ttl;
+    }
+
     public String encode(SecurityRealmAuthentication authentication) {
         return JWT
             .create()

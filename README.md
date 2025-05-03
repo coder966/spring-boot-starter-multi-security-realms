@@ -212,7 +212,9 @@ Rendered username+password form and submitted, and got:
     "authorities": [],
     "nextAuthenticationStep": "OTP",
     "realm": "ADMIN_USER",
-    "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjoiT1RQIiwiYXV0aG9yaXRpZXMiOltdLCJleHAiOjE3NDYxMzcwMDN9.T-C2LO5DmawUXG6XuhyqTH9hxc8VIE4nF1u2_u2a_Xqw4SRbMpJ7Aq--AwcEA-jzSj6Si9_O1V21P-mkKU31FQ"
+    "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjoiT1RQIiwiYXV0aG9yaXRpZXMiOltdLCJleHAiOjE3NDYxMzcwMDN9.T-C2LO5DmawUXG6XuhyqTH9hxc8VIE4nF1u2_u2a_Xqw4SRbMpJ7Aq--AwcEA-jzSj6Si9_O1V21P-mkKU31FQ",
+    "tokenType": "Bearer",
+    "expiresInSeconds": 300
 }
 ```
 
@@ -224,7 +226,9 @@ Rendered OTP form and submitted again, and got:
     "authorities": [],
     "nextAuthenticationStep": null,
     "realm": "ADMIN_USER",
-    "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjpudWxsLCJhdXRob3JpdGllcyI6W10sImV4cCI6MTc0NjEzNzA3OX0.OYwacoHwO6iS-t3JXe0Fw0xKMIjBTypaasNJIghrdPW9RZMGzaghxCw1GYSz5p6E7c8dIubLKkvRf-QAhGIxVA"
+    "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjpudWxsLCJhdXRob3JpdGllcyI6W10sImV4cCI6MTc0NjEzNzA3OX0.OYwacoHwO6iS-t3JXe0Fw0xKMIjBTypaasNJIghrdPW9RZMGzaghxCw1GYSz5p6E7c8dIubLKkvRf-QAhGIxVA",
+    "tokenType": "Bearer",
+    "expiresInSeconds": 300
 }
 ```
 
