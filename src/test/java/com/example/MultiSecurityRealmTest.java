@@ -93,7 +93,7 @@ public class MultiSecurityRealmTest {
 
         client
             .request(HttpMethod.GET, "/admin-user/my-name")
-            .exchange(SuccessResponse.class)
+            .exchange(null)
             .expectStatus(403);
 
         SuccessResponse loginResponse = client
@@ -378,7 +378,7 @@ public class MultiSecurityRealmTest {
 
     @Test
     public void extrasPresentInResponse() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "authenticatedUserCanAccessPublicApi");
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "extrasPresentInResponse");
 
         // partially authenticated
         SuccessResponse loginResponse = client
