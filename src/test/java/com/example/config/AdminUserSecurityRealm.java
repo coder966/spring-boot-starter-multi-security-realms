@@ -38,7 +38,8 @@ public class AdminUserSecurityRealm {
     public SecurityRealmAuthentication firstAuthenticationStep(@RequestBody AuthUsernameAndPasswordStepRequest request) {
         Optional<AdminUser> optionalUser = adminUserRepo.findByUsername(request.getUsername());
         if(optionalUser.isEmpty()){
-            throw new SecurityRealmAuthenticationException(Constants.ErrorCodes.BAD_CREDENTIALS);
+            // Error description (the second argument) is optional
+            throw new SecurityRealmAuthenticationException(Constants.ErrorCodes.BAD_CREDENTIALS, "Username or password is incorrect");
         }
         AdminUser user = optionalUser.get();
 
@@ -47,6 +48,7 @@ public class AdminUserSecurityRealm {
 
         // WARNING: FOR DEMO PURPOSE ONLY
         if(!user.getPassword().equals(request.getPassword())){
+            // Since error description (the second argument to SecurityRealmAuthenticationException) is optional, we skipped it
             throw new SecurityRealmAuthenticationException(Constants.ErrorCodes.BAD_CREDENTIALS);
         }
 
@@ -76,7 +78,7 @@ public class AdminUserSecurityRealm {
 
 
         if(!user.getOtp().equals(otp)){
-            throw new SecurityRealmAuthenticationException(Constants.ErrorCodes.BAD_OTP);
+            throw new SecurityRealmAuthenticationException(Constants.ErrorCodes.BAD_OTP, "OTP is incorrect");
         }
 
         // clear otp

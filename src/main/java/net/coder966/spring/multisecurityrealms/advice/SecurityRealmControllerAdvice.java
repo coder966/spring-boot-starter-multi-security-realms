@@ -79,6 +79,7 @@ public class SecurityRealmControllerAdvice implements ResponseBodyAdvice<Object>
         var response = new SecurityRealmAuthenticationErrorResponse();
 
         response.error = e.getMessage();
+        response.errorDescription = e.getErrorDescription();
 
         return response;
     }

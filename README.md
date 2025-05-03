@@ -85,12 +85,14 @@ public class NormalUserSecurityRealm {
     public SecurityRealmAuthentication firstAuthenticationStep(@RequestBody AuthUsernameAndPasswordStepRequest request) {
         Optional<NormalUser> optionalUser = normalUserRepo.findByUsername(request.getUsername());
         if (optionalUser.isEmpty()) {
-            throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
+            // Error description (the second argument) is optional
+            throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS, "Username or password is incorrect");
         }
         NormalUser user = optionalUser.get();
 
         // WARNING: FOR DEMO PURPOSE ONLY
         if (!user.getPassword().equals(request.getPassword())) {
+            // Since error description (the second argument to SecurityRealmAuthenticationException) is optional, we skipped it
             throw new SecurityRealmAuthenticationException(ErrorCodes.BAD_CREDENTIALS);
         }
 
@@ -238,7 +240,8 @@ Rendered OTP form and submitted again, and got:
 
 ```json
 {
-    "error": "BAD_CREDENTIALS"
+    "error": "BAD_CREDENTIALS",
+    "errorDescription": "Username or password is incorrect"
 }
 ```
 
