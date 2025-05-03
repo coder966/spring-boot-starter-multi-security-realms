@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmScanner;
 import org.springframework.context.ApplicationContext;
@@ -35,9 +34,5 @@ public class MultiSecurityRealmAuthenticationFilter extends OncePerRequestFilter
         }
 
         filterChain.doFilter(request, response);
-
-        // clear these to avoid misuse by library consumers
-        SecurityRealmContext.setDescriptor(null);
-        SecurityRealmContext.setCurrentStep(null);
     }
 }

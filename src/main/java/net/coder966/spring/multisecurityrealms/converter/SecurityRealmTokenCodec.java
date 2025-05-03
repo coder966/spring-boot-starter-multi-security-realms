@@ -55,7 +55,8 @@ public class SecurityRealmTokenCodec {
             String nextAuthenticationStep = decodedJWT.getClaim("nextAuthenticationStep").asString();
 
             SecurityRealmAuthentication auth = new SecurityRealmAuthentication(username, authorities, nextAuthenticationStep);
-            auth.setRealm(realmName);
+
+            auth._UNSAFE_overrideRealm(realmName);
             return auth;
         }catch(Exception e){
             return null;

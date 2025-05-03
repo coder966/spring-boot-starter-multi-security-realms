@@ -57,6 +57,10 @@ public class SecurityRealmAuthenticationFilter {
             return true;
         }
 
+        // cleanup
+        SecurityRealmContext.setDescriptor(null);
+        SecurityRealmContext.setCurrentStep(null);
+
 
         if(matchesPublicApi(request)){
             if(auth == null || !auth.isAuthenticated()){

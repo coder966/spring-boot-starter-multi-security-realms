@@ -40,10 +40,6 @@ public class SecurityRealmAuthentication implements Authentication {
         return realm;
     }
 
-    public void setRealm(String realm) {
-        this.realm = realm;
-    }
-
     public String getNextAuthenticationStep() {
         return nextAuthenticationStep;
     }
@@ -111,9 +107,13 @@ public class SecurityRealmAuthentication implements Authentication {
      * to appear in the JSON response
      */
     public String getToken() {
-        if(SecurityRealmContext.getDescriptor() == null){
-            return null;
-        }
         return SecurityRealmContext.getDescriptor().getSecurityRealmTokenCodec().encode(this);
+    }
+
+    /**
+     * this is used for internal use only
+     */
+    public void _UNSAFE_overrideRealm(String realm) {
+        this.realm = realm;
     }
 }
