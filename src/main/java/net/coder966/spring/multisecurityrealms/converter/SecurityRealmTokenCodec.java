@@ -65,7 +65,9 @@ public class SecurityRealmTokenCodec {
 
             SecurityRealmAuthentication auth = new SecurityRealmAuthentication(username, authorities, nextAuthenticationStep);
 
-            extras.forEach(auth::addExtra);
+            if(extras != null){ // to still support tokens generated before this feature was introduced
+                extras.forEach(auth::addExtra);
+            }
 
             auth._UNSAFE_overrideRealm(realmName);
 
