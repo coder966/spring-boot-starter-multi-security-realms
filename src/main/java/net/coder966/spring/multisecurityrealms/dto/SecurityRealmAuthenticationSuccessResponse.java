@@ -1,6 +1,7 @@
 package net.coder966.spring.multisecurityrealms.dto;
 
 
+import java.util.Map;
 import java.util.Set;
 
 public class SecurityRealmAuthenticationSuccessResponse {
@@ -16,4 +17,6 @@ public class SecurityRealmAuthenticationSuccessResponse {
 
 
     public String nextAuthenticationStep;
+
+    public Map<String, Object> extras;
 }

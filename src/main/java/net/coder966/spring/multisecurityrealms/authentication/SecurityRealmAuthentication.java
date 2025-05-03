@@ -1,6 +1,8 @@
 package net.coder966.spring.multisecurityrealms.authentication;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import org.springframework.security.core.Authentication;
@@ -14,6 +16,8 @@ public class SecurityRealmAuthentication implements Authentication {
     private final Set<? extends GrantedAuthority> authorities;
 
     private final String nextAuthenticationStep;
+
+    private final Map<String, Object> extras = new HashMap<>();
 
 
     /**
@@ -33,12 +37,24 @@ public class SecurityRealmAuthentication implements Authentication {
         this.realm = SecurityRealmContext.getDescriptor() == null ? null : SecurityRealmContext.getDescriptor().getName();
     }
 
+    /**
+     * Add extra key-value information to the authentication response. It will be available in the response under "extras" field.
+     */
+    public SecurityRealmAuthentication addExtra(String key, Object value) {
+        extras.put(key, value);
+        return this;
+    }
+
     public String getRealm() {
         return realm;
     }
 
     public String getNextAuthenticationStep() {
         return nextAuthenticationStep;
+    }
+
+    public Map<String, Object> getExtras() {
+        return extras;
     }
 
     @Override

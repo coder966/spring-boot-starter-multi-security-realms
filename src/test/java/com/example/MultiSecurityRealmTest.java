@@ -3,6 +3,8 @@ package com.example;
 import com.example.dto.AuthOtpStepRequest;
 import com.example.dto.AuthUsernameAndPasswordStepRequest;
 import com.example.other.Constants;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -52,7 +54,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         client
@@ -73,7 +75,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         client
@@ -82,7 +84,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthOtpStepRequest("1234"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null));
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, null));
     }
 
     @Test
@@ -99,7 +101,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         loginResponse = client
@@ -108,7 +110,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthOtpStepRequest("1234"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
         client
@@ -168,7 +170,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         client
@@ -189,7 +191,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthOtpStepRequest("1234"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
         client
@@ -217,7 +219,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         loginResponse = client
@@ -226,7 +228,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthOtpStepRequest("1234"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
         int loginCounter = client
@@ -243,7 +245,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         client
@@ -261,7 +263,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthOtpStepRequest("1234"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
         client
@@ -282,7 +284,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         loginResponse = client
@@ -291,7 +293,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthOtpStepRequest("1234"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
         // already logged in, idempotent operation
@@ -301,7 +303,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
     }
 
@@ -315,7 +317,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
         // public api from the same realm
@@ -341,7 +343,7 @@ public class MultiSecurityRealmTest {
             .body(new AuthOtpStepRequest("1234"))
             .exchange(SuccessResponse.class)
             .expectStatus(200)
-            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null))
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
         // public api from the same realm
@@ -374,6 +376,30 @@ public class MultiSecurityRealmTest {
         System.out.println(healthResponse);
     }
 
+    @Test
+    public void extrasPresentInResponse() {
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "authenticatedUserCanAccessPublicApi");
+
+        // partially authenticated
+        SuccessResponse loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .body(new AuthUsernameAndPasswordStepRequest("khalid", "kpass"))
+            .exchange(SuccessResponse.class)
+            .expectStatus(200)
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, Collections.emptyMap()))
+            .readBody();
+
+        // fully authenticated
+        loginResponse = client
+            .request(HttpMethod.POST, "/admin-user/auth")
+            .header("Authorization", loginResponse.getToken())
+            .body(new AuthOtpStepRequest("1234"))
+            .exchange(SuccessResponse.class)
+            .expectStatus(200)
+            .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, Map.of("countBadges", 0)))
+            .readBody();
+    }
+
     @Setter
     @Getter
     @ToString
@@ -382,6 +408,7 @@ public class MultiSecurityRealmTest {
         private String realm;
         private String token;
         private String nextAuthenticationStep;
+        private Map<String, Object> extras;
 
         @Override
         public boolean equals(Object other) {
@@ -391,7 +418,8 @@ public class MultiSecurityRealmTest {
 
             return Objects.equals(realm, otherResponse.getRealm()) &&
                 Objects.equals(nextAuthenticationStep, otherResponse.getNextAuthenticationStep()) &&
-                (token == null ? otherResponse.getToken() == null : (token.equals("ANY") || Objects.equals(token, otherResponse.getToken())));
+                (token == null ? otherResponse.getToken() == null : (token.equals("ANY") || Objects.equals(token, otherResponse.getToken()))) &&
+                (extras == null || Objects.equals(extras, otherResponse.getExtras()));
         }
     }
 

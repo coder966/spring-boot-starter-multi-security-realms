@@ -70,6 +70,8 @@ public class SecurityRealmControllerAdvice implements ResponseBodyAdvice<Object>
 
         response.nextAuthenticationStep = auth.getNextAuthenticationStep();
 
+        response.extras = auth.getExtras();
+
         return response;
     }
 

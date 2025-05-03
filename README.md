@@ -214,7 +214,8 @@ Rendered username+password form and submitted, and got:
     "realm": "ADMIN_USER",
     "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjoiT1RQIiwiYXV0aG9yaXRpZXMiOltdLCJleHAiOjE3NDYxMzcwMDN9.T-C2LO5DmawUXG6XuhyqTH9hxc8VIE4nF1u2_u2a_Xqw4SRbMpJ7Aq--AwcEA-jzSj6Si9_O1V21P-mkKU31FQ",
     "tokenType": "Bearer",
-    "expiresInSeconds": 300
+    "expiresInSeconds": 300,
+    "extras": {}
 }
 ```
 
@@ -228,7 +229,8 @@ Rendered OTP form and submitted again, and got:
     "realm": "ADMIN_USER",
     "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjpudWxsLCJhdXRob3JpdGllcyI6W10sImV4cCI6MTc0NjEzNzA3OX0.OYwacoHwO6iS-t3JXe0Fw0xKMIjBTypaasNJIghrdPW9RZMGzaghxCw1GYSz5p6E7c8dIubLKkvRf-QAhGIxVA",
     "tokenType": "Bearer",
-    "expiresInSeconds": 300
+    "expiresInSeconds": 300,
+    "extras": {}
 }
 ```
 
@@ -272,6 +274,41 @@ You can also specify global values using the configuration properties:
 
 - `security-realm.signing-secret`
 - `security-realm.token-expiration-duration`
+
+### Pass extra data to the response in success authentication
+
+You can put extra data (key-value pairs) in the authentication object, which will appear in the authentication response under the key `extras`.
+
+#### Example code
+
+```java
+
+@AuthenticationStep(Constants.StepNames.OTP)
+public SecurityRealmAuthentication otpAuthenticationStep(@RequestBody AuthOtpStepRequest request) {
+    SecurityRealmAuthentication previousStepAuth = (SecurityRealmAuthentication) SecurityContextHolder.getContext().getAuthentication();
+
+    // code
+
+    return new SecurityRealmAuthentication(user.getUsername(), null).addExtra("countBadges", user.getBadges().size());
+}
+```
+
+#### Example response
+
+```json
+{
+    "realm": "ADMIN_USER",
+    "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJyZWFsbSI6IkFETUlOX1VTRVIiLCJzdWIiOiJraGFsaWQiLCJhdXRob3JpdGllcyI6W10sIm5leHRBdXRoZW50aWNhdGlvblN0ZXAiOm51bGwsImV4cCI6MTc0NjI5MjU4MX0.JWxJKEU5mOsDA4czZV1ZdpxqLpNefrkeVmc-wmb3r4YmT5pVS3EBJi8jW-0ohne7q8VsQ5WYx4e3vW0OIgw4ig",
+    "tokenType": "Bearer",
+    "expiresInSeconds": 300,
+    "name": "khalid",
+    "authorities": [],
+    "nextAuthenticationStep": null,
+    "extras": {
+        "countBadges": 0
+    }
+}
+```
 
 ### I want to define my own `SecurityFilterChain`
 

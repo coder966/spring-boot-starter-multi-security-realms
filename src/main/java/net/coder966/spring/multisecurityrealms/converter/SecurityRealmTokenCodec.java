@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
@@ -38,6 +39,8 @@ public class SecurityRealmTokenCodec {
 
             .withClaim("nextAuthenticationStep", authentication.getNextAuthenticationStep())
 
+            .withClaim("extras", authentication.getExtras())
+
             .withExpiresAt(Instant.now().plus(ttl))
             .sign(algorithm);
     }
@@ -58,9 +61,14 @@ public class SecurityRealmTokenCodec {
 
             String nextAuthenticationStep = decodedJWT.getClaim("nextAuthenticationStep").asString();
 
+            Map<String, Object> extras = decodedJWT.getClaim("extras").asMap();
+
             SecurityRealmAuthentication auth = new SecurityRealmAuthentication(username, authorities, nextAuthenticationStep);
 
+            extras.forEach(auth::addExtra);
+
             auth._UNSAFE_overrideRealm(realmName);
+
             return auth;
         }catch(Exception e){
             return null;

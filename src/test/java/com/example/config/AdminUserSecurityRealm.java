@@ -83,6 +83,6 @@ public class AdminUserSecurityRealm {
         user.setOtp(otp);
         user = adminUserRepo.save(user);
 
-        return new SecurityRealmAuthentication(user.getUsername(), null);
+        return new SecurityRealmAuthentication(user.getUsername(), null).addExtra("countBadges", user.getBadges().size());
     }
 }
