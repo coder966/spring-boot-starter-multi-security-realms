@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0] - 2025-05-03
+
+- **Breaking**: Error response from authentication endpoints now has HTTP status `400` instead of `401`.
+- **Breaking**: Error response from authentication endpoints now has HTTP body containing only the `error` key; since other fields are irrelevant and should not
+  be read by the client in case of error.
+- Added `tokenType` and `expiresInSeconds` to success response.
+- Added the ability to put extra data (key-value pairs) in the authentication object, which will appear in the authentication response.
+- Added optional `errorDescription` to error response, based on if you add it to `SecurityRealmAuthenticationException`.
+- Internal enhancements.
+
 ## [0.2.1] - 2025-05-03
 
 - Fix the default exception handler for `SecurityRealmAuthenticationException` was not invoked if the user defines a custom `@ControllerAdvice`, even if they
