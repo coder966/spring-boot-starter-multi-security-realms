@@ -10,14 +10,12 @@ import org.springframework.security.core.GrantedAuthority;
 @JsonIgnoreProperties({"authenticated", "credentials", "details", "principal"})
 public class SecurityRealmAuthentication implements Authentication {
 
-    private boolean isAuthenticated;
+    private String realm;
 
     private final String name;
     private final Set<? extends GrantedAuthority> authorities;
+
     private final String nextAuthenticationStep;
-
-    private String realm;
-
     private String error;
 
 
@@ -34,7 +32,6 @@ public class SecurityRealmAuthentication implements Authentication {
     public SecurityRealmAuthentication(String name, Set<? extends GrantedAuthority> authorities, String nextAuthenticationStep) {
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
-        this.isAuthenticated = nextAuthenticationStep == null;
         this.nextAuthenticationStep = nextAuthenticationStep;
         this.realm = SecurityRealmContext.getDescriptor() == null ? null : SecurityRealmContext.getDescriptor().getName();
     }
@@ -84,12 +81,12 @@ public class SecurityRealmAuthentication implements Authentication {
 
     @Override
     public boolean isAuthenticated() {
-        return isAuthenticated;
+        return nextAuthenticationStep == null;
     }
 
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-        this.isAuthenticated = isAuthenticated;
+        throw new UnsupportedOperationException("SecurityRealmAuthentication does not support setAuthenticated(boolean)");
     }
 
     @Override

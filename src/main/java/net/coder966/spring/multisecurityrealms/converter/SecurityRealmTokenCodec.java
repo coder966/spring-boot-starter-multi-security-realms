@@ -27,10 +27,13 @@ public class SecurityRealmTokenCodec {
     public String encode(SecurityRealmAuthentication authentication) {
         return JWT
             .create()
-            .withSubject(authentication.getName())
             .withClaim("realm", authentication.getRealm())
-            .withClaim("nextAuthenticationStep", authentication.getNextAuthenticationStep())
+
+            .withSubject(authentication.getName())
             .withClaim("authorities", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+
+            .withClaim("nextAuthenticationStep", authentication.getNextAuthenticationStep())
+
             .withExpiresAt(Instant.now().plus(ttl))
             .sign(algorithm);
     }
@@ -40,14 +43,16 @@ public class SecurityRealmTokenCodec {
             DecodedJWT decodedJWT = verifier.verify(token);
 
             String realmName = decodedJWT.getClaim("realm").asString();
+
             String username = decodedJWT.getSubject();
-            String nextAuthenticationStep = decodedJWT.getClaim("nextAuthenticationStep").asString();
             Set<GrantedAuthority> authorities = decodedJWT
                 .getClaim("authorities")
                 .asList(String.class)
                 .stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
+
+            String nextAuthenticationStep = decodedJWT.getClaim("nextAuthenticationStep").asString();
 
             SecurityRealmAuthentication auth = new SecurityRealmAuthentication(username, authorities, nextAuthenticationStep);
             auth.setRealm(realmName);
