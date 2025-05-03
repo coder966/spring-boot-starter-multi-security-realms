@@ -1,19 +1,17 @@
 package net.coder966.spring.multisecurityrealms.advice;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-import java.util.Collections;
 import java.util.stream.Collectors;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
-import net.coder966.spring.multisecurityrealms.dto.SecurityRealmAuthenticationResponse;
+import net.coder966.spring.multisecurityrealms.dto.SecurityRealmAuthenticationErrorResponse;
+import net.coder966.spring.multisecurityrealms.dto.SecurityRealmAuthenticationSuccessResponse;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationAlreadyAuthenticatedException;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationException;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -30,17 +28,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 public class SecurityRealmControllerAdvice implements ResponseBodyAdvice<Object> {
 
     @ExceptionHandler(SecurityRealmAuthenticationException.class)
-    public ResponseEntity<SecurityRealmAuthenticationResponse> handleAuthError(SecurityRealmAuthenticationException e) {
-        SecurityRealmAuthentication currentAuth = (SecurityRealmAuthentication) SecurityContextHolder.getContext().getAuthentication();
-        SecurityRealmAuthenticationResponse response = mapError(currentAuth, e);
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    public ResponseEntity<SecurityRealmAuthenticationErrorResponse> handleAuthError(SecurityRealmAuthenticationException e) {
+        return ResponseEntity.status(400).body(mapError(e));
     }
 
     @ExceptionHandler(SecurityRealmAuthenticationAlreadyAuthenticatedException.class)
-    public ResponseEntity<SecurityRealmAuthenticationResponse> handleAlreadyAuthenticated(SecurityRealmAuthenticationAlreadyAuthenticatedException e) {
+    public ResponseEntity<SecurityRealmAuthenticationSuccessResponse> handleAlreadyAuthenticated(SecurityRealmAuthenticationAlreadyAuthenticatedException e) {
         SecurityRealmAuthentication currentAuth = (SecurityRealmAuthentication) SecurityContextHolder.getContext().getAuthentication();
-        SecurityRealmAuthenticationResponse response = mapSuccess(currentAuth);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(mapSuccess(currentAuth));
     }
 
     @Override
@@ -60,8 +55,8 @@ public class SecurityRealmControllerAdvice implements ResponseBodyAdvice<Object>
         return mapSuccess(auth);
     }
 
-    private SecurityRealmAuthenticationResponse mapSuccess(@Nonnull SecurityRealmAuthentication auth) {
-        SecurityRealmAuthenticationResponse response = new SecurityRealmAuthenticationResponse();
+    private SecurityRealmAuthenticationSuccessResponse mapSuccess(@Nonnull SecurityRealmAuthentication auth) {
+        var response = new SecurityRealmAuthenticationSuccessResponse();
 
         response.realm = SecurityRealmContext.getDescriptor().getName();
 
@@ -69,27 +64,15 @@ public class SecurityRealmControllerAdvice implements ResponseBodyAdvice<Object>
         response.authorities = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 
         response.token = SecurityRealmContext.getDescriptor().getSecurityRealmTokenCodec().encode(auth);
+
         response.nextAuthenticationStep = auth.getNextAuthenticationStep();
 
         return response;
     }
 
-    private SecurityRealmAuthenticationResponse mapError(@Nullable SecurityRealmAuthentication auth, @Nonnull SecurityRealmAuthenticationException e) {
-        SecurityRealmAuthenticationResponse response = new SecurityRealmAuthenticationResponse();
+    private SecurityRealmAuthenticationErrorResponse mapError(@Nonnull SecurityRealmAuthenticationException e) {
+        var response = new SecurityRealmAuthenticationErrorResponse();
 
-        response.realm = SecurityRealmContext.getDescriptor().getName();
-
-        if(auth == null){
-            response.name = null;
-            response.authorities = Collections.emptySet();
-            response.token = null;
-        }else{
-            response.name = auth.getName();
-            response.authorities = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
-            response.token = SecurityRealmContext.getDescriptor().getSecurityRealmTokenCodec().encode(auth);
-        }
-
-        response.nextAuthenticationStep = SecurityRealmContext.getCurrentStep();
         response.error = e.getMessage();
 
         return response;

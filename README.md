@@ -195,14 +195,16 @@ public class AdminUserSecurityRealm {
 ### Client Application (Frontend)
 
 - The client app should call the realm authentication endpoint.
-- You will receive a JWT token in the response body as a string.
-- Store this token and pass in all subsequent requests in the `Authorization` header.
+- You will receive an access token in the response body field `token`, store it and pass it to all subsequent requests in the `Authorization` header.
 - If the realm requires additional authentication steps from you (MFA),
-  you will see the required authentication step name in the response body `nextAuthenticationStep`. Render this step form and again submit to the same
-  authentication endpoint.
-- In any case, if there is an error in the authentication (for example, bad credentials), you will receive the error in the response body `error`.
+  you will see the required authentication step name in the response body field `nextAuthenticationStep`. Redirect the user or
+  render this step form and again submit to the same authentication endpoint.
+- In any case, if there is an error in the authentication (for example, bad credentials, bad otp, etc...), you will receive the error in the response body field
+  `error`, and the HTTP status will be `400`.
 
 #### Sample Response (success)
+
+Rendered username+password form and submitted, and got:
 
 ```json
 {
@@ -210,10 +212,11 @@ public class AdminUserSecurityRealm {
     "authorities": [],
     "nextAuthenticationStep": "OTP",
     "realm": "ADMIN_USER",
-    "error": null,
     "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjoiT1RQIiwiYXV0aG9yaXRpZXMiOltdLCJleHAiOjE3NDYxMzcwMDN9.T-C2LO5DmawUXG6XuhyqTH9hxc8VIE4nF1u2_u2a_Xqw4SRbMpJ7Aq--AwcEA-jzSj6Si9_O1V21P-mkKU31FQ"
 }
 ```
+
+Rendered OTP form and submitted again, and got:
 
 ```json
 {
@@ -221,21 +224,15 @@ public class AdminUserSecurityRealm {
     "authorities": [],
     "nextAuthenticationStep": null,
     "realm": "ADMIN_USER",
-    "error": null,
     "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJraGFsaWQiLCJyZWFsbSI6IkFETUlOX1VTRVIiLCJuZXh0QXV0aGVudGljYXRpb25TdGVwIjpudWxsLCJhdXRob3JpdGllcyI6W10sImV4cCI6MTc0NjEzNzA3OX0.OYwacoHwO6iS-t3JXe0Fw0xKMIjBTypaasNJIghrdPW9RZMGzaghxCw1GYSz5p6E7c8dIubLKkvRf-QAhGIxVA"
 }
 ```
 
-#### Sample Response (error)
+#### Sample Response (error) status = 400
 
 ```json
 {
-    "name": null,
-    "authorities": [],
-    "nextAuthenticationStep": "USERNAME_AND_PASSWORD",
-    "realm": "ADMIN_USER",
-    "error": "BAD_CREDENTIALS",
-    "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOm51bGwsInJlYWxtIjoiQURNSU5fVVNFUiIsIm5leHRBdXRoZW50aWNhdGlvblN0ZXAiOiJVU0VSTkFNRV9BTkRfUEFTU1dPUkQiLCJhdXRob3JpdGllcyI6W10sImV4cCI6MTc0NjEzNDM4NX0.k-zw8IKbtrLXTg-fCkjbgL7mUUYap8sTMRnDYEth9rKGT0B95iTCI6cuMVbpRaalwnMOgfJPPoMNm0vPPjp6xQ"
+    "error": "BAD_CREDENTIALS"
 }
 ```
 
