@@ -1,13 +1,11 @@
 package net.coder966.spring.multisecurityrealms.authentication;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.HashSet;
 import java.util.Set;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-@JsonIgnoreProperties({"authenticated", "credentials", "details", "principal"})
 public class SecurityRealmAuthentication implements Authentication {
 
     private String realm;
@@ -16,7 +14,6 @@ public class SecurityRealmAuthentication implements Authentication {
     private final Set<? extends GrantedAuthority> authorities;
 
     private final String nextAuthenticationStep;
-    private String error;
 
 
     /**
@@ -42,17 +39,6 @@ public class SecurityRealmAuthentication implements Authentication {
 
     public String getNextAuthenticationStep() {
         return nextAuthenticationStep;
-    }
-
-    /**
-     * to appear in the JSON response
-     */
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
     }
 
     @Override
@@ -101,13 +87,6 @@ public class SecurityRealmAuthentication implements Authentication {
     @Override
     public int hashCode() {
         return this.getPrincipal().hashCode();
-    }
-
-    /**
-     * to appear in the JSON response
-     */
-    public String getToken() {
-        return SecurityRealmContext.getDescriptor().getSecurityRealmTokenCodec().encode(this);
     }
 
     /**
