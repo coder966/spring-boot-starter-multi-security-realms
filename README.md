@@ -245,6 +245,99 @@ Rendered OTP form and submitted again, and got:
 }
 ```
 
+#### Full Sample Client (React App NextJS)
+
+```tsx
+'use client'
+
+import {RruForm, RruTextInput} from "react-rich-ui";
+import validationSchemas from "@/utils/validationSchemas";
+import * as yup from "yup";
+import React, {useEffect} from "react";
+import Image from "next/image";
+import LoadingService from "@/service/LoadingService";
+import {useRouter} from "next/navigation";
+import AuthApis, {AuthenticationStep} from "@/client/AuthApis";
+import DialogService from "@/service/DialogService";
+
+export default function Login() {
+    const router = useRouter();
+    const [step, setStep] = React.useState<AuthenticationStep>('USERNAME_PASSWORD');
+
+    useEffect(() => {
+        if (!step) {
+            router.replace("/protected");
+        }
+    }, [step]);
+
+    const usernamePasswordFormSchema = yup.object().shape({
+        username: validationSchemas.username(true),
+        password: validationSchemas.password(true),
+    })
+
+    const otpFormSchema = yup.object().shape({
+        otp: validationSchemas.otp(true),
+    })
+
+    const onSubmitUsernamePassword = async (form) => {
+        try {
+            LoadingService.start();
+            const res = await AuthApis.usernamePassword(form.username, form.password);
+            localStorage.setItem("token", res.token);
+            setStep(res.nextAuthenticationStep);
+        } catch (error) {
+            DialogService.showError(error);
+        } finally {
+            LoadingService.stop();
+        }
+    }
+
+    const onSubmitOtp = async (form) => {
+        try {
+            LoadingService.start();
+            const res = await AuthApis.otp(form.otp);
+            localStorage.setItem("token", res.token);
+            setStep(res.nextAuthenticationStep);
+        } catch (error) {
+            DialogService.showError(error);
+        } finally {
+            LoadingService.stop();
+        }
+    }
+
+    return (
+            <div className="container d-flex align-items-center justify-content-center min-vh-100">
+                <div className="w-100" style={{maxWidth: '400px'}}>
+
+                    <Image src={'/images/logo.svg'} width={70} height={70} className="ms-auto me-auto mb-4" alt={'logo'}/>
+
+                    {step === 'USERNAME_PASSWORD' && (
+                            <RruForm onSubmit={onSubmitUsernamePassword} yupValidationSchema={usernamePasswordFormSchema}>
+                                <div className="mb-3">
+                                    <RruTextInput name={'username'} label={'Username'} autoComplete={'username'} requiredAsterisk={true}/>
+                                </div>
+                                <div className="mb-3">
+                                    <RruTextInput name={'password'} label={'Password'} autoComplete={'password'} requiredAsterisk={true}/>
+                                </div>
+                                <button type="submit" className="btn btn-primary w-100">Login</button>
+                            </RruForm>
+                    )}
+
+                    {step === 'OTP' && (
+                            <RruForm onSubmit={onSubmitOtp} yupValidationSchema={otpFormSchema}>
+                                <div className="mb-3">
+                                    <RruTextInput name={'otp'} label={'OTP'} autoComplete={'otp'} requiredAsterisk={true} maxLength={4}/>
+                                </div>
+                                <button type="submit" className="btn btn-primary w-100">Login</button>
+                            </RruForm>
+                    )}
+
+                </div>
+            </div>
+    );
+}
+```
+
 ### Realm Protected APIs
 
 To protect an api so that it can only be used by a certain realm users, you can use `@PreAuthorize("permitRealm('<realm-role-name>')")`.
