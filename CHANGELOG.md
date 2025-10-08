@@ -1,8 +1,12 @@
 # Changelog
 
+## [0.4.0] - 2025-10-09
+
+- Support websockets.
+
 ## [0.3.1] - 2025-05-04
 
-- Support tokens generated before "extras" feature was introduced.
+- Fix: support tokens generated before version `0.3.0`.
 
 ## [0.3.0] - 2025-05-03
 
