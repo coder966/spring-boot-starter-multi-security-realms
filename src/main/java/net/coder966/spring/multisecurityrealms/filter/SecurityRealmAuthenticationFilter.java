@@ -116,7 +116,17 @@ public class SecurityRealmAuthenticationFilter {
     }
 
     private String extractTokenFromRequest(HttpServletRequest request) {
-        String authorization = request.getHeader("Authorization");
+        String authorization;
+
+        if(isWebsocketUpgradeRequest(request)){
+            // if the request is a websocket upgrade, we support passing the token in Authorization param or token param (case-sensitive)
+            authorization = request.getParameter("Authorization");
+            if(authorization == null){
+                authorization = request.getParameter("token");
+            }
+        }else{
+            authorization = request.getHeader("Authorization");
+        }
 
         if(authorization != null){
             if(authorization.toUpperCase().startsWith("BEARER ")){
@@ -149,6 +159,18 @@ public class SecurityRealmAuthenticationFilter {
             return false;
         }
 
+        return true;
+    }
+
+    private boolean isWebsocketUpgradeRequest(HttpServletRequest request){
+        String connectionHeader = request.getHeader("Connection");
+        if(connectionHeader == null || !connectionHeader.equalsIgnoreCase("Upgrade")){
+            return false;
+        }
+        String upgradeHeader = request.getHeader("Upgrade");
+        if(upgradeHeader == null || !upgradeHeader.equalsIgnoreCase("websocket")){
+            return false;
+        }
         return true;
     }
 

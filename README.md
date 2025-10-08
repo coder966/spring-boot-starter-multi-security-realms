@@ -449,6 +449,20 @@ public class SecurityConfig {
 }
 ```
 
+### WebSocket Support
+
+If you have a websocket endpoint configured in your application, you have two options to connect to it:
+- If the websocket should be available for anonymous users, make the endpoint open (as explained above).
+- If the websocket should be available for authorized users only, then pass the token as a query parameter in the ws connection url. The parameter name could either be `Authorization` or `token`. Please note that this is case-sensitive.
+  - Example 1: `ws://localhost:8080/ws?Authorization=eyJhbG.......`
+  - Example 2: `ws://localhost:8080/ws?token=eyJhbG.......`
+
+#### Special note on websocket security:
+This library only supports authentication and authorization for the initial websocket hande-shake.
+If you need to handle security for STOMP protocol (SUBSCRIBE/SEND), you need to configure your app accordingly.
+You can still access `SecurityContextHolder` which will be populated by this library.
+
+
 ## License
 
 ```txt
