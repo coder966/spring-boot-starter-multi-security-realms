@@ -80,6 +80,7 @@ public class SecurityRealmAuthenticationFilter {
         if(auth != null && auth.isAuthenticated()){
             exceptionResolvers
                 .forEach(resolver -> resolver.resolveException(request, response, null, new SecurityRealmAuthenticationAlreadyAuthenticatedException()));
+            return;
         }
 
 
