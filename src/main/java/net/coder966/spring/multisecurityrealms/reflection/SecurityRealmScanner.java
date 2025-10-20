@@ -2,13 +2,14 @@ package net.coder966.spring.multisecurityrealms.reflection;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.coder966.spring.multisecurityrealms.annotation.AnonymousAccess;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.annotation.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
@@ -18,10 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -33,6 +38,10 @@ public class SecurityRealmScanner {
     private final Environment env;
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
+    // scan result
+    private Collection<SecurityRealmDescriptor> descriptors;
+    private List<RequestMatcher> anonymousRequestMatchers;
+
     public SecurityRealmScanner(ApplicationContext context, Environment env) {
         this.context = context;
         this.env = env;
@@ -43,15 +52,23 @@ public class SecurityRealmScanner {
         this.requestMappingHandlerMapping = context.getBeansOfType(RequestMappingHandlerMapping.class).values().stream().findFirst().get();
     }
 
-    public Collection<SecurityRealmDescriptor> scan() {
-        Map<String, Object> beans = context.getBeansWithAnnotation(SecurityRealm.class);
-        return buildDescriptors(beans.values());
+    public void scan() {
+        scanForSecurityRealms();
+        scanForAnonymousAccess();
     }
 
-    private Collection<SecurityRealmDescriptor> buildDescriptors(Collection<Object> beans) {
+    public Collection<SecurityRealmDescriptor> getDescriptors() {
+        return descriptors;
+    }
+
+    public List<RequestMatcher> getAnonymousRequestMatchers() {
+        return anonymousRequestMatchers;
+    }
+
+    private void scanForSecurityRealms() {
         Map<String, SecurityRealmDescriptor> descriptors = new HashMap<>();
 
-        for(Object bean : beans){
+        for(Object bean : context.getBeansWithAnnotation(SecurityRealm.class).values()){
             final SecurityRealm realmAnnotation = bean.getClass().getSuperclass().getAnnotation(SecurityRealm.class);
 
             validateRealmAnnotation(realmAnnotation);
@@ -60,7 +77,6 @@ public class SecurityRealmScanner {
                 realmAnnotation.name(),
                 buildAuthenticationEndpointRequestMatcher(realmAnnotation),
                 realmAnnotation.firstStepName(),
-                buildPublicApisRequestMatchers(realmAnnotation),
                 buildSecurityRealmTokenCodec(realmAnnotation)
             );
 
@@ -72,7 +88,7 @@ public class SecurityRealmScanner {
             descriptors.put(realmAnnotation.name(), descriptor);
         }
 
-        return descriptors.values();
+        this.descriptors = descriptors.values();
     }
 
     private void validateRealmAnnotation(SecurityRealm realmAnnotation) {
@@ -130,20 +146,6 @@ public class SecurityRealmScanner {
         }
     }
 
-    private List<RequestMatcher> buildPublicApisRequestMatchers(SecurityRealm realmAnnotation) {
-        List<RequestMatcher> requestMatchers = new ArrayList<>(realmAnnotation.publicApis().length);
-        for(String pattern : realmAnnotation.publicApis()){
-            try{
-                requestMatchers.add(new AntPathRequestMatcher(pattern));
-            }catch(Exception e){
-                throw new IllegalArgumentException(
-                        "Invalid publicApis (" + pattern + ") for SecurityRealm (" + realmAnnotation.name() + ")"
-                );
-            }
-        }
-        return requestMatchers;
-    }
-
     private SecurityRealmTokenCodec buildSecurityRealmTokenCodec(SecurityRealm realmAnnotation) {
         SecurityRealmConfigurationProperties defaultProperties = context.getBean(SecurityRealmConfigurationProperties.class);
 
@@ -173,4 +175,46 @@ public class SecurityRealmScanner {
 
         return new SecurityRealmTokenCodec(signingSecret, tokenExpirationDuration);
     }
+
+    private void scanForAnonymousAccess() {
+        List<RequestMatcher> requestMatchers = new LinkedList<>();
+
+        // use map, so that if a class is annotated with both @Controller and @RestController we don't process it twice
+        Map<String, Object> beansMap = new HashMap<>();
+        beansMap.putAll(context.getBeansWithAnnotation(Controller.class));
+        beansMap.putAll(context.getBeansWithAnnotation(RestController.class));
+
+        for(Object bean : beansMap.values()){
+            Method[] methods = bean.getClass().getDeclaredMethods();
+            for(Method method : methods){
+                if(!method.isAnnotationPresent(AnonymousAccess.class)){
+                    continue;
+                }
+
+                RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
+
+                if(requestMapping == null){
+                    throw new IllegalArgumentException(
+                        "@AnonymousAccess should be used on controller mapping methods only. The method (" + method + ") is not a controller method."
+                    );
+                }
+
+                String[] paths = requestMapping.path();
+                RequestMethod[] requestMethods = requestMapping.method();
+
+                for (String path : paths) {
+                    if (requestMethods.length == 0) { // No method restriction
+                        requestMatchers.add(new AntPathRequestMatcher(path));
+                    } else {
+                        for (RequestMethod requestMethod : requestMethods) {
+                            requestMatchers.add(new AntPathRequestMatcher(path, requestMethod.name()));
+                        }
+                    }
+                }
+            }
+        }
+
+        this.anonymousRequestMatchers = requestMatchers;
+    }
+
 }

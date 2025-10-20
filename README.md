@@ -18,16 +18,25 @@ These different user types are probably authenticated (login mechanism/flow/step
 Configuring this in Spring can be tricky and a bit complicated. You can even potentially introduce security bugs if you try to implement these features
 manually.
 
-## Why `spring-boot-starter-multi-security-realms`
+## Multi-Factor Authentication (MFA) / Multi-Step Authentication
 
-This library allows you to easily and declaratively define these realms. It also brings extra features like:
+#### For example: username & password step, then OTP step, etc...
 
-- Multi-steps authentication support (aka Multi-Factor Authentication MFA). For example: username & password step, then OTP step, etc... You don't have to think
-  about how to implement this, just use the built-in support.
-- Ability to define public apis per realm without the need to access and update the `SecurityFilterChain` manually.
-  This is helpful if your application is huge, and you want to define public apis in segregated modules without the need to define them in a central place.
-- You still have full control and can define custom `SecurityFilterChain`s if you wish. By default,
-  this library creates a default `SecurityFilterChain` and injects the multi realm support into it.
+Often it's hard to implement MFA securely. Some issues we let you avoid when using this library:
+- Protect against user jumping steps (directly calling the final step api).
+- Protect against completed-step data being sent for subsequent step api call.
+  For example, we don't need and shouldn't send username & password to the otp step. This is often a discouraged approach, which we handle for you.
+- Stateless, no need to keep track of user current step in your db or any persistence layer.
+
+## Other Features
+In addition to supporting multiple realms and MFA, we also provide these features:
+
+- Declarative approach using annotations. No manual configurations.
+- Ability to define public apis directly using `@AnonymousAccess`.
+  - Just annotate your `@GetMapping` or similar methods with `@AnonymousAccess` and you are good to go.
+  - No need to get your hands dirty with `SecurityFilterChain`.
+- You still have full control and can define custom `SecurityFilterChain`s if you wish.
+  By default, this library creates a default `SecurityFilterChain` and injects the multi realm support into it.
 
 ## Usage
 
@@ -67,13 +76,9 @@ Here in this example, we define two realms (normal-user & admin-user).
 @SecurityRealm(
         name = "NORMAL_USER",
         authenticationEndpoint = "/normal-user/auth",
-        firstStepName = StepNames.USERNAME_AND_PASSWORD,
+        firstStepName = StepNames.USERNAME_AND_PASSWORD
         //    signingSecret = "", // not specified, will use default configured under security-realm.*
-        //    tokenExpirationDuration = "", // not specified, will use default configured under security-realm.*
-        publicApis = {
-                "/my-third-open-api",
-                "/my-forth-open-api"
-        }
+        //    tokenExpirationDuration = "" // not specified, will use default configured under security-realm.*
 )
 public class NormalUserSecurityRealm {
 
@@ -120,7 +125,7 @@ public class NormalUserSecurityRealm {
         }
 
         // clear otp
-        user.setOtp(otp);
+        user.setOtp(null);
         user = normalUserRepo.save(user);
 
         return new SecurityRealmAuthentication(user.getUsername(), null);
@@ -137,11 +142,7 @@ public class NormalUserSecurityRealm {
         authenticationEndpoint = "/admin-user/auth",
         firstStepName = StepNames.USERNAME_AND_PASSWORD,
         signingSecret = "${my-app.admin-realm-jwt-secret}",
-        tokenExpirationDuration = "5m", // 5 minutes
-        publicApis = {
-                "/my-first-open-api",
-                "/my-second-open-api"
-        }
+        tokenExpirationDuration = "5m" // 5 minutes
 )
 public class AdminUserSecurityRealm {
 
@@ -186,7 +187,7 @@ public class AdminUserSecurityRealm {
         }
 
         // clear otp
-        user.setOtp(otp);
+        user.setOtp(null);
         user = adminUserRepo.save(user);
 
         return new SecurityRealmAuthentication(user.getUsername(), null);
@@ -358,6 +359,25 @@ public class AdminUserController {
         return authentication.getName(); // username
     }
 
+}
+```
+
+### Public APIs
+
+To indicate an api is public and can be accessed without authentication, use `@AnonymousAccess`.
+
+Example:
+
+```java
+@RestController
+@RequestMapping("/lookup")
+public class PublicController {
+
+    @AnonymousAccess
+    @GetMapping("/cities")
+    public List<String> getCities() {
+        return "This endpoint is open to everyone.";
+    }
 }
 ```
 

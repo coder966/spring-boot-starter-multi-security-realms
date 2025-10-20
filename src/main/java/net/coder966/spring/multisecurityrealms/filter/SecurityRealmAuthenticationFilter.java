@@ -1,27 +1,21 @@
 package net.coder966.spring.multisecurityrealms.filter;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAnonymousAuthentication;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationAlreadyAuthenticatedException;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmDescriptor;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-public class SecurityRealmAuthenticationFilter {
+public class SecurityRealmAuthenticationFilter extends AbstractAuthenticationFilter {
 
     private final SecurityRealmDescriptor descriptor;
     private final HttpServlet httpServlet;
@@ -37,11 +31,7 @@ public class SecurityRealmAuthenticationFilter {
         return request.getMethod().equals("POST") && descriptor.getAuthenticationEndpointRequestMatcher().matches(request);
     }
 
-    private boolean matchesPublicApi(HttpServletRequest request) {
-        return descriptor.getPublicApisRequestMatchers().stream().anyMatch(requestMatcher -> requestMatcher.matches(request));
-    }
-
-    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public boolean handle(HttpServletRequest request, HttpServletResponse response){
         SecurityRealmContext.setDescriptor(descriptor);
 
         SecurityRealmAuthentication auth = extractAuthenticationFromRequest(request);
@@ -54,29 +44,17 @@ public class SecurityRealmAuthenticationFilter {
 
         if(matchesLogin(request)){
             handleLogin(request, response, auth);
-            return true;
+            return true; // to stop the filter chain
         }
 
         // cleanup
         SecurityRealmContext.setDescriptor(null);
         SecurityRealmContext.setCurrentStep(null);
 
-
-        if(matchesPublicApi(request)){
-            if(auth == null || !auth.isAuthenticated()){
-                // don't use AnonymousAuthenticationToken because it will be rejected down via AuthorizationFilter
-                setAuthenticationInContext(new SecurityRealmAnonymousAuthentication());
-            }
-
-            // don't return true; as we need to continue the filter chain on order to reach the servlet controller
-            return false;
-        }
-
-        // anything else
         return false;
     }
 
-    private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth) throws ServletException, IOException {
+    private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth){
         if(auth != null && auth.isAuthenticated()){
             exceptionResolvers
                 .forEach(resolver -> resolver.resolveException(request, response, null, new SecurityRealmAuthenticationAlreadyAuthenticatedException()));
@@ -100,7 +78,11 @@ public class SecurityRealmAuthenticationFilter {
             }
         };
 
-        httpServlet.service(wrapped, response);
+        try{
+            httpServlet.service(wrapped, response);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
     }
 
     private SecurityRealmAuthentication extractAuthenticationFromRequest(HttpServletRequest request) {
@@ -137,30 +119,6 @@ public class SecurityRealmAuthenticationFilter {
         }
 
         return null;
-    }
-
-    private void setAuthenticationInContext(Authentication authentication) {
-        if(doesContextHoldStrongerAuthentication(authentication)){
-            return;
-        }
-
-        SecurityContext newContext = SecurityContextHolder.createEmptyContext();
-        newContext.setAuthentication(authentication);
-        SecurityContextHolder.setContext(newContext);
-    }
-
-    private boolean doesContextHoldStrongerAuthentication(Authentication newAuth) {
-        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
-
-        if(currentAuth == null){
-            return false;
-        }
-
-        if(!currentAuth.isAuthenticated() && newAuth.isAuthenticated()){
-            return false;
-        }
-
-        return true;
     }
 
     private boolean isWebsocketUpgradeRequest(HttpServletRequest request){

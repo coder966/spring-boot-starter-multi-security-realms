@@ -22,11 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
     authenticationEndpoint = "/admin-user/auth",
     firstStepName = Constants.StepNames.USERNAME_AND_PASSWORD,
     signingSecret = "${my-app.admin-realm-jwt-secret}",
-    tokenExpirationDuration = "5m", // 5 minutes
-    publicApis = {
-        "/my-first-open-api",
-        "/my-second-open-api"
-    }
+    tokenExpirationDuration = "5m" // 5 minutes
 )
 public class AdminUserSecurityRealm {
 
@@ -82,7 +78,7 @@ public class AdminUserSecurityRealm {
         }
 
         // clear otp
-        user.setOtp(otp);
+        user.setOtp(null);
         user = adminUserRepo.save(user);
 
         return new SecurityRealmAuthentication(user.getUsername(), null).addExtra("countBadges", user.getBadges().size());

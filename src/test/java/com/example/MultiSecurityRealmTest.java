@@ -128,32 +128,20 @@ public class MultiSecurityRealmTest {
     }
 
     @Test
-    public void testAccessingOpenApis() {
-        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "testAccessingOpenApis");
-
-        client
-            .request(HttpMethod.GET, "/my-third-open-api")
-            .exchange(String.class)
-            .expectStatus(200)
-            .expectBody("Normal User Open API");
-
-        client
-            .request(HttpMethod.GET, "/my-forth-open-api")
-            .exchange(String.class)
-            .expectStatus(200)
-            .expectBody("Normal User Open API");
+    public void testAccessingPublicApis() {
+        BrowserEmulatorTestHttpClient client = new BrowserEmulatorTestHttpClient(port, "testAccessingPublicApis");
 
         client
             .request(HttpMethod.GET, "/my-first-open-api")
             .exchange(String.class)
             .expectStatus(200)
-            .expectBody("Admin User Open API");
+            .expectBody("my-first-open-api");
 
         client
             .request(HttpMethod.GET, "/my-second-open-api")
             .exchange(String.class)
             .expectStatus(200)
-            .expectBody("Admin User Open API");
+            .expectBody("my-second-open-api");
     }
 
     @Test
@@ -320,21 +308,13 @@ public class MultiSecurityRealmTest {
             .expectBody(new SuccessResponse("ADMIN_USER", "ANY", Constants.StepNames.OTP, null))
             .readBody();
 
-        // public api from the same realm
+        // public api
         client
             .request(HttpMethod.GET, "/my-first-open-api")
             .header("Authorization", loginResponse.getToken())
             .exchange(String.class)
             .expectStatus(200)
-            .expectBody("Admin User Open API");
-
-        // public api from the another realm
-        client
-            .request(HttpMethod.GET, "/my-forth-open-api")
-            .header("Authorization", loginResponse.getToken())
-            .exchange(String.class)
-            .expectStatus(200)
-            .expectBody("Normal User Open API");
+            .expectBody("my-first-open-api");
 
         // fully authenticated
         loginResponse = client
@@ -346,21 +326,13 @@ public class MultiSecurityRealmTest {
             .expectBody(new SuccessResponse("ADMIN_USER", "ANY", null, null))
             .readBody();
 
-        // public api from the same realm
+        // public api
         client
             .request(HttpMethod.GET, "/my-first-open-api")
             .header("Authorization", loginResponse.getToken())
             .exchange(String.class)
             .expectStatus(200)
-            .expectBody("Admin User Open API");
-
-        // public api from the another realm
-        client
-            .request(HttpMethod.GET, "/my-forth-open-api")
-            .header("Authorization", loginResponse.getToken())
-            .exchange(String.class)
-            .expectStatus(200)
-            .expectBody("Normal User Open API");
+            .expectBody("my-first-open-api");
     }
 
     @Test

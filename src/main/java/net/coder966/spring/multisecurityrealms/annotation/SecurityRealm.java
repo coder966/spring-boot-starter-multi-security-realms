@@ -23,6 +23,4 @@ public @interface SecurityRealm {
      * @return Duration expression, for example, "3m" for 3 minutes or "7h" for 7 hours etc...
      */
     String tokenExpirationDuration() default "";
-
-    String[] publicApis() default {};
 }
