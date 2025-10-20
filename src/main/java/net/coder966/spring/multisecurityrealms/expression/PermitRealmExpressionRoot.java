@@ -1,6 +1,7 @@
 package net.coder966.spring.multisecurityrealms.expression;
 
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.core.Authentication;
 
@@ -10,6 +11,7 @@ public class PermitRealmExpressionRoot extends SecurityExpressionRoot {
         super(authentication);
     }
 
+    @RegisterReflectionForBinding
     public boolean permitRealm(String[] realmName) {
         Authentication auth = getAuthentication();
 
@@ -34,6 +36,7 @@ public class PermitRealmExpressionRoot extends SecurityExpressionRoot {
         return permitted;
     }
 
+    @RegisterReflectionForBinding
     public boolean permitRealm(String realmName) {
         return permitRealm(new String[]{realmName});
     }
