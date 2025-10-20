@@ -21,6 +21,7 @@ import org.springframework.boot.convert.DurationStyle;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Controller;
@@ -138,7 +139,7 @@ public class SecurityRealmScanner {
 
     private RequestMatcher buildAuthenticationEndpointRequestMatcher(SecurityRealm realmAnnotation) {
         try{
-            return new AntPathRequestMatcher(realmAnnotation.authenticationEndpoint());
+            return new AntPathRequestMatcher(realmAnnotation.authenticationEndpoint(), HttpMethod.POST.name());
         }catch(Exception e){
             throw new IllegalArgumentException(
                     "Invalid authenticationEndpoint (" + realmAnnotation.authenticationEndpoint() + ") for SecurityRealm (" + realmAnnotation.name() + ")"

@@ -27,61 +27,62 @@ public class SecurityRealmAuthenticationFilter extends AbstractAuthenticationFil
         this.exceptionResolvers = context.getBeansOfType(HandlerExceptionResolver.class).values();
     }
 
-    private boolean matchesLogin(HttpServletRequest request) {
-        return request.getMethod().equals("POST") && descriptor.getAuthenticationEndpointRequestMatcher().matches(request);
-    }
-
     public boolean handle(HttpServletRequest request, HttpServletResponse response){
-        SecurityRealmContext.setDescriptor(descriptor);
-
         SecurityRealmAuthentication auth = extractAuthenticationFromRequest(request);
-        if(auth != null){
+
+        boolean isAuthenticationRequest = descriptor.getAuthenticationEndpointRequestMatcher().matches(request);
+        boolean isSameRealm = isAuthenticationRequest || (auth != null && auth.getRealm().equals(descriptor.getName()));
+
+        if(!isSameRealm){
+            return false;
+        }
+
+        // populate SecurityRealmContext and SecurityContextHolder
+        SecurityRealmContext.setDescriptor(descriptor);
+        if(auth == null){
+            SecurityRealmContext.setCurrentStep(descriptor.getFirstStepName());
+        }else{
             setAuthenticationInContext(auth);
+            SecurityRealmContext.setCurrentStep(auth.getNextAuthenticationStep());
         }
 
-        SecurityRealmContext.setCurrentStep(auth == null ? descriptor.getFirstStepName() : auth.getNextAuthenticationStep());
+        if(isAuthenticationRequest){
 
-
-        if(matchesLogin(request)){
-            handleLogin(request, response, auth);
-            return true; // to stop the filter chain
-        }
-
-        // cleanup
-        SecurityRealmContext.setDescriptor(null);
-        SecurityRealmContext.setCurrentStep(null);
-
-        return false;
-    }
-
-    private void handleLogin(HttpServletRequest request, HttpServletResponse response, SecurityRealmAuthentication auth){
-        if(auth != null && auth.isAuthenticated()){
-            exceptionResolvers
-                .forEach(resolver -> resolver.resolveException(request, response, null, new SecurityRealmAuthenticationAlreadyAuthenticatedException()));
-            return;
-        }
-
-
-        HttpServletRequestWrapper wrapped = new HttpServletRequestWrapper(request) {
-            @Override
-            public String getParameter(String name) {
-                return super.getParameter(name);
+            // if already fully authenticated
+            if(auth != null && auth.isAuthenticated()){
+                exceptionResolvers
+                    .forEach(resolver -> resolver.resolveException(request, response, null, new SecurityRealmAuthenticationAlreadyAuthenticatedException()));
+                return true;
             }
 
-            @Override
-            public Map<String, String[]> getParameterMap() {
-                // DON'T copy old params, or at lease copy old except the ones that start with "AuthenticationStep-"
-                // not to allow the client to jump to incorrect/future step forcefully.
-                Map<String, String[]> params = new HashMap<>();
-                params.put("AuthenticationStep-" + SecurityRealmContext.getCurrentStep(), new String[]{UUID.randomUUID().toString()});
-                return params;
-            }
-        };
+            // craft the request so that it can be routed to the appropriate step handler
+            HttpServletRequestWrapper wrapped = new HttpServletRequestWrapper(request) {
+                @Override
+                public String getParameter(String name) {
+                    return super.getParameter(name);
+                }
 
-        try{
-            httpServlet.service(wrapped, response);
-        }catch(Exception e){
-            throw new RuntimeException(e);
+                @Override
+                public Map<String, String[]> getParameterMap() {
+                    // DON'T copy old params, or at lease copy old except the ones that start with "AuthenticationStep-"
+                    // not to allow the client to jump to incorrect/future step forcefully.
+                    Map<String, String[]> params = new HashMap<>();
+                    params.put("AuthenticationStep-" + SecurityRealmContext.getCurrentStep(), new String[]{UUID.randomUUID().toString()});
+                    return params;
+                }
+            };
+
+            // dispatch
+            try{
+                httpServlet.service(wrapped, response);
+            }catch(Exception e){
+                throw new RuntimeException(e);
+            }
+
+            return true;
+
+        }else{
+            return false;
         }
     }
 
