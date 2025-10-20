@@ -1,4 +1,4 @@
-package net.coder966.spring.multisecurityrealms.advice;
+package net.coder966.spring.multisecurityrealms.mvc;
 
 import jakarta.annotation.Nonnull;
 import java.util.stream.Collectors;

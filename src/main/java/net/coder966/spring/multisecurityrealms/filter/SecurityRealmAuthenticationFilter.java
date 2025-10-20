@@ -2,12 +2,8 @@ package net.coder966.spring.multisecurityrealms.filter;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.context.SecurityRealmContext;
 import net.coder966.spring.multisecurityrealms.exception.SecurityRealmAuthenticationAlreadyAuthenticatedException;
@@ -16,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 public class SecurityRealmAuthenticationFilter extends AbstractAuthenticationFilter {
+    public final static String AUTHENTICATION_REQUEST_ATTRIBUTE_NAME = SecurityRealmAuthenticationFilter.class.getCanonicalName() + ".AUTHENTICATION_STEP_NAME";
 
     private final SecurityRealmDescriptor descriptor;
     private final HttpServlet httpServlet;
@@ -55,32 +52,14 @@ public class SecurityRealmAuthenticationFilter extends AbstractAuthenticationFil
                 return true;
             }
 
-            // craft the request so that it can be routed to the appropriate step handler
-            HttpServletRequestWrapper wrapped = new HttpServletRequestWrapper(request) {
-                @Override
-                public String getParameter(String name) {
-                    return super.getParameter(name);
-                }
-
-                @Override
-                public Map<String, String[]> getParameterMap() {
-                    // DON'T copy old params, or at lease copy old except the ones that start with "AuthenticationStep-"
-                    // not to allow the client to jump to incorrect/future step forcefully.
-                    Map<String, String[]> params = new HashMap<>();
-                    params.put("AuthenticationStep-" + SecurityRealmContext.getCurrentStep(), new String[]{UUID.randomUUID().toString()});
-                    return params;
-                }
-            };
-
-            // dispatch
             try{
-                httpServlet.service(wrapped, response);
+                // craft the request so that it can be routed to the appropriate step handler and dispatch it
+                request.setAttribute(AUTHENTICATION_REQUEST_ATTRIBUTE_NAME, SecurityRealmContext.getCurrentStep());
+                httpServlet.service(request, response);
+                return true;
             }catch(Exception e){
                 throw new RuntimeException(e);
             }
-
-            return true;
-
         }else{
             return false;
         }

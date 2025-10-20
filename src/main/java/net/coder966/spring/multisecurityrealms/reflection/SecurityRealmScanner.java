@@ -15,6 +15,8 @@ import net.coder966.spring.multisecurityrealms.annotation.SecurityRealm;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import net.coder966.spring.multisecurityrealms.configuration.SecurityRealmConfigurationProperties;
 import net.coder966.spring.multisecurityrealms.converter.SecurityRealmTokenCodec;
+import net.coder966.spring.multisecurityrealms.filter.SecurityRealmAuthenticationFilter;
+import net.coder966.spring.multisecurityrealms.mvc.AttributeValueRequestCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.convert.DurationStyle;
@@ -128,9 +130,9 @@ public class SecurityRealmScanner {
             stepNames.add(stepName);
 
             RequestMappingInfo mappingInfo = RequestMappingInfo
-                    .paths(realmAnnotation.authenticationEndpoint())
+                .paths(realmAnnotation.authenticationEndpoint())
                 .methods(RequestMethod.POST)
-                .params("AuthenticationStep-" + stepName)
+                .customCondition(new AttributeValueRequestCondition(SecurityRealmAuthenticationFilter.AUTHENTICATION_REQUEST_ATTRIBUTE_NAME, stepName))
                 .build();
             
             requestMappingHandlerMapping.registerMapping(mappingInfo, realmBean, method);

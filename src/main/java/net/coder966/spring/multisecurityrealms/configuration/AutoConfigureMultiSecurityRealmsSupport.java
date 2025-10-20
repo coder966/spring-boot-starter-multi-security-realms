@@ -1,6 +1,6 @@
 package net.coder966.spring.multisecurityrealms.configuration;
 
-import net.coder966.spring.multisecurityrealms.advice.SecurityRealmControllerAdvice;
+import net.coder966.spring.multisecurityrealms.mvc.SecurityRealmControllerAdvice;
 import net.coder966.spring.multisecurityrealms.expression.PermitRealmMethodSecurityExpressionHandler;
 import net.coder966.spring.multisecurityrealms.filter.MultiSecurityRealmAuthenticationFilter;
 import net.coder966.spring.multisecurityrealms.reflection.SecurityRealmScanner;
