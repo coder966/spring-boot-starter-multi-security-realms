@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import net.coder966.spring.multisecurityrealms.annotation.AnonymousAccess;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.annotation.SecurityRealm;
@@ -156,9 +157,22 @@ public class SecurityRealmScanner {
         // determine the source of the value (annotation or properties)
         String signingSecret = realmAnnotation.signingSecret();
         if(signingSecret == null || signingSecret.trim().isEmpty()){
-            log.warn("SecurityRealm (" + realmAnnotation.name() + ") does not specify a signing secret,"
-                + " will use the default specified under the configuration property security-realm.signing-secret");
-            signingSecret = defaultProperties.getSigningSecret();
+            if(defaultProperties.getSigningSecret() == null){
+                signingSecret = UUID.randomUUID().toString();
+                log.warn(
+                    "SecurityRealm ({}) does not specify a signing secret, "
+                        + "nor configuration property security-realm.signing-secret was found, "
+                        + "so we are going to use a randomly-generated secret.",
+                    realmAnnotation.name()
+                );
+            }else{
+                signingSecret = defaultProperties.getSigningSecret();
+                log.warn(
+                    "SecurityRealm ({}) does not specify a signing secret, "
+                        + "will use the default specified under the configuration property security-realm.signing-secret",
+                    realmAnnotation.name()
+                );
+            }
         }
 
         // support placeholders in the expression
@@ -173,9 +187,25 @@ public class SecurityRealmScanner {
         // determine the source of the value (annotation or properties)
         String durationExpression = realmAnnotation.fullyAuthenticatedTokenTtl();
         if(durationExpression == null || durationExpression.trim().isEmpty()){
-            log.warn("SecurityRealm (" + realmAnnotation.name() + ") does not specify a token expiration duration,"
-                + " will use the default specified under the configuration property security-realm.fully-authenticated-token-ttl");
-            durationExpression = defaultProperties.getFullyAuthenticatedTokenTtl().toString();
+            if(defaultProperties.getFullyAuthenticatedTokenTtl() == null){
+                durationExpression = Duration.ofHours(3).toString();
+                log.warn(
+                    "SecurityRealm ({}) does not specify a token expiration duration, "
+                        + "nor configuration property security-realm.fully-authenticated-token-ttl was found, "
+                        + "so we are going to use the default value of {}",
+                    realmAnnotation.name(),
+                    durationExpression
+                );
+            }else{
+                durationExpression = defaultProperties.getFullyAuthenticatedTokenTtl().toString();
+                log.warn(
+                    "SecurityRealm ({}) does not specify a token expiration duration, "
+                        + "will use the default specified under the configuration property security-realm.fully-authenticated-token-ttl "
+                        + "which is {}",
+                    realmAnnotation.name(),
+                    durationExpression
+                );
+            }
         }
 
         // support placeholders in the expression
