@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
     authenticationEndpoint = "/normal-user/auth",
     firstStepName = StepNames.USERNAME_AND_PASSWORD
 //    signingSecret = "", // not specified, will use default configured under security-realm.*
-//    tokenExpirationDuration = "" // not specified, will use default configured under security-realm.*
+//    fullyAuthenticatedTokenTtl = "" // not specified, will use default configured under security-realm.*
 )
 public class NormalUserSecurityRealm extends TestClass implements TestInterface {
 

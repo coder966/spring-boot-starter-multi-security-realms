@@ -160,23 +160,23 @@ public class SecurityRealmScanner {
         }
         signingSecret = env.resolveRequiredPlaceholders(signingSecret);
 
-        String tokenExpirationDurationString = realmAnnotation.tokenExpirationDuration();
-        if(tokenExpirationDurationString == null || tokenExpirationDurationString.trim().isEmpty()){
+        String durationExpression = realmAnnotation.fullyAuthenticatedTokenTtl();
+        if(durationExpression == null || durationExpression.trim().isEmpty()){
             log.warn("SecurityRealm (" + realmAnnotation.name() + ") does not specify a token expiration duration,"
-                + " will use the default specified under the configuration property security-realm.token-expiration-duration");
-            tokenExpirationDurationString = defaultProperties.getTokenExpirationDuration().toString();
+                + " will use the default specified under the configuration property security-realm.fully-authenticated-token-ttl");
+            durationExpression = defaultProperties.getFullyAuthenticatedTokenTtl().toString();
         }
-        tokenExpirationDurationString = env.resolvePlaceholders(tokenExpirationDurationString);
-        Duration tokenExpirationDuration;
+        durationExpression = env.resolvePlaceholders(durationExpression);
+        Duration duration;
         try{
-            tokenExpirationDuration = DurationStyle.detectAndParse(tokenExpirationDurationString);
+            duration = DurationStyle.detectAndParse(durationExpression);
         }catch(Exception e){
             throw new IllegalArgumentException(
-                "Invalid tokenExpirationDuration (" + tokenExpirationDurationString + ") for SecurityRealm (" + realmAnnotation.name() + ")"
+                "Invalid TTL (" + durationExpression + ") for SecurityRealm (" + realmAnnotation.name() + ")"
             );
         }
 
-        return new SecurityRealmTokenCodec(signingSecret, tokenExpirationDuration);
+        return new SecurityRealmTokenCodec(signingSecret, duration);
     }
 
     private void scanForAnonymousAccess() {

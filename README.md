@@ -78,7 +78,7 @@ Here in this example, we define two realms (normal-user & admin-user).
         authenticationEndpoint = "/normal-user/auth",
         firstStepName = StepNames.USERNAME_AND_PASSWORD
         //    signingSecret = "", // not specified, will use default configured under security-realm.*
-        //    tokenExpirationDuration = "" // not specified, will use default configured under security-realm.*
+        //    fullyAuthenticatedTokenTtl = "" // not specified, will use default configured under security-realm.*
 )
 public class NormalUserSecurityRealm {
 
@@ -142,7 +142,7 @@ public class NormalUserSecurityRealm {
         authenticationEndpoint = "/admin-user/auth",
         firstStepName = StepNames.USERNAME_AND_PASSWORD,
         signingSecret = "${my-app.admin-realm-jwt-secret}",
-        tokenExpirationDuration = "5m" // 5 minutes
+        fullyAuthenticatedTokenTtl = "5m" // 5 minutes
 )
 public class AdminUserSecurityRealm {
 
@@ -389,7 +389,7 @@ You can specify a different signing secret and a TTL for each realm separately (
 You can also specify global values using the configuration properties:
 
 - `security-realm.signing-secret`
-- `security-realm.token-expiration-duration`
+- `security-realm.fully-authenticated-token-ttl`
 
 ### Pass extra data to the response in success authentication
 

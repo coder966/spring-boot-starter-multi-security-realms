@@ -14,7 +14,7 @@ public class SecurityRealmConfigurationProperties implements InitializingBean {
     private static final Logger log = LoggerFactory.getLogger(SecurityRealmConfigurationProperties.class);
 
     private String signingSecret;
-    private Duration tokenExpirationDuration;
+    private Duration fullyAuthenticatedTokenTtl;
 
     @Override
     public void afterPropertiesSet() {
@@ -26,11 +26,11 @@ public class SecurityRealmConfigurationProperties implements InitializingBean {
             signingSecret = UUID.randomUUID().toString() + UUID.randomUUID().toString();
         }
 
-        if(tokenExpirationDuration == null){
+        if(fullyAuthenticatedTokenTtl == null){
             log.warn(
-                "Security Realm token expiration duration is not provided (security-realm.token-expiration-duration). Will use 3 hours."
+                "Security Realm token expiration duration is not provided (security-realm.fully-authenticated-token-ttl). Will use 3 hours."
             );
-            tokenExpirationDuration = Duration.of(3, ChronoUnit.HOURS);
+            fullyAuthenticatedTokenTtl = Duration.of(3, ChronoUnit.HOURS);
         }
     }
 
@@ -42,11 +42,11 @@ public class SecurityRealmConfigurationProperties implements InitializingBean {
         this.signingSecret = signingSecret;
     }
 
-    public Duration getTokenExpirationDuration() {
-        return tokenExpirationDuration;
+    public Duration getFullyAuthenticatedTokenTtl() {
+        return fullyAuthenticatedTokenTtl;
     }
 
-    public void setTokenExpirationDuration(Duration tokenExpirationDuration) {
-        this.tokenExpirationDuration = tokenExpirationDuration;
+    public void setFullyAuthenticatedTokenTtl(Duration fullyAuthenticatedTokenTtl) {
+        this.fullyAuthenticatedTokenTtl = fullyAuthenticatedTokenTtl;
     }
 }

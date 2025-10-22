@@ -20,7 +20,9 @@ public @interface SecurityRealm {
     String signingSecret() default "";
 
     /**
-     * @return Duration expression, for example, "3m" for 3 minutes or "7h" for 7 hours etc...
+     * The TTL (Time-To-Live) after which the token <b>for the fully authenticated user (no further steps)</b> will expire.
+     * This is a duration expression, for example, "3m" for 3 minutes or "7h" for 7 hours etc...
+     * If not specified, will use the default specified under the configuration property <pre>security-realm.fully-authenticated-token-ttl</pre>
      */
-    String tokenExpirationDuration() default "";
+    String fullyAuthenticatedTokenTtl() default "";
 }

@@ -5,7 +5,7 @@
             "type": "java.lang.String"
         },
         {
-            "name": "security-realm.token-expiration-duration",
+            "name": "security-realm.fully-authenticated-token-ttl",
             "type": "java.time.Duration"
         }
     ]

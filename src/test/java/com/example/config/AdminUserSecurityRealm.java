@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
     authenticationEndpoint = "/admin-user/auth",
     firstStepName = Constants.StepNames.USERNAME_AND_PASSWORD,
     signingSecret = "${my-app.admin-realm-jwt-secret}",
-    tokenExpirationDuration = "5m" // 5 minutes
+    fullyAuthenticatedTokenTtl = "5m" // 5 minutes
 )
 public class AdminUserSecurityRealm {
 
