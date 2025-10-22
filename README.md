@@ -240,12 +240,36 @@ Rendered OTP form and submitted again, and got:
 }
 ```
 
+Typescript:
+
+```typescript
+type SuccessResponse = {
+    realm: string
+    token: string
+    tokenType: string
+    expiresInSeconds: number
+    name: string
+    authorities: any[]
+    nextAuthenticationStep: string
+    extras: Record<string, any>
+}
+```
+
 #### Sample Response (error) status = 400
 
 ```json
 {
     "error": "BAD_CREDENTIALS",
     "errorDescription": "Username or password is incorrect"
+}
+```
+
+Typescript:
+
+```typescript
+type ErrorResponse = {
+    error: string
+    errorDescription: string
 }
 ```
 
