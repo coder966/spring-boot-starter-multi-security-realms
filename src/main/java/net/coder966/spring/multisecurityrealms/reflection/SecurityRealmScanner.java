@@ -80,7 +80,8 @@ public class SecurityRealmScanner {
                 realmAnnotation.name(),
                 buildAuthenticationEndpointRequestMatcher(realmAnnotation),
                 realmAnnotation.firstStepName(),
-                buildSecurityRealmTokenCodec(realmAnnotation)
+                buildSecurityRealmTokenCodec(realmAnnotation),
+                buildFullyAuthenticatedTokenTtl(realmAnnotation)
             );
 
             registerAuthenticationStepHandlers(realmAnnotation, bean);
@@ -152,21 +153,35 @@ public class SecurityRealmScanner {
     private SecurityRealmTokenCodec buildSecurityRealmTokenCodec(SecurityRealm realmAnnotation) {
         SecurityRealmConfigurationProperties defaultProperties = context.getBean(SecurityRealmConfigurationProperties.class);
 
+        // determine the source of the value (annotation or properties)
         String signingSecret = realmAnnotation.signingSecret();
         if(signingSecret == null || signingSecret.trim().isEmpty()){
             log.warn("SecurityRealm (" + realmAnnotation.name() + ") does not specify a signing secret,"
                 + " will use the default specified under the configuration property security-realm.signing-secret");
             signingSecret = defaultProperties.getSigningSecret();
         }
+
+        // support placeholders in the expression
         signingSecret = env.resolveRequiredPlaceholders(signingSecret);
 
+        return new SecurityRealmTokenCodec(signingSecret);
+    }
+
+    private Duration buildFullyAuthenticatedTokenTtl(SecurityRealm realmAnnotation) {
+        SecurityRealmConfigurationProperties defaultProperties = context.getBean(SecurityRealmConfigurationProperties.class);
+
+        // determine the source of the value (annotation or properties)
         String durationExpression = realmAnnotation.fullyAuthenticatedTokenTtl();
         if(durationExpression == null || durationExpression.trim().isEmpty()){
             log.warn("SecurityRealm (" + realmAnnotation.name() + ") does not specify a token expiration duration,"
                 + " will use the default specified under the configuration property security-realm.fully-authenticated-token-ttl");
             durationExpression = defaultProperties.getFullyAuthenticatedTokenTtl().toString();
         }
+
+        // support placeholders in the expression
         durationExpression = env.resolvePlaceholders(durationExpression);
+
+        // parse
         Duration duration;
         try{
             duration = DurationStyle.detectAndParse(durationExpression);
@@ -176,7 +191,7 @@ public class SecurityRealmScanner {
             );
         }
 
-        return new SecurityRealmTokenCodec(signingSecret, duration);
+        return duration;
     }
 
     private void scanForAnonymousAccess() {

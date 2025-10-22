@@ -14,22 +14,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class SecurityRealmTokenCodec {
-
-    private final Duration ttl;
     private final Algorithm algorithm;
     private final JWTVerifier verifier;
 
-    public SecurityRealmTokenCodec(String secret, Duration ttl) {
-        this.ttl = ttl;
+    public SecurityRealmTokenCodec(String secret) {
         this.algorithm = Algorithm.HMAC512(secret);
         this.verifier = JWT.require(algorithm).build();
     }
 
-    public Duration getTtl() {
-        return ttl;
-    }
-
-    public String encode(SecurityRealmAuthentication authentication) {
+    public String encode(SecurityRealmAuthentication authentication, Duration ttl) {
         return JWT
             .create()
             .withClaim("realm", authentication.getRealm())
@@ -63,7 +56,7 @@ public class SecurityRealmTokenCodec {
 
             Map<String, Object> extras = decodedJWT.getClaim("extras").asMap();
 
-            SecurityRealmAuthentication auth = new SecurityRealmAuthentication(username, authorities, nextAuthenticationStep);
+            SecurityRealmAuthentication auth = new SecurityRealmAuthentication(username, authorities, nextAuthenticationStep, Duration.ZERO);
 
             if(extras != null){ // to still support tokens generated before this feature was introduced
                 extras.forEach(auth::addExtra);

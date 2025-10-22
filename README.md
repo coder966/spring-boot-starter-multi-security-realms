@@ -71,7 +71,10 @@ To define a realm, simply create a Spring component and annotate it with `@Secur
 Here in this example, we define two realms (normal-user & admin-user).
 
 #### NormalUserSecurityRealm.java
+
 ```java
+import java.time.Duration;
+
 @Slf4j
 @SecurityRealm(
         name = "NORMAL_USER",
@@ -106,9 +109,9 @@ public class NormalUserSecurityRealm {
         user.setOtp(otp);
         user = normalUserRepo.save(user);
 
-        // here we specify the next step name in the SecurityRealmAuthentication
-        // if this is the last step, then don't specify the next step name, or send null
-        return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP);
+        // here we specify the next step name and the temp token ttl (not fully authenticated, there is still a next step, so the ttl here is 5 minutes)
+        // if this is the final step, then use the overloaded constructor SecurityRealmAuthentication(name, authorities) which does not take in token ttl, because that is specified at the realm level
+        return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP, Duration.ofMinutes(5));
     }
 
     @Transactional
@@ -168,9 +171,9 @@ public class AdminUserSecurityRealm {
         user.setOtp(otp);
         user = adminUserRepo.save(user);
 
-        // here we specify the next step name in the SecurityRealmAuthentication
-        // if this is the last step, then don't specify the next step name, or send null
-        return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP);
+        // here we specify the next step name and the temp token ttl (not fully authenticated, there is still a next step, so the ttl here is 5 minutes)
+        // if this is the final step, then use the overloaded constructor SecurityRealmAuthentication(name, authorities) which does not take in token ttl, because that is specified at the realm level
+        return new SecurityRealmAuthentication(user.getUsername(), null, StepNames.OTP, Duration.ofMinutes(5));
     }
 
     @Transactional

@@ -1,5 +1,6 @@
 package net.coder966.spring.multisecurityrealms.authentication;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,6 +17,7 @@ public class SecurityRealmAuthentication implements Authentication {
     private final Set<? extends GrantedAuthority> authorities;
 
     private final String nextAuthenticationStep;
+    private final Duration tokenTtl;
 
     private final Map<String, Object> extras = new HashMap<>();
 
@@ -24,16 +26,27 @@ public class SecurityRealmAuthentication implements Authentication {
      * Use this when the user is fully authenticated.
      */
     public SecurityRealmAuthentication(String name, Set<? extends GrantedAuthority> authorities) {
-        this(name, authorities, null);
+        this(name, authorities, null, null);
     }
 
     /**
      * Use this when the user is not fully authenticated and needs to proceed to the another auth step.
      */
-    public SecurityRealmAuthentication(String name, Set<? extends GrantedAuthority> authorities, String nextAuthenticationStep) {
+    public SecurityRealmAuthentication(String name, Set<? extends GrantedAuthority> authorities, String nextAuthenticationStep, Duration tokenTtl) {
+        if(name == null || name.trim().length() != name.length() || name.isBlank()){
+            throw new IllegalArgumentException("You must provide the username");
+        }
+
+        if(nextAuthenticationStep != null && tokenTtl == null){
+            throw new IllegalArgumentException("Token TTL must be provided when nextAuthenticationStep is provided");
+        }
+
         this.name = name;
         this.authorities = authorities == null ? new HashSet<>() : authorities;
+
         this.nextAuthenticationStep = nextAuthenticationStep;
+        this.tokenTtl = tokenTtl;
+
         this.realm = SecurityRealmContext.getDescriptor() == null ? null : SecurityRealmContext.getDescriptor().getName();
     }
 
@@ -51,6 +64,10 @@ public class SecurityRealmAuthentication implements Authentication {
 
     public String getNextAuthenticationStep() {
         return nextAuthenticationStep;
+    }
+
+    public Duration getTokenTtl() {
+        return tokenTtl;
     }
 
     public Map<String, Object> getExtras() {

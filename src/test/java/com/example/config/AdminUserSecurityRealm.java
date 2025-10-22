@@ -5,6 +5,7 @@ import com.example.dto.AuthUsernameAndPasswordStepRequest;
 import com.example.entity.AdminUser;
 import com.example.other.Constants;
 import com.example.repo.AdminUserRepo;
+import java.time.Duration;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
     authenticationEndpoint = "/admin-user/auth",
     firstStepName = Constants.StepNames.USERNAME_AND_PASSWORD,
     signingSecret = "${my-app.admin-realm-jwt-secret}",
-    fullyAuthenticatedTokenTtl = "5m" // 5 minutes
+    fullyAuthenticatedTokenTtl = "8h" // 8 hours
 )
 public class AdminUserSecurityRealm {
 
@@ -53,9 +54,9 @@ public class AdminUserSecurityRealm {
         user.setOtp(otp);
         user = adminUserRepo.save(user);
 
-        // here we specify the next step name in the SecurityRealmAuthentication
-        // if this is the last step, then don't specify the next step name, or send null
-        return new SecurityRealmAuthentication(user.getUsername(), null, Constants.StepNames.OTP);
+        // here we specify the next step name and the temp token ttl (not fully authenticated, there is still a next step, so the ttl here is 5 minutes)
+        // if this is the final step, then use the overloaded constructor SecurityRealmAuthentication(name, authorities) which does not take in token ttl, because that is specified at the realm level
+        return new SecurityRealmAuthentication(user.getUsername(), null, Constants.StepNames.OTP, Duration.ofMinutes(5));
     }
 
     @Transactional

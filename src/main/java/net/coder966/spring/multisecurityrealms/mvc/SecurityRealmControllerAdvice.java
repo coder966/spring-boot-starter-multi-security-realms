@@ -1,6 +1,7 @@
 package net.coder966.spring.multisecurityrealms.mvc;
 
 import jakarta.annotation.Nonnull;
+import java.time.Duration;
 import java.util.stream.Collectors;
 import net.coder966.spring.multisecurityrealms.annotation.AuthenticationStep;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
@@ -59,14 +60,17 @@ public class SecurityRealmControllerAdvice implements ResponseBodyAdvice<Object>
         var realmDescriptor = SecurityRealmContext.getDescriptor();
         var response = new SecurityRealmAuthenticationSuccessResponse();
 
+        // determine TTL
+        Duration ttl = auth.getNextAuthenticationStep() == null ? realmDescriptor.getFullyAuthenticatedTokenTtl() : auth.getTokenTtl();
+
         response.realm = realmDescriptor.getName();
 
         response.name = auth.getName();
         response.authorities = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
 
-        response.token = realmDescriptor.getSecurityRealmTokenCodec().encode(auth);
+        response.token = realmDescriptor.getSecurityRealmTokenCodec().encode(auth, ttl);
         response.tokenType = "Bearer";
-        response.expiresInSeconds = realmDescriptor.getSecurityRealmTokenCodec().getTtl().toSeconds();
+        response.expiresInSeconds = ttl.toSeconds();
 
         response.nextAuthenticationStep = auth.getNextAuthenticationStep();
 
