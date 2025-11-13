@@ -5,18 +5,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class OpenApisController {
+public class OpenApisFirstController {
 
-    @AnonymousAccess
     @GetMapping("/my-first-open-api")
+    @AnonymousAccess
     public String myFirstOpenApi() {
         return "my-first-open-api";
-    }
-
-    @AnonymousAccess
-    @GetMapping("/my-second-open-api")
-    public String mySecondOpenApi() {
-        return "my-second-open-api";
     }
 
 }

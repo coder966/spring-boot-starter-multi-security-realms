@@ -239,18 +239,31 @@ public class SecurityRealmScanner {
                     continue;
                 }
 
-                RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
+                RequestMapping classRequestMapping = AnnotatedElementUtils.findMergedAnnotation(method.getDeclaringClass(), RequestMapping.class);
+                RequestMapping methodRequestMapping = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 
-                if(requestMapping == null){
+                if(methodRequestMapping == null){
                     throw new IllegalArgumentException(
                         "@AnonymousAccess should be used on controller mapping methods only. The method (" + method + ") is not a controller method."
                     );
                 }
 
-                String[] paths = requestMapping.path();
-                RequestMethod[] requestMethods = requestMapping.method();
+                String[] methodPaths = methodRequestMapping.path();
+                RequestMethod[] requestMethods = methodRequestMapping.method();
 
-                for (String path : paths) {
+                List<String> finalPaths = new LinkedList<>();
+                for(String methodPath : methodPaths){
+                    if(classRequestMapping == null) {
+                        finalPaths.add(methodPath);
+                    }else{
+                        for(String classPath : classRequestMapping.path()){
+                            finalPaths.add(classPath + methodPath);
+                        }
+                    }
+                }
+
+
+                for (String path : finalPaths) {
                     if (requestMethods.length == 0) { // No method restriction
                         requestMatchers.add(new AntPathRequestMatcher(path));
                     } else {

@@ -160,8 +160,9 @@ public class MultiSecurityRealmTest {
             .expectStatus(200)
             .expectBody("my-first-open-api");
 
+        // with a request mapping on controller class, which is different to the above case
         client
-            .request(HttpMethod.GET, "/my-second-open-api")
+            .request(HttpMethod.GET, "/open-apis/my-second-open-api")
             .exchange(String.class)
             .expectStatus(200)
             .expectBody("my-second-open-api");
