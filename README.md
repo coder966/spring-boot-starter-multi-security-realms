@@ -393,7 +393,7 @@ public class AdminUserController {
 
 To indicate an api is public and can be accessed without authentication, use `@AnonymousAccess`.
 
-Example:
+#### Example:
 
 ```java
 @RestController
@@ -407,6 +407,11 @@ public class PublicController {
     }
 }
 ```
+
+#### Note:
+Please note that this annotation is to bypass authentication not authorization, so in order for this to work, you should NOT annotate the controller with `@PreAuthorize`. 
+Exception is `@PreAuthorize("permitRealm('sample-realm')")` as we handle this case as it is a widespread case.
+Only define authorization rules on the method level, otherwise the public api should be defined in another controller where there are no authorization rules defined at the controller level.
 
 ## Tips
 
