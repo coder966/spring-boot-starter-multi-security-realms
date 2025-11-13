@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.2] - 2025-11-14
+
+- Fix `AnonymousAccess` not working if the method `RequestMapping` has no path specified.
+
 ## [0.5.1] - 2025-11-14
 
 - Fix `AnonymousAccess` not working if the controller had a path defined in a `RequestMapping` on the controller level.
