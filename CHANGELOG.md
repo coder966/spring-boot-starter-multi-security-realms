@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.1] - 2025-11-14
+
+- Fix `AnonymousAccess` not working if the controller had a path defined in a `RequestMapping` on the controller level.
+- Fix `AnonymousAccess` not working if the controller is annotated with `PreAuthorize`.
+
+
 ## [0.5.0] - 2025-11-05
 
 - Added a new annotation `AnonymousAccess` replacing the attribute `publicApis` in the annotation `SecurityRealm` for two reasons;
