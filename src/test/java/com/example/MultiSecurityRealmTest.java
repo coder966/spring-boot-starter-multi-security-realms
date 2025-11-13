@@ -166,6 +166,13 @@ public class MultiSecurityRealmTest {
             .exchange(String.class)
             .expectStatus(200)
             .expectBody("my-second-open-api");
+
+        // with a request mapping on controller class which has a @PreAuthorize, which is different to the above case
+        client
+            .request(HttpMethod.GET, "/open-apis-3/my-third-open-api")
+            .exchange(String.class)
+            .expectStatus(200)
+            .expectBody("my-third-open-api");
     }
 
     @Test

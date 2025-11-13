@@ -1,5 +1,6 @@
 package net.coder966.spring.multisecurityrealms.expression;
 
+import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAnonymousAuthentication;
 import net.coder966.spring.multisecurityrealms.authentication.SecurityRealmAuthentication;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
@@ -14,6 +15,11 @@ public class PermitRealmExpressionRoot extends SecurityExpressionRoot {
     @RegisterReflectionForBinding
     public boolean permitRealm(String[] realmName) {
         Authentication auth = getAuthentication();
+
+        // bypass permitRealm for anonymous access apis
+        if(auth instanceof SecurityRealmAnonymousAuthentication){
+            return true;
+        }
 
         if(!(auth instanceof SecurityRealmAuthentication)){
             return false;
