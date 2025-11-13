@@ -167,6 +167,13 @@ public class MultiSecurityRealmTest {
             .expectStatus(200)
             .expectBody("my-second-open-api");
 
+        // no path in method level, only controller (try with no trailing slash)
+        client
+            .request(HttpMethod.GET, "/open-apis")
+            .exchange(String.class)
+            .expectStatus(200)
+            .expectBody("my-second-open-api-v2");
+
         // with a request mapping on controller class which has a @PreAuthorize, which is different to the above case
         client
             .request(HttpMethod.GET, "/open-apis-3/my-third-open-api")

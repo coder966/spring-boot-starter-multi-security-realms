@@ -249,20 +249,16 @@ public class SecurityRealmScanner {
                     );
                 }
 
-                String[] methodPaths = methodRequestMapping.path();
+                String[] classPaths = classRequestMapping == null ? new String[]{""} : classRequestMapping.path();
+                String[] methodPaths = methodRequestMapping.path().length == 0 ? new String[]{""} : methodRequestMapping.path();
                 RequestMethod[] requestMethods = methodRequestMapping.method();
 
                 List<String> finalPaths = new LinkedList<>();
-                for(String methodPath : methodPaths){
-                    if(classRequestMapping == null) {
-                        finalPaths.add(methodPath);
-                    }else{
-                        for(String classPath : classRequestMapping.path()){
-                            finalPaths.add(classPath + methodPath);
-                        }
+                for(String classPath : classPaths){
+                    for(String methodPath : methodPaths){
+                        finalPaths.add(classPath + methodPath);
                     }
                 }
-
 
                 for (String path : finalPaths) {
                     if (requestMethods.length == 0) { // No method restriction

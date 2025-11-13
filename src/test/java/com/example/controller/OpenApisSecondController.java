@@ -15,4 +15,10 @@ public class OpenApisSecondController {
         return "my-second-open-api";
     }
 
+    @AnonymousAccess
+    @GetMapping
+    public String mySecondOpenApiV2() {
+        return "my-second-open-api-v2";
+    }
+
 }
