@@ -20,6 +20,7 @@ import net.coder966.spring.multisecurityrealms.filter.SecurityRealmAuthenticatio
 import net.coder966.spring.multisecurityrealms.mvc.AttributeValueRequestCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.convert.DurationStyle;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -73,7 +74,7 @@ public class SecurityRealmScanner {
         Map<String, SecurityRealmDescriptor> descriptors = new HashMap<>();
 
         for(Object bean : context.getBeansWithAnnotation(SecurityRealm.class).values()){
-            final SecurityRealm realmAnnotation = bean.getClass().getSuperclass().getAnnotation(SecurityRealm.class);
+            final SecurityRealm realmAnnotation = AopUtils.getTargetClass(bean).getAnnotation(SecurityRealm.class);
 
             validateRealmAnnotation(realmAnnotation);
 
@@ -107,7 +108,7 @@ public class SecurityRealmScanner {
     private void registerAuthenticationStepHandlers(SecurityRealm realmAnnotation, Object realmBean) {
         Set<String> stepNames = new HashSet<>();
 
-        for(Method method : realmBean.getClass().getSuperclass().getDeclaredMethods()){
+        for(Method method : AopUtils.getTargetClass(realmBean).getDeclaredMethods()){
             AuthenticationStep stepAnnotation = method.getAnnotation(AuthenticationStep.class);
             if(stepAnnotation == null){
                 continue;
@@ -233,7 +234,7 @@ public class SecurityRealmScanner {
         beansMap.putAll(context.getBeansWithAnnotation(RestController.class));
 
         for(Object bean : beansMap.values()){
-            Method[] methods = bean.getClass().getDeclaredMethods();
+            Method[] methods = AopUtils.getTargetClass(bean).getDeclaredMethods();
             for(Method method : methods){
                 if(!method.isAnnotationPresent(AnonymousAccess.class)){
                     continue;
