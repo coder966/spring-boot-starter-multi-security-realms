@@ -42,7 +42,7 @@ In addition to supporting multiple realms and MFA, we also provide these feature
 
 ### Requirements
 
-- Spring Boot >= 3.x.x
+- Spring Boot >= 3.x.x || 4.x.x
 
 ### Installation
 

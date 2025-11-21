@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.3] - 2025-11-22
+
+- Support Spring Boot 4
+
 ## [0.5.2] - 2025-11-14
 
 - Fix `AnonymousAccess` not working if the method `RequestMapping` has no path specified.
