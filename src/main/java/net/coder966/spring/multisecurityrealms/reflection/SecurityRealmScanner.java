@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -144,7 +144,7 @@ public class SecurityRealmScanner {
 
     private RequestMatcher buildAuthenticationEndpointRequestMatcher(SecurityRealm realmAnnotation) {
         try{
-            return new AntPathRequestMatcher(realmAnnotation.authenticationEndpoint(), HttpMethod.POST.name());
+            return PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, realmAnnotation.authenticationEndpoint());
         }catch(Exception e){
             throw new IllegalArgumentException(
                     "Invalid authenticationEndpoint (" + realmAnnotation.authenticationEndpoint() + ") for SecurityRealm (" + realmAnnotation.name() + ")"
@@ -262,10 +262,10 @@ public class SecurityRealmScanner {
 
                 for (String path : finalPaths) {
                     if (requestMethods.length == 0) { // No method restriction
-                        requestMatchers.add(new AntPathRequestMatcher(path));
+                        requestMatchers.add(PathPatternRequestMatcher.withDefaults().matcher(path));
                     } else {
                         for (RequestMethod requestMethod : requestMethods) {
-                            requestMatchers.add(new AntPathRequestMatcher(path, requestMethod.name()));
+                            requestMatchers.add(PathPatternRequestMatcher.withDefaults().matcher(requestMethod.asHttpMethod(), path));
                         }
                     }
                 }
